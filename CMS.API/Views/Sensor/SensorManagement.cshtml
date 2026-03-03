@@ -1,0 +1,593 @@
+﻿@model SensorModel
+
+@{
+    ViewBag.Title = "혼잡도 센서 관리";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>시스템관리 > </span><strong>혼잡도 센서 관리</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="hidActionType" />
+<input type="hidden" id="hidAreaCd" />
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">혼잡도 센서 관리</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:areaList();"><em></em>조회</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for=""><em></em>센서 영역명</label>
+            <input type="text" id="txtSensorAreaNm" />
+        </div>
+
+        <div class="sub_cnt_g">
+            <div class="subCnt_left">
+                <div class="bul_arr3">
+                    <h3 class="bul_arr2 f_l">센서 목록</h3>
+                    <div class="f_r" style="margin-top:3px;">
+                        <a class="a_btn btn_style1" onclick="showJBSensor('I')">추가</a>
+                        <a class="a_btn btn_style1" onclick="manageSensor('D')">삭제</a>
+                    </div>
+                </div>
+                <div class="groupArea grid_ej">
+                    <!-- 	오른쪽 그리드 영역 -->
+                    <table id="jgSensor"></table>
+                    <div id="jgpSensor"></div>
+                </div>
+            </div>
+
+            <div class="subCnt_btn">
+                <div class="subCntBtn_wrap">
+                    <img src="../images/sub/btn_right.png" alt="" onclick="addRow()">
+                    <img src="../images/sub/btn_left.png" alt="" onclick="removeRow()">
+                </div>
+            </div>
+
+            <div class="subCnt_right">
+                <div class="subCnt_right_top">
+                    <div class="bul_arr3">
+                        <h3 class="bul_arr2 f_l">설치 영역</h3>
+                        <div class="f_r" style="margin-top:3px;">
+                            <a class="a_btn btn_style1" onclick="showJBSensorArea('I')">추가</a>
+                            <a class="a_btn btn_style1" onclick="manageArea('D')">삭제</a>
+                        </div>
+                    </div>
+                    <div class="groupArea_g grid_ej">
+                        <table id="jgArea"></table>
+                        <div id="jgpArea"></div>
+                    </div>
+                </div>
+                <div class="subCnt_right_bottom">
+                    <div class="bul_arr3">
+                        <h3 class="bul_arr2 f_l">영역별 센서</h3>
+                    </div>
+                    <div class="groupArea_g grid_ej">
+                        <table id="jgMap"></table>
+                        <div id="jgMap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 팝업 -->
+
+        <div id="jbSensor" class="popup7" style="display:none;">
+            <div class="popup_area">
+                <div class="popup_contents">
+                    <table>
+                        <tr>
+                            <td>시리얼번호</td>
+                            <td><input type="text" id="mtxtSensorNm" maxlength="8" disabled></td>
+                        </tr>
+                        <tr>
+                            <td>사용유무</td>
+                            <td>
+                                @Html.DropDownListFor(model => model.USE_YN_SELECTED, Model.USE_YN_LIST, new { @id = "mselUseYn" })
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="step_button">
+                    <a class="a_btn btn_style3" href="javascript:manageSensor($hidActionType.val());">저장</a>
+                    <a class="a_btn btn_style3" href="javascript:jbSensor.close(); void 0">취소</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="jbSensorArea" class="popup7" style="display:none;">
+            <div class="popup_area">
+                <div class="popup_contents">
+                    <table>
+                        <tr>
+                            <td>영역명</td>
+                            <td><input type="text" id="mtxtSensorAreaNm" maxlength="20"></td>
+                        </tr>
+                    </table>
+                    <table class="congestion_table">
+                        <tr><td colspan="4">혼잡도 기준</td></tr>
+                        <tr>
+                            <td>혼잡</td>
+                            <td><input type="text" id="mtxtSensorAreaCrowd" maxlength="2" numberonly></td>
+                            <td>원활</td>
+                            <td><input type="text" id="mtxtSensorAreaUncrowd" maxlength="2" numberonly></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="step_button">
+                    <a class="a_btn btn_style3" href="javascript:manageArea($hidActionType.val());">저장</a>
+                    <a class="a_btn btn_style3" href="javascript:jbSensorArea.close(); void 0">취소</a>
+                </div>
+            </div>
+        </div>
+        <!--// 팝업 -->
+
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).on("keyup", "input:text[numberonly]", function () { $(this).val($(this).val().replace(/[^0-9]/gi, "")); });
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+        function SensorModel() {
+            this.RESTAURANT_CODE    = '@ViewBag.RESTAURANT_CD';
+            this.SERIAL_NO = '';
+            this.USE_YN = '';
+        };
+        function AreaModel() {
+            this.RESTAURANT_CODE    = '@ViewBag.RESTAURANT_CD';
+            this.AREA_CD = '';
+            this.AREA_NM = '';
+            this.CROWDED = '';
+            this.UNCROWDED = '';
+        };
+        function SensorAreaModel() {
+            this.RESTAURANT_CODE    = '@ViewBag.RESTAURANT_CD';
+            this.AREA_CD = '';
+            this.SERIAL_NO = '';
+        };
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+        var $txtSensorAreaNm     = $('#txtSensorAreaNm');
+        var $jgArea              = $('#jgArea');
+        var $jgSensor            = $('#jgSensor');
+        var $jgMap               = $('#jgMap');
+
+        var $hidActionType       = $('#hidActionType');
+        var $hidAreaCd           = $('#hidAreaCd');
+
+        var $mtxtSensorNm = $('#mtxtSensorNm');
+        var $mselUseYn = $('#mselUseYn');
+
+        var $mtxtSensorAreaNm = $('#mtxtSensorAreaNm');
+        var $mtxtSensorAreaCrowd = $('#mtxtSensorAreaCrowd');
+        var $mtxtSensorAreaUncrowd = $('#mtxtSensorAreaUncrowd');
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+        function initSensorModal() {
+            $hidActionType.val('');
+            $mtxtSensorNm.val('');
+            $mselUseYn.val('');
+        }
+        function initSensorAreaModal() {
+            $hidActionType.val('');
+            //$hidDisplayAreaId.val('');
+            $mtxtSensorAreaNm.val('');
+            $mtxtSensorAreaCrowd.val('');
+            $mtxtSensorAreaUncrowd.val('');
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var jbSensor = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '센서',
+            content            : $('#jbSensor'),
+            closeButton        : 'title',
+            width              : "15%",
+            height             : "20%",
+            minWidth           : 450,
+            minHeight          : 230,
+            responsiveMinWidth : 450,
+            responsiveMinHeight: 230,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        var jbSensorArea = new jBox('Modal', {
+            draggable: 'title',
+            dragOver: false,
+            closeOnEsc: true,
+            attach: '#myModal',
+            title: '센서영역',
+            content: $('#jbSensorArea'),
+            closeButton: 'title',
+            width: "15%",
+            height: "20%",
+            minWidth: 450,
+            minHeight: 230,
+            responsiveMinWidth: 450,
+            responsiveMinHeight: 230,
+            responsiveWidth: false,
+            responsiveHeight: false
+        });
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+        // 센서 추가/수정 모달
+        function showJBSensor(actionType, rowid) {
+
+            // 컨트롤 초기화
+            initSensorModal();
+
+            $hidActionType.val(actionType);
+
+            if (actionType.toUpperCase() == "U") {
+                $mtxtSensorNm.val($jgSensor.jqGrid('getRowData', rowid).SERIAL_NO);
+                $mtxtSensorNm.attr('disabled', true);
+                $mselUseYn.val($jgSensor.jqGrid('getRowData', rowid).USE_YN);
+            } else {
+                $mtxtSensorNm.attr('disabled', false);
+            }
+
+            jbSensor.open();
+        }
+        // 영역 추가/수정 모달
+        function showJBSensorArea(actionType, rowid) {
+
+            // 컨트롤 초기화
+            initSensorAreaModal();
+
+            $hidActionType.val(actionType);
+
+            if (actionType.toUpperCase() == "U") {
+                $hidAreaCd.val($jgArea.jqGrid('getRowData', rowid).AREA_CD);
+                $mtxtSensorAreaNm.val($jgArea.jqGrid('getRowData', rowid).AREA_NM);
+                $mtxtSensorAreaCrowd.val($jgArea.jqGrid('getRowData', rowid).CROWDED);
+                $mtxtSensorAreaUncrowd.val($jgArea.jqGrid('getRowData', rowid).UNCROWDED);
+            }
+
+            jbSensorArea.open();
+        }
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+        $jgSensor.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '시리얼번호', name: 'SERIAL_NO', width: 150, sortable: false },
+                { label: '사용유무', name: 'USE_YN', width: 50, align: 'center', sortable: false },
+                { label: '생성자', name: 'REG_ID', width: 80, sortable: false },
+                { label: '생성일', name: 'REG_DTM', width: 120, align: 'center', sortable: false },
+                { label: '수정자', name: 'MOD_ID', width: 80, sortable: false },
+                { label: '수정일', name: 'MOD_DTM', width: 120, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 50, align: 'center', formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="javascript:showJBSensor(' + "'U', '" + options.rowId + "'" + ')" value="수정">';
+                    },
+                    sortable: false
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpSensor",
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        });
+
+        $jgArea.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '영역 아이디', name: 'AREA_CD',   width: 50, hidden: true, sortable: false },
+                { label: '영역 이름',   name: 'AREA_NM',   width: 120, sortable: false },
+                { label: '원활',        name: 'CROWDED', width: 50, sortable: false },
+                { label: '복잡', name: 'UNCROWDED', width: 50, sortable: false },
+                { label: '생성자', name: 'REG_ID', width: 80, sortable: false },
+                { label: '생성일', name: 'REG_DTM', width: 120, align: 'center', sortable: false },
+                { label: '수정자', name: 'MOD_ID', width: 80, sortable: false },
+                { label: '수정일', name: 'MOD_DTM', width: 120, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 50, align: 'center', formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="javascript:showJBSensorArea(' + "'U', '" + options.rowId + "'" + ')" value="수정">';
+                    },
+                    sortable: false
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpArea",
+            onSelectRow: function (rowid, status, e) {
+                mappingList();
+            }
+        });
+
+        $jgMap.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '영역 이름', name: 'AREA_NM', width: 150, sortable: false },
+                { label: '센서 시리얼 번호', name: 'SERIAL_NO', width: 150, sortable: false },
+                { label: '생성자', name: 'REG_ID', width: 80, sortable: false },
+                { label: '생성일', name: 'REG_DTM', width: 150, align: 'center', sortable: false }
+            ],
+            viewrecords: true,
+            height: 200,
+            rowNum: 'all',
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        })
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        // 센서 조회
+         function sensorList() {
+             var areaModel = new AreaModel();
+             areaModel.AREA_NM = $txtSensorAreaNm.val();
+
+             simpleAjax('@Url.Action("SensorList", "sensor")', { areaModel: areaModel }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                $jgSensor.jqGrid('clearGridData');
+
+                $jgSensor[0].addJSONData({ rows: data});
+                $jgSensor.jqGrid("setSelection", 1);
+            });
+        }
+
+        // 센서 조회
+        function areaList() {
+            var areaModel = new AreaModel();
+            areaModel.AREA_NM = $txtSensorAreaNm.val();
+
+            simpleAjax('@Url.Action("AreaList", "sensor")', { areaModel: areaModel }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                $jgArea.jqGrid('clearGridData');
+                //$jgTimeMap.jqGrid('clearGridData');
+
+                $jgArea[0].addJSONData({ rows: data});
+                $jgArea.jqGrid("setSelection", 1);
+            });
+        }
+
+        // 매핑리스트 조회
+        function mappingList() {
+            var sensorAreaModel = new SensorAreaModel();
+            sensorAreaModel.AREA_CD = $jgArea.jqGrid('getRowData', $jgArea.jqGrid('getGridParam', 'selrow')).AREA_CD;
+
+            simpleAjax('@Url.Action("SensorAreaList", "sensor")', { sensorAreaModel: sensorAreaModel }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                $jgMap.jqGrid('clearGridData');
+                //$jgTimeMap.jqGrid('clearGridData');
+
+                $jgMap[0].addJSONData({ rows: data});
+                $jgMap.jqGrid("setSelection", 1);
+            });
+        }
+
+        // 센서 저장/수정/삭제
+        function manageSensor(type) {
+            // Validation Check
+            if (type.toUpperCase() !== "D") {
+
+                if (!$mtxtSensorNm.val()) {
+                    alert('시리얼 번호를 입력하세요.');
+                    $mtxtSensorNm.focus();
+                    return;
+                }
+            }
+            else {
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+            }
+
+            var data = {
+                TYPE: type,
+                sensorModels : []
+            };
+
+            if (type.toUpperCase() !== "D") {
+                var sensorModel = new SensorModel();
+
+                sensorModel.SERIAL_NO = $mtxtSensorNm.val();
+                sensorModel.USE_YN = $mselUseYn.val();
+                data.sensorModels.push(sensorModel);
+            }
+            else {
+                var arrSel = $jgSensor.jqGrid('getGridParam', 'selarrrow');
+
+                for (var i = 0; i < arrSel.length; i++) {
+                    var sensorModel = new SensorModel();
+                    sensorModel.SERIAL_NO = $jgSensor.jqGrid('getRowData', arrSel[i]).SERIAL_NO;
+                    data.sensorModels.push(sensorModel);
+                }
+            }
+
+            simpleAjax('@Url.Action("SensorManage", "sensor")', data).done(function (data) {
+                if (data.ERR_CODE == "0") {
+                    resultMessage(type, sensorList);
+                    mappingList();
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                jbSensor.close();
+            });
+        }
+
+        // 센서 영역 저장/수정/삭제
+        function manageArea(type) {
+            // Validation Check
+            if (type.toUpperCase() !== "D") {
+
+                if (!$mtxtSensorAreaNm.val()) {
+                    alert('영역 이름을 입력하세요.');
+                    $mtxtSensorAreaNm.focus();
+                    return;
+                }
+            }
+            else {
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+            }
+
+            var data = {
+                TYPE: type,
+                areaModels : []
+            };
+
+            if (type.toUpperCase() !== "D") {
+                var areaModel = new AreaModel();
+
+                areaModel.AREA_CD = $hidAreaCd.val();
+                areaModel.AREA_NM = $mtxtSensorAreaNm.val();
+                areaModel.CROWDED = $mtxtSensorAreaCrowd.val();
+                areaModel.UNCROWDED = $mtxtSensorAreaUncrowd.val();
+                data.areaModels.push(areaModel);
+            }
+            else {
+                var areaModel = new AreaModel();
+                areaModel.AREA_CD = $jgArea.jqGrid('getRowData', $jgArea.jqGrid('getGridParam', 'selrow')).AREA_CD;
+                data.areaModels.push(areaModel);
+            }
+
+            simpleAjax('@Url.Action("AreaManage", "sensor")', data).done(function (data) {
+                if (data.ERR_CODE == "0") {
+                    resultMessage(type, areaList);
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                jbSensorArea.close();
+            });
+        }
+        // 센서-영역 매핑 저장/삭제
+        function manageSensorAreaMap(type) {
+            var arrSel;
+
+            var data = {
+                TYPE: type,
+                sensorAreaModels: [],
+            };
+
+            if (type.toUpperCase() !== "D") {
+                arrSel = $jgSensor.jqGrid('getGridParam', 'selarrrow');
+
+                for (var i = 0; i < arrSel.length; i++) {
+                    var sensorAreaModel = new SensorAreaModel();
+                    sensorAreaModel.SERIAL_NO = $jgSensor.jqGrid('getRowData', arrSel[i]).SERIAL_NO;
+                    sensorAreaModel.AREA_CD = $jgArea.jqGrid('getRowData', $jgArea.jqGrid('getGridParam', 'selrow')).AREA_CD;
+                    data.sensorAreaModels.push(sensorAreaModel);
+                }
+            } else {
+                arrSel = $jgMap.jqGrid('getGridParam', 'selarrrow');
+
+                for (var i = 0; i < arrSel.length; i++) {
+                    var sensorAreaModel = new SensorAreaModel();
+                    sensorAreaModel.SERIAL_NO = $jgMap.jqGrid('getRowData', arrSel[i]).SERIAL_NO;
+                    sensorAreaModel.AREA_CD = $jgMap.jqGrid('getRowData', arrSel[i]).AREA_CD;
+                    data.sensorAreaModels.push(sensorAreaModel);
+                }
+            }
+
+
+            simpleAjax('@Url.Action("SensorAreaManage", "sensor")', data).done(function (data) {
+                if (data.ERR_CODE == "0") {
+                    resultMessage(type, mappingList);
+                    sensorList();
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                jbSensorArea.close();
+            });
+        }
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        // 일반 함수
+        function addRow() {
+            if ($jgArea.jqGrid('getRowData', $jgArea.jqGrid('getGridParam', 'selrow')) && $jgSensor.jqGrid('getGridParam', 'selarrrow').length > 0) {
+                manageSensorAreaMap("I");
+                jqgridMoveRows($jgSensor, $jgMap, true);
+            }
+        }
+
+        function removeRow() {
+            if ($jgMap.jqGrid('getGridParam', 'selarrrow').length > 0) {
+                manageSensorAreaMap("D");
+                jqgridMoveRows($jgMap, $jgSensor, true);
+            }
+        }
+
+        // 최초 조회
+        sensorList();
+        areaList();
+    </script>
+}

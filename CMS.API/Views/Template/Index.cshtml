@@ -1,0 +1,448 @@
+﻿
+@{
+    ViewBag.Title = "템플릿";
+}
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>템플릿 관리 > </span><strong>템플릿</strong></h1>
+    </div>
+}
+
+<div class="container_wrap">
+    <div class="content">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">템플릿</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style1" href="javascript:currentPageNo = 1; searchTemplate();"><em></em>조회</a>
+                <a class="a_btn btn_style2" href="javascript:showJBLayout();">템플릿 생성</a>
+                <a class="a_btn btn_style2" href="javascript:showJBSchedule();">스케줄 등록</a>
+            </div>
+        </div>
+
+        <div class="search_area">
+            <label><em></em>템플릿 이름</label>
+            <input type="text" id="TXT_TEMPLATE_NM" />
+        </div>
+
+        <h3 class="bul_arr2"><p class="f_l">템플릿 리스트</p><span class="f_r" id="pagingInfoArea"></span></h3>
+        <div class="tem_sub_cnt">
+            <ul id="templateArea" class="tem_list"></ul>
+        </div>
+
+    </div>
+</div>
+
+<!-- 팝업 -->
+
+<div id="jbSchedule" class="popup" style="display: none">
+    @Html.Partial("~/Views/Schedule/ManageSchedule.cshtml")
+</div>
+
+
+<div id="jbLayout" class="popup11" style="display: none">
+    <div class="popup_subCnt">
+        <div class="bul_wrap">
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:l_currentPageNo = 1; searchLayout();"><em></em>조회</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for="txtLayoutNm"><em></em>레이아웃 명</label>
+            <input type="text" id="txtLayoutNm" />
+        </div>
+        <ul id="layoutArea" class="popup_conList"></ul>
+
+        <div class="step_button">
+            <p class="a_btn_wrap">
+                <a class="a_btn btn_style3" href="javascript:applyLayout();">확인</a>
+                <a class="a_btn btn_style3" href="javascript:jbLayout.close(); void 0">취소</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<!--// 팝업 -->
+
+@section scripts
+{
+    @*<script src="~/Scripts/Views/manage-schedule.js" ></script>*@
+    <script type="text/javascript" src="~/Scripts/Views/manage-schedule.js"></script> @* 스케줄 등록 수정 삭제 파티셜뷰 *@
+    <script>
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function TemplateModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.TEMPLATE_ID     = '';
+            this.TEMPLATE_NM     = '';
+            this.PAGE_CNT        = '8';
+            this.PAGE_NO         = '';
+        }
+
+
+        function LayoutModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.LAYOUT_ID       = '';
+            this.LAYOUT_TYPE     = 'UPL';   // 현재는 업로드만 구현되어 있으므로 고정 값
+            this.LAYOUT_NM       = '';
+            this.LAYOUT_DESC     = '';
+            this.FILE_NM         = '';
+            this.CONTENT_CNT     = '';
+            this.SCREEN_W        = '';
+            this.SCREEN_H        = '';
+            this.LAYOUT_HV_TYPE  = '';
+            this.LAYOUT_H_BY_V   = '';
+            this.EVAL_USE_YN     = '';
+            this.PAGE_CNT        = '8';
+            this.PAGE_NO         = '';
+        };
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+        var $templateArea    = $('#templateArea');
+        var $layoutArea      = $('#layoutArea');
+        var $pagingInfoArea  = $('#pagingInfoArea');
+        var $TXT_TEMPLATE_NM = $('#TXT_TEMPLATE_NM');
+        var $txtLayoutNm     = $('#txtLayoutNm');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+
+
+
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        // 스케줄 등록 팝업 정의
+        var jbSchedule = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '스케줄 관리',
+            content            : $('#jbSchedule'),
+            closeButton        : 'title',
+            width              : "47%",
+            height             : "64%",
+            minWidth           : 760,
+            minHeight          : 550,
+            responsiveMinWidth : 760,
+            responsiveMinHeight: 550,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        var jbLayout = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            isolateScroll      : false,
+            overlay            : true,
+            attach             : '#myModal',
+            title              : '레이아웃 선택',
+            content            : $('#jbLayout'),
+            closeButton        : 'title',
+            width              : "51%",
+            height             : "64%",
+            minWidth           : 730,
+            minHeight          : 620,
+            responsiveMinWidth : 730,
+            responsiveMinHeight: 620,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        // 스케줄 등록 팝업 열기
+        function showJBSchedule() {
+
+            if (isEmpty(templateSelectedIds)) {
+                alert('스케줄에 등록할 템플릿을 선택하세요.');
+                return false;
+            }
+
+            manageSchedule.elements.$btnSearchTemplate.hide();
+            manageSchedule.popups.showJBSchedule('I');
+
+            var templateSelectedData = [];
+
+            for (templateSelectedId in templateSelectedIds) {
+                templateSelectedData.push(templateData[templateSelectedId]);
+            }
+
+            manageSchedule.addSelectedTemplate(templateSelectedData);
+        }
+
+        function showJBLayout() {
+            l_currentPageNo = 1;
+            searchLayout();
+            jbLayout.open();
+        }
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        var currentPageNo       = 0;
+        var totalPageCnt        = 0;
+        var templateData        = {};
+        var templateSelectedIds = {};
+
+        function searchTemplate() {
+
+            var templateModel = new TemplateModel();
+            templateModel.TEMPLATE_NM = $TXT_TEMPLATE_NM.val();
+            templateModel.PAGE_NO     = currentPageNo;
+
+            simpleAjax('@Url.Action("getTemplatePageList", "Template")', { templateModel: templateModel }, true, (currentPageNo == 1 ? false : true)).done(function (data) {
+                // 2019-05-14 컨텐츠 조회 데이터 변조 체크
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+                else {
+                    // 1 페이지 조회시 초기화
+                    if (currentPageNo == 1) {
+                        $templateArea.parent().scrollTop(0);
+                        $templateArea.empty();
+                        $('#nodata').remove();
+                        templateData = {};
+
+                        if (data.Table.length <= 0) {
+                            $templateArea.parent().append($('<p id="nodata" class="date_n">데이터가 없습니다.</p>'));
+                            $pagingInfoArea.empty().text('0/0 Page (0 건)');
+                            return false;
+                        }
+                    }
+
+                    var template = '';
+
+                    for (var i = 0; i < data.Table.length; i++) {
+                        template += '<li class="transition">';
+                        template += '<h1>';
+                        template += '<div class="f_l"><label for="' + data.Table[i].TEMPLATE_ID + '">';
+                        template += '<input type="checkbox" id="' + data.Table[i].TEMPLATE_ID + '" name="template" />';
+                        template += '<p>' + data.Table[i].TEMPLATE_ID + '<strong>' + data.Table[i].TEMPLATE_NM + '</strong></p>';
+                        template += '</label></div>';
+                        template += '<div class="f_r"><i class="fa fa-pen"></i></div>';
+                        template += '</h1>';
+                        template += '<div>';
+                        template += '<img data-templateid="' + data.Table[i].TEMPLATE_ID + '" src="' + data.Table[i].THUMBNAIL_NM + '?date=' + Date.now() + '" onclick="updateTemplate(' + data.Table[i].TEMPLATE_ID + ')" />';
+                        template += '</div >';
+                        template += '<table>';
+                        template += '<tr><td>작성자</td><td>' + data.Table[i].REG_ID + '</td></tr>';
+                        template += '<tr><td>템플릿 설명</td><td>' + data.Table[i].TEMPLATE_DESC + '</td></tr>';
+                        template += '<tr><td>해상도</td><td>' + data.Table[i].SCREEN_W_H + '</td></tr>';
+                        template += '</table>';
+                        template += '</div>';
+                        template += '</li>';
+
+                        templateData[data.Table[i].TEMPLATE_ID] = data.Table[i];
+                    }
+
+                    var $template = $(template);
+
+                    $template.find('img').on('error', function () {
+                        var templateid = $(this).data('templateid');
+                        $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/thumbnail_icon_2.png" alt=""></div>').click(function () {
+                            updateTemplate(templateid);
+                        });
+                    });
+
+
+                    $templateArea.append($template);
+                    totalPageCnt = data.Table1[0].TOT_PAGE_COUNT;  // 총 페이지 수
+                    $pagingInfoArea.empty().text(currentPageNo + '/' + data.Table1[0].TOT_PAGE_COUNT + ' Page (' + data.Table1[0].TOT_ROW_COUNT + ' 건)');
+
+
+                    $('input[type="checkbox"][name="template"]').click(function () {
+
+                        if ($(this).prop('checked')) {
+                            $(this).prop('checked', true).parents('.transition').addClass('list_click');
+
+                            templateSelectedIds[$(this).attr('id')] = true;
+                        }
+                        else {
+                            $(this).parents('.transition').removeClass('list_click');
+                            delete templateSelectedIds[$(this).attr('id')];
+                        }
+                    });
+                }
+            });
+        }
+
+        var l_currentPageNo    = 1;
+        var l_totalPageCnt     = 0;
+        var layoutData         = {};
+        var layoutSelectedId   = '';
+
+        var layoutsearching = false;
+
+        // 레이아웃 조회
+        function searchLayout() {
+
+            layoutsearching = true;
+
+            var layoutModel = new LayoutModel();
+            layoutModel.LAYOUT_NM = $txtLayoutNm.val();
+            layoutModel.PAGE_NO = l_currentPageNo;
+
+            simpleAjax('@Url.Action("getLayoutPageList", "layout")', { layoutModel: layoutModel }, false, (l_currentPageNo == 1 ? false : true)).done(function (data) {
+                // 2019-05-14 탬플릿 조회 데이터 변조 체크
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998") {
+                        window.location.href = '@Url.Action("logout", "account")';
+                        return;
+                    }
+                }
+                else {
+                    var layout = '';
+
+                    // 페이지 1 조회시 내용 초기화
+                    if (l_currentPageNo == 1) {
+                        $layoutArea.scrollTop(0);
+                        $layoutArea.empty();
+                        layoutData = {};
+
+                        if (data.Table.length <= 0) {
+
+                            layout += '<p class="date_n">데이터가 없습니다.</p>';
+                            $layoutArea.empty();
+                            $layoutArea.append($(layout));
+                            return;
+                        }
+                    }
+
+                    for (var i = 0; i < data.Table.length; i++) {
+                        layout += '<li class="transition">';
+                        layout += '<h1>';
+                        layout += '<div class="f_l"><label class="list_title" for="L' + data.Table[i].LAYOUT_ID + '">';
+                        layout += '<input type="checkbox" id="L' + data.Table[i].LAYOUT_ID + '" name="layout" value="' + data.Table[i].LAYOUT_ID + '" />';
+                        layout += '<p>' + data.Table[i].LAYOUT_ID + '<strong>' + data.Table[i].LAYOUT_NM + '</strong></p>';
+                        layout += '</label></div>';
+                        layout += '<div class="f_r"><i class="fa fa-pen"></i></div>';
+                        layout += '</h1>';
+                        layout += '<div class="thumbnail_style1">';
+                        layout += '<img  src="' + data.Table[i].THUMBNAIL_NM + '" />';
+                        layout += '</div >';
+                        layout += '<table>';
+                        layout += '<tr><td>레이아웃 설명</td><td>' + data.Table[i].LAYOUT_DESC + '</td></tr>';
+                        layout += '<tr><td>해상도</td><td>' + data.Table[i].SCREEN_W_H + '</td></tr>';
+                        layout += '</table>';
+                        layout += '</div>';
+                        layout += '</li>';
+
+                        layoutData[data.Table[i].LAYOUT_ID] = data.Table[i];
+                    }
+
+                    var $layout = $(layout);
+
+                    $layout.find('img').on('error', function () {
+                        $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/icon_layout.png" alt=""></div>');
+                    });
+
+                    $layoutArea.append($layout);
+                    l_totalPageCnt = data.Table1[0].TOT_PAGE_COUNT;  // 총 페이지 수
+                    //$pagingInfoArea.empty().text(l_currentPageNo + '/' + data.Table1[0].TOT_PAGE_COUNT + ' Page (' + data.Table1[0].TOT_ROW_COUNT + ' 건)');
+
+                    $('input[type="checkbox"][name="layout"]').click(function () {
+                        if ($(this).prop('checked')) {
+
+                            $('input[type="checkbox"][name="layout"]').prop('checked', false).parents('.transition').removeClass('list_click');
+                            $(this).prop('checked', true).parents('.transition').addClass('list_click');
+
+                            layoutSelectedId = $(this).val();
+                        }
+                        else {
+                            $(this).parents('.transition').removeClass('list_click');
+                            layoutSelectedId = '';
+                        }
+                    });
+
+                    layoutsearching = false;
+                    l_currentPageNo++;
+                }
+            });
+        }
+
+        // 템플릿 수정
+        function updateTemplate(templateId) {
+            window.location.href = '@Url.Action("managetemplate", "template")' + '?type=U&id=' + templateId;
+        }
+
+        // 템플릿 생성
+        function applyLayout() {
+            window.location.href = '@Url.Action("managetemplate", "template")' + '?type=I&id=' + layoutSelectedId;
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        // 템플릿 스크롤
+        $('.tem_sub_cnt').on('scroll', function () {
+
+            if (isIE()) {
+                if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 10) {
+                    if (!(totalPageCnt == currentPageNo)) {
+                        searchTemplate(currentPageNo++);
+                    }
+                }
+            }
+            else {
+                if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                    if (!(totalPageCnt == currentPageNo)) {
+                        searchTemplate(currentPageNo++);
+                    }
+                }
+            }
+        });
+
+        // 레이아웃 팝업 스크롤
+        $layoutArea.on('scroll', function () {
+
+            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 10) {
+                if (!(l_totalPageCnt == (l_currentPageNo - 1))) {
+
+                    if (!layoutsearching) {
+                        searchLayout(l_currentPageNo);
+                    }
+                }
+            }
+
+        });
+
+        // 템플릿 최초 조회
+        currentPageNo++;
+        searchTemplate();
+
+    </script>
+}

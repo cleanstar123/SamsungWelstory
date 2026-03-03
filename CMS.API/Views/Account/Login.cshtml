@@ -1,0 +1,55 @@
+﻿@model LoginModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "Login";
+}
+
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+    <title>로그인</title>
+    <link rel="stylesheet" type="text/css" href="~/Content/main.css">
+</head>
+<body>
+    
+    <div id="wrap">
+
+        @using (Html.BeginForm(Url.Action("login", "account")))
+        {
+            
+            <div class="main p_a">
+                <div class="login_wrap p_a">
+                    <div class="logo"></div>
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td><label for="" class="label_m">사용자 ID</label></td>
+                                <td>@Html.TextBoxFor(m => m.USER_ID, new { @class = "form-control", placeholder = "아이디" })</td>
+                                <td rowspan="2"><input type="submit" value="로그인" onClick="" tabindex="3" /></td>
+                            </tr>
+                            <tr>
+                                <td><label for="" class="label_m">비밀번호</label></td>
+                                <td>@Html.PasswordFor(m => m.USER_PW, new { @class = "form-control", placeholder = "비밀번호" })</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <ul class="select">
+                        <li><label for="RememberMe">@Html.CheckBoxFor(m => m.RememberMe)  아이디 저장</label></li>
+                    </ul>
+                    @if (!string.IsNullOrEmpty(ViewBag.ERR_MSG))
+                    {
+                        <div class="login_fail">@ViewBag.ERR_MSG</div>
+                    }
+
+                </div>
+            </div>
+            
+        }
+    </div>
+    
+</body>
+</html>
+

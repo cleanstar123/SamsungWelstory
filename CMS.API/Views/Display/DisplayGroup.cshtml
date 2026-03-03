@@ -1,0 +1,432 @@
+﻿
+@{
+    ViewBag.Title = "디스플레이 그룹";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>시스템관리 > </span><strong>디스플레이 그룹</strong></h1>
+    </div>
+}
+
+
+<input type="hidden" id="hidActionType" />
+<input type="hidden" id="hidDisplayGroupId" />
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">디스플레이 그룹</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:searchGroup();"><em></em>조회</a>
+                <a class="a_btn btn_style1" href="javascript:showModalGroup('I');">추가</a>
+                <a class="a_btn btn_style1" href="javascript:manageGroup('D');">삭제</a>
+                <a class="a_btn btn_style1" href="javascript:manageDisplayMap('I');">저장</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for=""><em></em>디스플레이 그룹명</label>
+            <input type="text" id="txtDisplayGroupNm" />
+        </div>
+
+        <div class="sub_cnt_g">
+            <div class="subCnt_left">
+                <h3 class="bul_arr2">디스플레이 목록</h3>
+                <div class="groupArea grid_ej">
+                    <!-- 	오른쪽 그리드 영역 -->
+                    <table id="jgDisplay"></table>
+                    <div id="jgpDisplay"></div>
+                </div>
+            </div>
+
+            <div class="subCnt_btn">
+                <div class="subCntBtn_wrap">
+                    <img src="../images/sub/btn_right.png" alt="" onclick="addRow()">
+                    <img src="../images/sub/btn_left.png" alt="" onclick="removeRow()">
+                </div>
+            </div>
+
+            <div class="subCnt_right">
+                <div class="subCnt_right_top">
+                    <h3 class="bul_arr2">그룹</h3>
+                    <div class="groupArea_g grid_ej">
+                        <table id="jgGroup"></table>
+                        <div id="jgpGroup"></div>
+                    </div>
+                </div>
+                <div class="subCnt_right_bottom">
+                    <h3 class="bul_arr2">그룹 디스플레이 목록</h3>
+                    <div class="groupArea_g grid_ej">
+                        <table id="jgDisplayMap"></table>
+                        <div id="jgpDisplayMap"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 팝업 -->
+
+        <div id="jbDisplayGroup" class="popup7" style="display:none;">
+            <div class="popup_area">
+                <div class="popup_contents">
+                    <table>
+                        <tr>
+                            <td>그룹명</td>
+                            <td><input type="text" id="mtxtDisplayGroupNm" maxlength="60"></td>
+                        </tr>
+                        <tr>
+                            <td>그룹 설명</td>
+                            <td><input type="text" id="mtxtDisplayGroupDesc" maxlength="60"></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="step_button">
+                    <a class="a_btn btn_style3" href="javascript:manageGroup($hidActionType.val());">저장</a>
+                    <a class="a_btn btn_style3" href="javascript:jbDisplayGroup.close(); void 0">취소</a>
+                </div>
+            </div>
+        </div>
+
+        <!--// 팝업 -->
+
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function DisplayGroupModel() {
+            this.RESTAURANT_CODE    = '@ViewBag.RESTAURANT_CD';
+            this.DISPLAY_GROUP_ID   = '';
+            this.DISPLAY_GROUP_NM   = '';
+            this.DISPLAY_GROUP_DESC = '';
+        };
+
+        function DisplayMapModel() {
+            this.DISPLAY_GROUP_ID = '';
+            this.DISPLAY_ID       = '';
+        };
+
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        var $jgGroup              = $('#jgGroup');
+        var $jgDisplay            = $('#jgDisplay');
+        var $jgDisplayMap         = $('#jgDisplayMap');
+
+        var $txtDisplayGroupNm    = $('#txtDisplayGroupNm');
+
+        var $hidActionType        = $('#hidActionType');
+        var $hidDisplayGroupId    = $('#hidDisplayGroupId');
+
+        var $mtxtDisplayGroupNm   = $('#mtxtDisplayGroupNm');
+        var $mtxtDisplayGroupDesc = $('#mtxtDisplayGroupDesc');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+        function initGroupCodeModal() {
+            $hidActionType.val('');
+            $hidDisplayGroupId.val('');
+            $mtxtDisplayGroupNm.val('');
+            $mtxtDisplayGroupDesc.val('');
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var jbDisplayGroup = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '디스플레이 그룹',
+            content            : $('#jbDisplayGroup'),
+            closeButton        : 'title',
+            width              : "15%",
+            height             : "20%",
+            minWidth           : 450,
+            minHeight          : 230,
+            responsiveMinWidth : 450,
+            responsiveMinHeight: 230,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });	
+
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+        // 그룹코드 생성/수정 모달
+        function showModalGroup(actionType, rowid) {
+
+            // 컨트롤 초기화
+            initGroupCodeModal();
+
+            $hidActionType.val(actionType);
+
+            if (actionType.toUpperCase() == "U") {
+                $hidDisplayGroupId.val($jgGroup.jqGrid('getRowData', rowid).DISPLAY_GROUP_ID);
+                $mtxtDisplayGroupNm.val($jgGroup.jqGrid('getRowData', rowid).DISPLAY_GROUP_NM);
+                $mtxtDisplayGroupDesc.val($jgGroup.jqGrid('getRowData', rowid).DISPLAY_GROUP_DESC);
+            }
+
+            jbDisplayGroup.open();
+        }
+
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+
+        $jgGroup.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '그룹 아이디', name: 'DISPLAY_GROUP_ID',   width: 50, hidden: true, sortable: false },
+                { label: '그룹 이름',   name: 'DISPLAY_GROUP_NM',   width: 200, sortable: false },
+                { label: '그룹 설명',   name: 'DISPLAY_GROUP_DESC', width: 200, sortable: false },
+                { label: '생성일',      name: 'REG_DTM', width: 120, align: 'center', sortable: false },
+                { label: '수정일',      name: 'MOD_DTM', width: 120, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 50, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="javascript:showModalGroup(' + "'U', '" + options.rowId + "'" + ')" value="수정">';
+                    },
+                    sortable: false
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpGroup",
+            onSelectRow: searchDisplayMap
+        });
+
+        $jgDisplayMap.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '아이디',      name: 'DISPLAY_ID',   width: 160, align: 'center', hidden: true, sortable: false },
+                { label: '이름',        name: 'DISPLAY_NM',   width: 150, sortable: false },
+                { label: '설명',        name: 'DISPLAY_DESC', width: 150, sortable: false },
+                { label: '해상도 넓이', name: 'SCREEN_W',     width: 110, hidden: true, sortable: false },
+                { label: '해상도 높이', name: 'SCREEN_H',     width: 110, hidden: true, sortable: false },
+                { label: '운영체제',    name: 'DISPLAY_OS',   width: 100, hidden: true, sortable: false },
+                { label: 'IP',          name: 'DISPLAY_IP',   width: 100, align: 'center', hidden: true, sortable: false },
+                { label: 'MAC',         name: 'DISPLAY_MAC',  width: 100, align: 'center', hidden: true, sortable: false },
+                { label: '사용유무',    name: 'USE_YN',       width: 100, align: 'center', hidden: true, sortable: false },
+                { label: '생성자',      name: 'REG_ID',       width: 80, hidden: true, sortable: false },
+                { label: '생성일',      name: 'REG_DTM',      width: 80,  align: 'center', hidden: true, sortable: false },
+                { label: '수정자',      name: 'MOD_ID',       width: 80, hidden: true, sortable: false },
+                { label: '수정일',      name: 'MOD_DTM',      width: 80,  align: 'center', hidden: true, sortable: false }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpDisplayMap",
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        });
+
+
+        $jgDisplay.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '아이디',      name: 'DISPLAY_ID',   width: 160, align: 'center', hidden: true, sortable: false },
+                { label: '이름',        name: 'DISPLAY_NM',   width: 150, sortable: false },
+                { label: '설명',        name: 'DISPLAY_DESC', width: 150, sortable: false },
+                { label: '해상도 넓이', name: 'SCREEN_W',     width: 110, hidden: true, sortable: false },
+                { label: '해상도 높이', name: 'SCREEN_H',     width: 110, hidden: true, sortable: false },
+                { label: '운영체제',    name: 'DISPLAY_OS',   width: 100, hidden: true, sortable: false },
+                { label: 'IP',          name: 'DISPLAY_IP',   width: 100, align: 'center', hidden: true, sortable: false },
+                { label: 'MAC',         name: 'DISPLAY_MAC',  width: 100, align: 'center', hidden: true, sortable: false },
+                { label: '사용유무',    name: 'USE_YN',       width: 100, align: 'center', hidden: true, sortable: false },
+                { label: '생성자',      name: 'REG_ID',       width: 80,  hidden: true, sortable: false },
+                { label: '생성일',      name: 'REG_DTM',      width: 80,  align: 'center', hidden: true, sortable: false },
+                { label: '수정자',      name: 'MOD_ID',       width: 80, hidden: true, sortable: false },
+                { label: '수정일',      name: 'MOD_DTM',      width: 80,  align: 'center', hidden: true, sortable: false }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpDisplay",
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        });
+
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        // 디스플레이 그룹 조회
+        function searchGroup() {
+
+            var displayGroupModel = new DisplayGroupModel();
+            displayGroupModel.DISPLAY_GROUP_NM = $txtDisplayGroupNm.val();
+
+            simpleAjax('@Url.Action("DisplayGroups", "display")', { displayGroupModel: displayGroupModel }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                $jgGroup.jqGrid('clearGridData');
+                $jgDisplayMap.jqGrid('clearGridData');
+                $jgDisplay.jqGrid('clearGridData');
+
+                $jgGroup[0].addJSONData({ rows: data.Table });
+                $jgGroup.jqGrid("setSelection", 1);
+            });
+        }
+
+        // 디스플레이 그룹 저장/수정/삭제
+        function manageGroup(type) {
+            // Validation Check
+            if (type.toUpperCase() !== "D") {
+
+                if (!$mtxtDisplayGroupNm.val()) {
+                    alert('그룹명을 입력하세요.');
+                    $mtxtDisplayGroupNm.focus();
+                    return;
+                }
+            }
+            else {
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+            }
+
+            var data = {
+                TYPE: type,
+                displayGroupModels: []
+            };
+
+            if (type.toUpperCase() !== "D") {
+                var displayGroupModel = new DisplayGroupModel();
+
+                displayGroupModel.DISPLAY_GROUP_ID   = $hidDisplayGroupId.val();
+                displayGroupModel.DISPLAY_GROUP_NM   = $mtxtDisplayGroupNm.val();
+                displayGroupModel.DISPLAY_GROUP_DESC = $mtxtDisplayGroupDesc.val();
+
+                data.displayGroupModels.push(displayGroupModel);
+            }
+            else {
+                var displayGroupModel = new DisplayGroupModel();
+
+                displayGroupModel.DISPLAY_GROUP_ID = $jgGroup.jqGrid('getRowData', $jgGroup.jqGrid('getGridParam', 'selrow')).DISPLAY_GROUP_ID;
+
+                data.displayGroupModels.push(displayGroupModel);
+            }
+
+            simpleAjax('@Url.Action("DisplayGroupManage", "display")', data).done(function (data) {
+                if (data.ERR_CODE == "0")
+                    resultMessage(type, searchGroup);
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+                
+                jbDisplayGroup.close();
+            });
+        }
+
+
+        // 디스플레이 맵핑 조회
+        function searchDisplayMap(rowid, status, e) {
+
+            var displayGroupModel = new DisplayGroupModel();
+
+            displayGroupModel.DISPLAY_GROUP_ID = $jgGroup.jqGrid('getRowData', rowid).DISPLAY_GROUP_ID;
+
+            simpleAjax('@Url.Action("DisplayMaps", "display")', { displayGroupModel: displayGroupModel }, true, true).done(function (data) {
+
+                $jgDisplayMap.jqGrid('clearGridData');
+                $jgDisplayMap[0].addJSONData({ rows: data.Table });
+
+                $jgDisplay.jqGrid('clearGridData');
+                $jgDisplay[0].addJSONData({ rows: data.Table1 });
+
+            });
+        }
+
+        // 디스플레이 맵 저장/수정/삭제
+        function manageDisplayMap(type) {
+
+            var sel            = $jgGroup.jqGrid('getGridParam', 'selrow');
+            var displayMapData = $jgDisplayMap.jqGrid('getRowData');
+            
+
+            var displayGroupModel = new DisplayGroupModel();
+            displayGroupModel.DISPLAY_GROUP_ID = $jgGroup.jqGrid('getRowData', sel).DISPLAY_GROUP_ID;
+
+            var displayMapModels = [];
+
+            for (var i = 0; i < displayMapData.length; i++) {
+                var displayMapModel = new DisplayMapModel();
+                displayMapModel.DISPLAY_GROUP_ID = $jgGroup.jqGrid('getRowData', sel).DISPLAY_GROUP_ID;
+                displayMapModel.DISPLAY_ID       = displayMapData[i].DISPLAY_ID;
+                displayMapModels.push(displayMapModel);
+            }
+
+
+            simpleAjax('@Url.Action("displayMapManage", "display")', { displayGroupModel: displayGroupModel, displayMapModels: displayMapModels }).done(function (data) {
+
+                if (data.ERR_CODE == "0") {
+                    resultMessage(type);
+
+                    searchGroup();
+                }
+                else
+                    alert(data.ERROR_MSG);
+
+                if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+
+            });
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        // 일반 함수
+        function addRow() {
+            jqgridMoveRows($jgDisplay, $jgDisplayMap, true);
+        }
+
+        function removeRow() {
+            jqgridMoveRows($jgDisplayMap, $jgDisplay, true);
+        }
+
+
+        // 최초 조회
+        searchGroup();
+
+    </script>
+}

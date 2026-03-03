@@ -1,0 +1,521 @@
+﻿@{
+    ViewBag.Title = "코드 관리";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>시스템관리 > </span><strong>코드관리</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="hidActionType" />
+<input type="hidden" id="hidCodeGroup" />
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">코드 관리</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style1" onclick="searchGroupCode();"><em></em>조회</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for=""><em></em>그룹코드</label>
+            <input type="text" id="txtCodeGroup" />
+            <label for=""><em></em>그룹코드</label>
+            <input type="text" id="txtCodeGroupNm" />
+        </div>
+        <!-- 좌측 영역 -->
+        <div class="content_left">
+            <div class="sub_cnt_g">
+                <div class="bul_arr3">
+                    <h3 class="bul_arr2 f_l">그룹 코드 목록</h3>
+                    <div class="f_r">
+                        <a class="a_btn btn_style1" onclick="showJBGroupCode('I');">추가</a>
+                        <a class="a_btn btn_style1" onclick="manageCodeGroup('D');">삭제</a>
+                    </div>
+                </div>
+                <div class="groupArea grid_ej">
+                    <table id="jqGrid"></table>
+                    <div id="jqGridPager"></div>
+                </div>
+            </div>
+        </div>
+        <!--// 좌측 영역 -->
+        <!-- 우측 영역 -->
+        <div class="content_right">
+            <div class="sub_cnt_g">
+                <div class="bul_arr3">
+                    <h3 class="bul_arr2 f_l">코드 목록</h3>
+                    <div class="f_r" style="margin-top:3px;">
+                        <a class="a_btn btn_style1" onclick="showJBCode('I')">추가</a>
+                        <a class="a_btn btn_style1" onclick="manageCode('D')">삭제</a>
+                    </div>
+                </div>
+                <div class="groupArea grid_ej">
+                    <table id="jqGridDetail"></table>
+                    <div id="jqGridPagerDetail"></div>
+                </div>
+            </div>
+        </div>
+        <!--// 우측 영역 -->
+    </div>
+</div>
+
+<!-- 팝업 -->
+<div id="jbGroupCode" class="popup8">
+    <div class="popup_area">
+        <div class="popup_contents">
+            <table>
+                <tr>
+                    <td>그룹코드명</td>
+                    <td><input type="text" id="mtxtCodeGroupNm" maxlength="60"></td>
+                </tr>
+                <tr>
+                    <td>그룹코드 설명</td>
+                    <td><input type="text" id="mtxtCodeGroupDesc" maxlength="60"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="step_button">
+            <a class="a_btn btn_style3" href="javascript:manageCodeGroup($hidActionType.val());">저장</a>
+            <a class="a_btn btn_style3" href="javascript:jbGroupCode.close(); void 0">취소</a>
+        </div>
+    </div>
+</div>
+
+<div id="jbCode" class="popup9">
+    <div class="popup_area">
+        <div class="popup_contents">
+            <table>
+                <tr>
+                    <td>코드</td>
+                    <td><input type="text" id="mtxtCode" maxlength="5"></td>
+                </tr>
+                <tr>
+                    <td>코드명</td>
+                    <td><input type="text" id="mtxtCodeNm" maxlength="60"></td>
+                </tr>
+                <tr>
+                    <td>코드 설명</td>
+                    <td><input type="text" id="mtxtCodeDesc" maxlength="60"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="step_button">
+            <a class="a_btn btn_style3" href="javascript:manageCode($hidActionType.val());">저장</a>
+            <a class="a_btn btn_style3" href="javascript:jbCode.close(); void 0">취소</a>
+        </div>
+    </div>
+</div>
+
+
+<!--// 팝업 -->
+
+
+@section scripts
+{
+    <script>
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function CodeGroupModel() {
+            this.CODE_GROUP       = '';
+            this.CODE_GROUP_NM    = '';
+            this.CODE_GROUP_DESC  = '';
+            this.DISPLAY_SEQ      = 0;
+            this.CODE_GROUP_ATTR1 = '';
+            this.CODE_GROUP_ATTR2 = '';
+            this.CODE_GROUP_ATTR3 = '';
+
+        };
+
+        function CodeModel() {
+            this.CODE_GROUP  = '';
+            this.CODE        = '';
+            this.CODE_NAME   = '';
+            this.DISPLAY_SEQ = 0;
+            this.CODE_DESC   = '';
+            this.CODE_ATTR1  = '';
+            this.CODE_ATTR2  = '';
+            this.CODE_ATTR3  = '';
+        };
+
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        var $jqGrid            = $('#jqGrid');
+        var $jqGridDetail      = $('#jqGridDetail');
+
+        var $txtCodeGroup      = $('#txtCodeGroup');
+        var $txtCodeGroupNm    = $('#txtCodeGroupNm');
+
+        var $hidActionType     = $('#hidActionType');
+        var $hidCodeGroup      = $('#hidCodeGroup');
+
+        var $mtxtCodeGroupNm   = $('#mtxtCodeGroupNm');
+        var $mtxtCodeGroupDesc = $('#mtxtCodeGroupDesc');
+
+        var $mtxtCode          = $('#mtxtCode');
+        var $mtxtCodeNm        = $('#mtxtCodeNm');
+        var $mtxtCodeDesc      = $('#mtxtCodeDesc');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+        function initGroupCodeModal() {
+            $hidActionType.val('');
+            $hidCodeGroup.val('');
+            $mtxtCodeGroupNm.val('');
+            $mtxtCodeGroupDesc.val('');
+        }
+
+        function initCodeModal() {
+            $hidActionType.val('');
+            $hidCodeGroup.val('');
+            $mtxtCode.val('');
+            $mtxtCodeNm.val('');
+            $mtxtCodeDesc.val('');
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var jbGroupCode = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '그룹코드',
+            content            : $('#jbGroupCode'),
+            closeButton        : 'title',
+            width              : "15%",
+            height             : "20%",
+            minWidth           : 450,
+            minHeight          : 230,
+            responsiveMinWidth : 450,
+            responsiveMinHeight: 230,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        var jbCode = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '코드',
+            content            : $('#jbCode'),
+            closeButton        : 'title',
+            width              : "15%",
+            height             : "20%",
+            minWidth           : 450,
+            minHeight          : 230,
+            responsiveMinWidth : 450,
+            responsiveMinHeight: 230,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        // 그룹코드 생성/수정 모달
+        function showJBGroupCode(type, rowid) {
+
+            // 컨트롤 초기화
+            initGroupCodeModal();
+
+            $hidActionType.val(type);
+
+            if (type.toUpperCase() == "U") {
+                $hidCodeGroup.val($jqGrid.jqGrid('getRowData', rowid).CODE_GROUP);
+                $mtxtCodeGroupNm.val($jqGrid.jqGrid('getRowData', rowid).CODE_GROUP_NM);
+                $mtxtCodeGroupDesc.val($jqGrid.jqGrid('getRowData', rowid).CODE_GROUP_DESC);
+            }
+
+            jbGroupCode.open();
+        }
+
+        // 코드 생성/수정 모달 팝업
+        function showJBCode(type, rowid) {
+
+            // 컨트롤 초기화
+            initCodeModal();
+
+            $hidActionType.val(type);
+
+            switch (type.toUpperCase()) {
+                case 'I':
+                    if (!$jqGrid.jqGrid('getGridParam', 'selrow')) {
+                        alert('그룹 코드 선택 후 코드 생성을 해주세요.');
+                        return false;
+                    }
+
+                    var selRow = $jqGrid.jqGrid('getGridParam', 'selrow');
+                    $hidCodeGroup.val($jqGrid.jqGrid('getRowData', selRow).CODE_GROUP);
+
+                    break;
+                case 'U':
+
+                    $hidCodeGroup.val($jqGridDetail.jqGrid('getRowData', rowid).CODE_GROUP);
+                    $mtxtCode.val($jqGridDetail.jqGrid('getRowData', rowid).CODE);
+                    $mtxtCodeNm.val($jqGridDetail.jqGrid('getRowData', rowid).CODE_NAME);
+                    $mtxtCodeDesc.val($jqGridDetail.jqGrid('getRowData', rowid).CODE_DESC);
+
+                    break;
+                default:
+                    return false;
+            }
+
+            jbCode.open();
+        }
+
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+
+        $jqGrid.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '그룹코드',   name: 'CODE_GROUP',      width: 50,  align: 'center', sortable: false },
+                { label: '그룹코드명', name: 'CODE_GROUP_NM',   width: 100, sortable: false },
+                { label: '설명',       name: 'CODE_GROUP_DESC', width: 150, sortable: false },
+                { label: '생성자',     name: 'REG_ID',          width: 80,  sortable: false },
+                { label: '생성일',     name: 'REG_DTM',         width: 100, align: 'center', sortable: false },
+                { label: '수정자',     name: 'MOD_ID',          width: 80,  sortable: false },
+                { label: '수정일',     name: 'MOD_DTM',         width: 100, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 50, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="showJBGroupCode(' + "'U', '" + options.rowId  + "'"+ ')" value="수정">';
+                    },
+                    align: 'center',
+                    sortable: false
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jqGridPager",
+            onSelectRow: searchCode
+        });
+
+        $jqGridDetail.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '그룹코드', name: 'CODE_GROUP', width: 50, align: 'center', sortable: false },
+                { label: '코드',     name: 'CODE',       width: 50, align: 'center', sortable: false },
+                { label: '코드명',   name: 'CODE_NAME',  width: 100, sortable: false },
+                { label: '코드명',   name: 'CODE_DESC',  width: 90, sortable: false },
+                { label: '생성자',   name: 'REG_ID',     width: 80, sortable: false },
+                { label: '생성일',   name: 'REG_DTM',    width: 100, align: 'center', sortable: false },
+                { label: '수정자',   name: 'MOD_ID',     width: 80, sortable: false },
+                { label: '수정일',   name: 'MOD_DTM',    width: 100, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 50, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="showJBCode(' + "'U', '" + options.rowId + "'" + ')" value="수정" />';
+                    },
+                    align: 'center',
+                    sortable: false
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jqGridPagerDetail",
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        });
+
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        // 그룹코드 조회
+        function searchGroupCode() {
+
+            simpleAjax('@Url.Action("groupcodes", "code")', { codeGroup: $txtCodeGroup.val(), codeGroupNm: $txtCodeGroupNm.val() }).done(function (data) {
+                $jqGrid.jqGrid('clearGridData');
+                $jqGridDetail.jqGrid('clearGridData');
+                $jqGrid[0].addJSONData({ rows: data.Table });
+                $jqGrid.jqGrid("setSelection", 1);
+
+                if (data.ERR_CODE == "9998") {
+                    alert(data.ERROR_MSG)
+                    window.location.href = '@Url.Action("logout", "account")';
+                    return;
+                }
+
+            });
+        }
+
+        // 그룹코드 저장/수정/삭제
+        function manageCodeGroup(type) {
+
+            // Validation Check
+            if (type.toUpperCase() !== "D") {
+
+                if (!$mtxtCodeGroupNm.val()) {
+                    alert('그룹코드명을 입력하세요.');
+                    return;
+                }
+            }
+            else {
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+            }
+
+            var params = {
+                TYPE: type,
+                codeGroupModel: []
+            };
+
+            if (type.toUpperCase() !== "D") {
+                var codeGroupModel = new CodeGroupModel();
+
+                codeGroupModel.CODE_GROUP      = $hidCodeGroup.val();
+                codeGroupModel.CODE_GROUP_NM   = $mtxtCodeGroupNm.val();
+                codeGroupModel.CODE_GROUP_DESC = $mtxtCodeGroupDesc.val();
+
+                params.codeGroupModel.push(codeGroupModel);
+            }
+            else {
+                var codeGroupModel = new CodeGroupModel();
+
+                codeGroupModel.CODE_GROUP = $jqGrid.jqGrid('getRowData', $jqGrid.jqGrid('getGridParam', 'selrow')).CODE_GROUP;
+
+                params.codeGroupModel.push(codeGroupModel);
+            }
+
+            @*simpleAjax('@Url.Action("codegroupmanage", "code")', params).done(function (data) {*@
+            simpleAjax('@Url.Action("codegroupmanage", "code")', { TYPE: params.TYPE, codeGroupModel: params.codeGroupModel }, true, false).done(function (data) {
+                if (data.ERR_CODE == "0")
+                    resultMessage(type, searchGroupCode);
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998") {
+                        window.location.href = '@Url.Action("logout", "account")';
+                        return;
+                    }
+                }
+
+                jbGroupCode.close();
+            });
+        }
+
+
+        // 코드 조회
+        function searchCode(rowid, status, e) {
+            simpleAjax('@Url.Action("codes", "code")', { codeGroup: $jqGrid.jqGrid('getRowData', rowid).CODE_GROUP }, false, false).done(function (data) {
+                $jqGridDetail.jqGrid('clearGridData');
+                $jqGridDetail[0].addJSONData({ rows: data.Table });
+
+                if (data.ERR_CODE == "9998") {
+                    alert(data.ERROR_MSG)
+                    window.location.href = '@Url.Action("logout", "account")';
+                    return;
+                }
+            });
+        }
+
+        // 코드 저장/수정/삭제
+        function manageCode(type) {
+
+            var params = {
+                TYPE     : type,
+                codeModel: []
+            };
+
+            // 정합성 체크
+            if (type.toUpperCase() !== "D") {
+
+                if (!$mtxtCode.val()) {
+                    alert('코드를 입력하세요.');
+                    $mtxtCode.focus();
+                    return;
+                }
+
+                if (!$mtxtCodeNm.val()) {
+                    alert('코드명을 입력하세요.');
+                    $mtxtCodeNm.focus();
+                    return;
+                }
+
+                var codeModel = new CodeModel();
+
+                codeModel.CODE_GROUP = $hidCodeGroup.val();
+                codeModel.CODE       = $mtxtCode.val();
+                codeModel.CODE_NAME  = $mtxtCodeNm.val();
+                codeModel.CODE_DESC  = $mtxtCodeDesc.val();
+
+                params.codeModel.push(codeModel);
+            }
+            else {
+
+                var arrSel = $jqGridDetail.jqGrid('getGridParam', 'selarrrow');
+
+                if (arrSel.length <= 0) {
+                    alert('삭제할 코드를 선택하세요.');
+                    return;
+                }
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+
+                for (var i = 0; i < arrSel.length; i++) {
+                    var codeModel = new CodeModel();
+                    codeModel.CODE_GROUP = $jqGridDetail.jqGrid('getRowData', arrSel[i]).CODE_GROUP;
+                    codeModel.CODE       = $jqGridDetail.jqGrid('getRowData', arrSel[i]).CODE;
+                    params.codeModel.push(codeModel);
+                }
+            }
+
+            simpleAjax('@Url.Action("codemanage", "code")', params).done(function (data) {
+                if (data.ERR_CODE == "0") {
+                    resultMessage(type);
+                    searchCode($jqGrid.jqGrid('getGridParam', 'selrow'));
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998") {
+                        window.location.href = '@Url.Action("logout", "account")';
+                        return;
+                    }
+                }
+
+
+                jbCode.close();
+            });
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        // 최초 조회
+        searchGroupCode();
+    </script>
+}

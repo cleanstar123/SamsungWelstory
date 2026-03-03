@@ -1,0 +1,48 @@
+﻿@charset "utf-8";
+@import url(https://fonts.googleapis.com/earlyaccess/notosanskr.css);
+
+/* =============================== reset =============================== */
+html,body{width:100%;height:100%}
+html{font-size:10px;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,form,fieldset,p,button{margin:0;padding:0}
+body,h1,h2,h3,h4,input,button{font-family:'Noto Sans KR',sans-serif;word-spacing:0.1em;font-size:14px;color:#fff;}
+body{text-align:left;*word-break:break-all;-ms-word-break:break-all; line-height:100%;}
+img,fieldset,iframe{border:0 none}
+li{list-style:none}
+input,select,button{vertical-align:middle;font-size: 14px;height: 30px;outline:none;border:none;outline:none;}
+input[type="submit"] {border: 0px;cursor: pointer;font-size: 16px;}
+img{vertical-align:top}
+i,em,address{font-style:normal}
+label,button{cursor:pointer}
+button{height:25px;line-height:25px; padding-left: 14px; padding-right: 14px; border-radius:20px;color: #fff;margin-right:5px;cursor: pointer;outline:none;border:none;}
+a{color:#fff;text-decoration:none;color:inherit;}
+button *{position:relative}
+button img{left:-3px;*left:auto}
+option{padding-right:6px}
+hr{display:none}
+legend{*width:0}
+table{border-collapse:collapse;border-spacing:0}
+input::-ms-clear{display:none}
+* {-webkit-text-size-adjust:none; margin:0; padding:0; }
+.p_r {position: relative;}
+.p_a {position: absolute;}
+.button_b {background-color: #244db7;}
+.button_b:hover {background-color: #f0901d;}
+
+/*---------- 로그인 화면 ----------*/
+#wrap {width:100%;height:100%;background:url('../images/login/bg.jpg') no-repeat 50% 50%; -webkit-background-size: cover;
+	background-size: cover; }
+.main { width: 462px; height: 272px; top: 0; bottom: 0; left: 0; right: 0; margin: auto; background:url('../images/login/main_bg.png') no-repeat 50% 50%; }
+.main .login_wrap {width: 350px; height: 200px; top: 0; bottom: 0; left: 0; right: 0; margin: auto; }
+.login_wrap .logo {width: 272px;height: 75px; background:url('../images/login/logo.png') no-repeat 0 0; margin: auto; }
+table {width:374px;margin: 10px auto;}
+table tr:nth-child(1) td:nth-child(1) {line-height: 30px;}
+table tr:nth-child(1) td:nth-child(2) {line-height: 30px;}
+table .label_m {width: 80px;text-align: left;font-size:16px;font-weight: normal;margin-bottom: 0;}
+table input {margin-left: -8px;}
+table input[type="text"]{width:164px;height:23px;line-height:23px;padding-left:6px;margin-left:10px;border:1px solid #ccc;-webkit-border-radius:3px; -moz-border-radius:3px; border-radius:3px;box-shadow: 2px 2px 2px rgba(233, 233, 233, .8) inset;color: #000;}
+table input[type="password"]{width:164px;height:23px;line-height:23px;padding-left:6px;margin-left:10px;border:1px solid #ccc;-webkit-border-radius:3px; -moz-border-radius:3px; border-radius:3px;box-shadow: 2px 2px 2px rgba(233, 233, 233, .8) inset;color: #000;}
+table input[type="submit"]{width:107px;height:60px;background:url('/images/login/login.png') no-repeat;margin-top: 8px;margin-left: -15px;}
+.select {font-family:'돋움',Dotum,sans-serif;font-weight: 900;letter-spacing: 1px;}
+.select li {width:180px;font-size: 12px;margin-left:80px}
+.login_fail {width:100%;position:absolute;left:0;right:0;margin:5px auto;font-family:'돋움',Dotum,sans-serif;font-size: 12px;border-bottom:1px solid #fff;}

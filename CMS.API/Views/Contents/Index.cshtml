@@ -1,0 +1,764 @@
+﻿
+@{
+    ViewBag.Title = "컨텐츠";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>템플릿 관리 > </span><strong>컨텐츠</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="ACTION_TYPE" />
+@*<input type="hidden" id="THUMBNAIL_URL" />*@
+<input type="hidden" id="VIDEO_DURATION" />
+
+<div class="container_wrap">
+    <div class="content">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">컨텐츠</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style1" href="javascript:searchContentsPage(1);"><em></em>조회</a>
+                <a class="a_btn btn_style2" href="javascript:showJBContentsMange('I');">컨텐츠 업로드</a>
+            </div>
+        </div>
+
+        <!-- 검색조건 -->
+        <div class="search_area">
+            <label for="CONTENT_TYPE"><em></em>컨텐츠 타입</label>
+            <select id="CONTENT_TYPE" class="">
+                <option value="">전체</option>
+                <option value="B">뱃지</option>
+                <option value="H">헤드라인</option>
+                <option value="I">이미지</option>
+                <option value="M">동영상</option>
+                <option value="U">URL</option>
+                <option value="T">텍스트</option>
+            </select>
+            <label for="CONTENT_NM"><em></em>컨텐츠 이름</label>
+            <input type="text" id="CONTENT_NM">
+        </div>
+        <!--// 검색조건 -->
+        <!-- 컨텐츠 조회 리스트 -->
+
+        <h3 class="bul_arr2"><p class="f_l">컨텐츠 리스트</p><span class="f_r" id="pagingInfoArea"></span></h3>
+        <div class="con_sub_cnt">
+            <ul id="contentsArea" class="con_list"></ul>
+        </div>
+        <ul class="paging"></ul>
+    </div>
+</div>
+
+
+@* 컨텐츠 업로드 팝업 *@
+<div id="gbDisplay2" class="popup5" style="display: none">
+    <input type="hidden" id="CONTENT_ID" />
+    <div class="popup_area">
+        <div class="popup_contents">
+            <table>
+                <tr>
+                    <td>컨텐츠 이름</td>
+                    <td><input type="text" id="M_CONTENT_NM" maxlength="60" /></td>
+                </tr>
+                <tr>
+                    <td>컨텐츠 타입</td>
+                    <td>
+                        <select id="M_CONTENT_TYPE">
+                            <option value="I">이미지</option>
+                            <option value="B">뱃지</option>
+                            <option value="H">헤드라인</option>
+                            <option value="M">동영상</option>
+                            <option value="T">텍스트</option>
+                            <option value="U">URL</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr id="FILE_AREA">
+                    <td>파일</td>
+                    <td id="FILE_UPLOAD_AREA"><input type="file" id="FILE_NM" class="w_m w_m_n" multiple accept="image/*" /></td>
+                    <td id="FILE_UPDATE_AREA"><div class="file_info"><div id="FILE_UPDATE_NM"></div><div><i class="fa fa-window-close" style="font-size:20px; cursor:pointer;" id="btnFileDelete"></i></div></div></td>
+                </tr>
+                <tr id="TEXT_AREA" style="display:none;">
+                    <td>텍스트</td>
+                    <td><div id="TEXT_HTML"></div></td>
+                </tr>
+                <tr id="URL_AREA" style="display:none;">
+                    <td>URL</td>
+                    <td><input type="text" id="FILE_URL" /></td>
+                </tr>
+            </table>
+            <div style="display:none;">
+                <video id="MOVIE" muted autoplay="autoplay">
+                    <source id="MOVIE_PREVIEW" src="">
+                    Your browser does not support HTML5 video tag
+                </video>
+                <canvas id="thumbnailCanvas"></canvas>
+                <div id="output"></div>
+                <img id="uploadPreview" />
+                <iframe id="FILE_URL_IFRAME" src=""></iframe>
+            </div>
+        </div>
+        <div class="step_button">
+            <p class="a_btn_wrap">
+                <a class="a_btn btn_style3" id="btnSave" href="javascript:manageContents($ACTION_TYPE.val());">저장</a>
+                <a class="a_btn btn_style3" id="btnDelete">삭제</a>
+                <a class="a_btn btn_style3" href="javascript:gbDisplay2.close(); void 0">취소</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- 컨텐츠 미리보기 -->
+<div id="jbPreview" style="display:none; background-color:#f0f0f0; overflow-x: scroll;"></div>
+
+
+@section scripts
+{
+    <!-- include summernote css/js -->
+    @*<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.min.js"></script>*@
+    <link href="~/Content/summernote.css" rel="stylesheet" />
+    <script src="~/Scripts/summernote.min.js"></script>
+
+    <script>
+        function ContentsModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.CONTENT_ID      = '';
+            this.CONTENT_NM      = '';
+            this.CONTENT_TYPE    = '';
+            this.TEXT_HTML       = '';
+            this.FILE_URL        = '';
+            this.ORGIN_FILE_URL  = '';
+            // this.THUMBNAIL_URL   = '';    // Movie 타입의 경우 Base64 이미지 URL 할당
+            this.VIDEO_DURATION  = '';
+            this.PAGE_CNT        = '15';
+            this.PAGE_NO         = '';
+            this.FILE_PATH       = '';
+            this.FILE_NM         = '';
+            this.THUMBNAIL_PATH  = '';
+            this.THUMBNAIL_NM    = '';
+            this.IS_FILE_UPDATE  = false;
+        };
+
+
+        /*********************************/
+        var isFileUpdate        = false;                    // 컨텐츠 수정시 파일을 수정했는지의 유무
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        // 인풋
+        var $ACTION_TYPE        = $('#ACTION_TYPE');
+        var $CONTENT_ID         = $('#CONTENT_ID');
+        var $CONTENT_NM         = $('#CONTENT_NM');
+        var $M_CONTENT_NM       = $('#M_CONTENT_NM');
+        var $CONTENT_TYPE       = $('#CONTENT_TYPE');
+        var $M_CONTENT_TYPE     = $('#M_CONTENT_TYPE');
+        var $FILE_NM            = $('#FILE_NM');
+        var $FILE_URL           = $('#FILE_URL');
+        // var $THUMBNAIL_URL      = $('#THUMBNAIL_URL');
+        var $VIDEO_DURATION     = $('#VIDEO_DURATION');
+        var $FILE_URL_IFRAME    = $('#FILE_URL_IFRAME');
+        var $TEXT_HTML          = $('#TEXT_HTML');
+        var $FILE_UPDATE_NM     = $('#FILE_UPDATE_NM');     // 수정시 저장된 컨텐츠 파일명
+
+        // 버튼
+        var $btnSave            = $('#btnSave');            // 컨텐츠 저장 버튼
+        var $btnDelete          = $('#btnDelete');          // 컨텐츠 삭제 버튼
+        var $btnFileDelete      = $('#btnFileDelete');      // 컨텐츠(파일) 삭제 버튼 (컨텐츠 수정할때 사용)
+
+        // 영역
+        var $contentsArea       = $('#contentsArea');
+        var $FILE_UPLOAD_AREA   = $('#FILE_UPLOAD_AREA');   // 컨텐츠 업로드 팝업의 파일 업로드 하는 영역
+        var $FILE_UPDATE_AREA   = $('#FILE_UPDATE_AREA');   // 컨턴츠 업로드 팝업의 파일 수정하는 영역
+        var $pagingInfoArea     = $('#pagingInfoArea');     // 페이지 정보 영역
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+        function initContentsModal() {
+            $ACTION_TYPE.val('');
+            $CONTENT_ID.val('');
+            $M_CONTENT_NM.val('');
+            $M_CONTENT_TYPE.val('I').trigger("change");
+            $M_CONTENT_TYPE.attr('disabled', false);
+            $FILE_NM.val('');
+            $TEXT_HTML.summernote('code', '');
+            $FILE_URL.val('');
+            // $THUMBNAIL_URL.val('');
+            $VIDEO_DURATION.val('');
+            $FILE_URL_IFRAME.attr('src', '');
+
+            $btnSave.text('저장');
+            $btnDelete.hide();
+
+            $FILE_UPLOAD_AREA.show();
+            $FILE_UPDATE_AREA.hide();
+
+            isFileUpdate = false;
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /**** 텍스트 에디터 설정 시작 ****/
+
+        $TEXT_HTML.summernote({
+            dialogsInBody: true,
+            placeholder: 'write here...',
+            fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'NanumBarunGothic'],
+            fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '40', '44', '48', '54', '60', '66', '72', '80', '88', '96'],
+            toolbar: [
+                ['style', ['bold', 'underline', 'clear', 'fontname']],
+                ['font', ['strikethrough']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['height', ['height']],
+            ],
+            fontNamesIgnoreCheck: ['NanumBarunGothic'],
+            height: 200
+        });
+
+        /***** 텍스트 에디터 설정 끝 *****/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var gbDisplay2 = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '컨텐츠 관리',
+            content            : $('#gbDisplay2'),
+            closeButton        : 'title',
+            width              : "47%",
+            height             : "64%",
+            minWidth           : 760,
+            minHeight          : 550,
+            responsiveMinWidth : 760,
+            responsiveMinHeight: 550,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+
+        var jbPreView = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '컨텐츠 미리보기',
+            content            : $('#jbPreview'),
+            closeButton        : 'title',
+            reposition         : true,
+            onClose: function () {
+
+                $('#jbPreview').empty();
+            }
+        });
+
+
+        // 컨텐츠 저장/수정/삭제 모달
+        // 수정일 경우 컨텐츠 아이디와 같이 전달
+        function showJBContentsMange(type, id) {
+
+            // 컨트롤 초기화
+            initContentsModal();
+
+            // 저장 : I, 수정 : U, 삭제 : D
+            $ACTION_TYPE.val(type);
+
+            if (type.toUpperCase() == "U") {
+
+                $M_CONTENT_TYPE.attr('disabled', true);
+
+                $CONTENT_ID.val(contentsData[id].CONTENT_ID);
+                $M_CONTENT_NM.val(contentsData[id].CONTENT_NM);
+                $M_CONTENT_TYPE.val(contentsData[id].CONTENT_TYPE).trigger("change");
+
+                // 파일(이미지, 뱃지, 헤드라인, 동영상) 컨텐츠 타입일 경우
+                switch (contentsData[id].CONTENT_TYPE.toUpperCase()) {
+                    case 'I':
+                    case 'B':
+                    case 'H':
+                    case 'M':
+                        $FILE_UPLOAD_AREA.hide();
+                        $FILE_UPDATE_AREA.show();
+
+                        $FILE_UPDATE_NM.text(contentsData[id].FILE_NM);
+
+                        $btnFileDelete.click(function () {
+                            $FILE_UPLOAD_AREA.show();
+                            $FILE_UPDATE_AREA.hide();
+                            isFileUpdate = true;
+                        });
+                        break;
+                    case 'T':
+                        $TEXT_HTML.summernote('code', contentsData[id].TEXT_HTML);
+                        break;
+                    case 'U':
+                        $FILE_URL.val(contentsData[id].FILE_URL);
+                        break;
+                }
+
+                $btnSave.text('수정');
+                $btnDelete.show();
+            }
+
+            gbDisplay2.open();
+        }
+
+        function closeJBContentsMange() {
+            initContentsModal();
+            gbDisplay2.close();
+        }
+
+        function showJBPreview(contentsId) {
+
+            $('#loadingbar').show();
+
+            $('#jbPreview').empty();
+
+            if (contentsData[contentsId].CONTENT_TYPE == 'M') {
+
+                //jbPreView.setContent($('<video id="previewVideo" controls muted><source src="' + contentsData[contentsId].FILE_URL + '">Your browser does not support HTML5 video tag</video>'), true);
+                $('#jbPreview').append($('<video id="previewVideo" controls muted><source src="' + contentsData[contentsId].FILE_URL + '">Your browser does not support HTML5 video tag</video>'));
+                $('#previewVideo').on('loadstart', function () {
+                    $('#loadingbar').hide();
+                    jbPreView.open();
+                });
+            }
+            else if ((contentsData[contentsId].CONTENT_TYPE == 'U')) {
+                $('#jbPreview').append($('<iframe id="previewIframe" src="' + contentsData[contentsId].FILE_URL + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>'));
+                $('#previewIframe').on('load', function () {
+                    $('#loadingbar').hide();
+                    jbPreView.open();
+                });
+            }
+            else {
+
+                $('<img alt="" src="' + contentsData[contentsId].FILE_URL + '" />').on('load', function () {
+                    $('#jbPreview').append($(this));
+                    $('#loadingbar').hide();
+                    jbPreView.open();
+                });
+            }
+        }
+
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+        var currentPageNo      = 1;
+        var totalPageCnt       = 0;
+        var contentsData       = {};
+        var contentsSelectedId = '';
+
+        function searchContentsPage(pageNo) {
+
+            var contentsModel = new ContentsModel();
+            contentsModel.CONTENT_NM   = $CONTENT_NM.val();
+            contentsModel.CONTENT_TYPE = $CONTENT_TYPE.val();
+            contentsModel.PAGE_NO      = pageNo;
+
+            var contents = '';
+
+            simpleAjax('@Url.Action("getContentsPageList", "contents")', { contentsModel: contentsModel }).done(function (data) {
+
+                $contentsArea.parent().scrollTop(0);
+
+                // 페이지 1 조회시 내용 초기화
+                if (currentPageNo == 1) {
+                    $contentsArea.empty();
+                    $('#nodata').remove();
+                    templateData = {};
+                }
+
+                //console.log(data);
+
+                var contents = '';
+
+                // 2019-05-14 컨텐츠 조회 데이터 변조 체크
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+                else {
+                    if (data.Table.length > 0) {
+                        for (var i = 0; i < data.Table.length; i++) {
+                            contents += '<li class="transition">';
+                            contents += '<h1>';
+                            contents += '<div class="f_l"><label class="list_title" for="' + data.Table[i].CONTENT_ID + '">';
+                            contents += '<input type="checkbox" id="' + data.Table[i].CONTENT_ID + '" name="contetns" />';
+                            contents += '<p>' + data.Table[i].CONTENT_ID + '<strong>' + data.Table[i].CONTENT_NM + '</strong></p>';
+                            contents += '</label></div>';
+                            contents += '<div class="f_r">';
+                            contents += '<img src="../images/common/write_ico.png" onmouseover="this.src=' + "'../images/common/write_ico_over.png'" + ';" onmouseout="this.src=' + "'../images/common/write_ico.png'" + ';" class="ico_btn" onclick="showJBContentsMange(' + "'U'," + "'" + data.Table[i].CONTENT_ID + "'" + ')">';
+                            contents += '</div>'
+                            contents += '</h1>';
+                            contents += '<div>';
+
+                            if (data.Table[i].CONTENT_TYPE == 'T') {
+                                contents += '<div class="layerList_text">';
+                                contents += data.Table[i].TEXT_HTML;
+                                contents += '</div>';
+                            }
+                            else {
+
+                                contents += '<img data-id="' + data.Table[i].CONTENT_ID + '" src="' + data.Table[i].THUMBNAIL_URL + '" />';
+
+                                if (data.Table[i].CONTENT_TYPE == 'M') {
+
+                                    var init = Math.floor(data.Table[i].VIDEO_DURATION);
+                                    var minutes = pad(Math.floor((init / 60) % 60), 2);
+                                    var seconds = pad(init % 60, 2);
+
+
+                                    contents += '<div class="video_btn">';
+                                    contents += '<div class="play_btn"><img src="/images/sub/play.png" alt=""></div>';
+                                    //contents += '<div class="time_btn">' + minutes + ' : ' + seconds + '</div>';
+                                    contents += '</div>';
+                                }
+                            }
+
+                            contents += '</div >';
+                            contents += '<table>';
+                            contents += '<tr><td>작성자</td><td>' + data.Table[i].REG_ID + '</td></tr>';
+                            contents += '<tr><td>용량</td><td>' + Math.ceil(data.Table[i].FILE_SIZE / 1028) + ' KB</td></tr>';
+                            contents += '<tr><td>타입</td><td>' + data.Table[i].CONTENT_TYPE_NM + '</td></tr>';
+                            contents += '</table>';
+                            contents += '</div>';
+                            contents += '</li>';
+
+                            contentsData[data.Table[i].CONTENT_ID] = data.Table[i];
+                        }
+
+                        var $contents = $(contents);
+
+                        $contents.find('img').on('error', function () {
+                            $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/thumbnail_icon_1.png" alt=""></div>');
+                        });
+
+                        // 미리보기 기능 추가
+                        $contents.find('img[data-id]').click(function () {
+                            showJBPreview($(this).data('id'));
+                        });
+
+                        $contentsArea.append($contents);
+
+                        var page_viewList = Paging(data.Table1[0].TOT_ROW_COUNT, 15, 10, pageNo, "searchContentsPage");
+                        $(".paging").empty().html(page_viewList);
+                        $pagingInfoArea.empty().text(pageNo + '/' + data.Table1[0].TOT_PAGE_COUNT + ' Page (' + data.Table1[0].TOT_ROW_COUNT + ' 건)');
+
+
+                        $('input[type="checkbox"][name="contetns"]').click(function () {
+                            if ($(this).prop('checked')) {
+                                $(this).parents('.transition').addClass('list_click');
+                            }
+                            else {
+                                $(this).parents('.transition').removeClass('list_click');
+                            }
+                        });
+                    }
+                    else {
+                        contents += '<p id="nodata" class="date_n">데이터가 없습니다.</p>';
+                        $contentsArea.empty();
+                        $contentsArea.parent().append($(contents));
+
+                        $pagingInfoArea.empty().text(0 + '/' + 0 + ' Page (' + 0 + ' 건)');
+                    }
+                }
+            });
+        }
+
+
+        // 컨텐츠 저장/수정
+        function manageContents(type) {
+            // 정합성 체크
+            if (type.toUpperCase() == "I" || type.toUpperCase() == "U") {
+
+                if (!$M_CONTENT_NM.val()) {
+                    alert('컨텐츠 이름을 입력하세요.');
+                    return false;
+                }
+
+                if (!$M_CONTENT_TYPE.val()) {
+                    alert('컨텐츠 타입을 선택하세요.');
+                    return false;
+                }
+
+                var extension = $FILE_NM.val().substring($FILE_NM.val().lastIndexOf('.'), $FILE_NM.val().length).toUpperCase();
+
+                switch ($M_CONTENT_TYPE.val()) {
+                    case 'I':
+                    case 'B':
+                    case 'H':
+                    case 'M':
+
+                        // 저장이거나 수정인데 파일을 수정했을 경우
+                        if (type.toUpperCase() == "I" || (type.toUpperCase() == 'U' && isFileUpdate)) {
+
+                            if ($FILE_NM.get(0).files.length <= 0) {
+                                alert('파일을 선택하세요.');
+                                return false;
+                            }
+
+                            if ($M_CONTENT_TYPE.val() != 'M') {
+
+                                //console.log(extension);
+
+                                if (extension != '.JPG' && extension != '.JPEG' && extension != '.GIF' && extension != '.PNG') {
+                                    alert('컨텐츠 타입 형식에 맞는 파일이 아닙니다.');
+                                    return false;
+                                }
+                            }
+                        }
+
+                        break;
+                    case 'T':
+
+                        if (!$TEXT_HTML.summernote('code')) {
+                            alert('텍스트를 입력하세요.');
+                            return false;
+                        }
+                        break;
+                    case 'U':
+
+                        if (!$FILE_URL.val()) {
+                            alert('URL을 입력하세요.');
+                            return false;
+                        }
+
+                        break;
+                }
+            }
+            else {
+                return false;
+            }
+
+            var contentsModel = new ContentsModel();
+
+            contentsModel.CONTENT_ID     = $CONTENT_ID.val();
+            contentsModel.CONTENT_NM     = $M_CONTENT_NM.val();
+            contentsModel.CONTENT_TYPE   = $M_CONTENT_TYPE.val();
+
+            if (type.toUpperCase() == "U") {
+                contentsModel.FILE_PATH      = contentsData[$CONTENT_ID.val()].FILE_PATH;
+                contentsModel.FILE_NM        = contentsData[$CONTENT_ID.val()].FILE_NM;
+                contentsModel.THUMBNAIL_PATH = contentsData[$CONTENT_ID.val()].THUMBNAIL_PATH;
+                contentsModel.THUMBNAIL_NM   = contentsData[$CONTENT_ID.val()].THUMBNAIL_NM;
+                contentsModel.IS_FILE_UPDATE = isFileUpdate;
+            }
+
+            // 동영상일 경우 추가 정보 설정
+            //if (contentsModel.CONTENT_TYPE == "M") {
+            //    contentsModel.THUMBNAIL_URL  = $THUMBNAIL_URL.val() ? $THUMBNAIL_URL.val().split(";")[1].split(',')[1] : '';
+            //    contentsModel.VIDEO_DURATION = $VIDEO_DURATION.val();
+            //}
+
+            if (contentsModel.CONTENT_TYPE == "I" || contentsModel.CONTENT_TYPE == "H" || contentsModel.CONTENT_TYPE == "B" || contentsModel.CONTENT_TYPE == "M") {
+
+                // 파일 업로드를 위함
+                var formData = new FormData();
+
+                var files = $FILE_NM.get(0).files;
+
+                for (var i = 0; i < files.length; i++)
+                    formData.append(files[i].name, files[i]);
+
+                formData.append('TYPE', type);
+                formData.append('contentsModel', JSON.stringify(contentsModel));
+
+                simplefileUploadAjax('@Url.Action("uploadfile", "contents")', formData).done(function (data) {
+                    var dataObj = JSON.parse(data);
+
+                    if (dataObj.ERR_CODE == "0")
+                        resultMessage(type);
+                    else {
+                        alert(dataObj.ERROR_MSG);
+
+                        if (dataObj.ERR_CODE == "9998") {
+                            window.location.href = '@Url.Action("logout", "account")';
+                            return;
+                        }
+                    }
+
+                    closeJBContentsMange();
+                    searchContentsPage(1);
+                });
+            }
+            else if (contentsModel.CONTENT_TYPE == "T" || contentsModel.CONTENT_TYPE == "U") {
+                contentsModel.TEXT_HTML      = $TEXT_HTML.summernote('code');
+                contentsModel.FILE_URL       = $FILE_URL.val();
+                
+                var data = {
+                    TYPE: type,
+                    contentsModel: contentsModel
+                };
+
+                var requestUrl = '';
+                
+                if (contentsModel.CONTENT_TYPE == "T")
+                    requestUrl = '@Url.Action("uploadtext", "contents")';
+                else
+                    requestUrl = '@Url.Action("uploadurl", "contents")';
+
+                simpleAjax(requestUrl, data).done(function (data) {
+
+                    if (data.ERR_CODE == "0") {
+                        resultMessage(type);
+                    }
+                    else {
+                        alert(data.ERROR_MSG);
+
+                        if (data.ERR_CODE == "9998") {
+                            window.location.href = '@Url.Action("logout", "account")';
+                            return;
+                        }
+                    }
+
+                    closeJBContentsMange();
+                    searchContentsPage(1);
+                });
+            }
+        }
+
+        // 컨텐츠 삭제 함수
+        function deleteContents() {
+
+            if (!confirm(deleteConfirmMessage))
+                return false;
+
+            var params = [];
+            var param = {
+                CONTENT_ID    : $CONTENT_ID.val(),
+                CONTENT_TYPE  : $M_CONTENT_TYPE.val(),
+                FILE_PATH     : contentsData[$CONTENT_ID.val()].FILE_PATH,
+                FILE_NM       : contentsData[$CONTENT_ID.val()].FILE_NM,
+                THUMBNAIL_PATH: contentsData[$CONTENT_ID.val()].THUMBNAIL_PATH,
+                THUMBNAIL_NM  : contentsData[$CONTENT_ID.val()].THUMBNAIL_NM
+            }
+
+            params.push(param);
+
+            simpleAjax('@Url.Action("managedelete", "contents")', params).done(function (data) {
+
+                if (data.ERR_CODE == "0") {
+                    resultMessage("D");
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998") {
+                        window.location.href = '@Url.Action("logout", "account")';
+                        return;
+                    }
+                }
+
+                closeJBContentsMange();
+                searchContentsPage(1);
+            });
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        $FILE_URL.focusout(function () {
+
+            if ($FILE_URL.val()) {
+                $FILE_URL_IFRAME.attr('src', $FILE_URL.val());
+            }
+        });
+
+        //$FILE_NM.change(function () {
+
+        //    var extension = $FILE_NM.val().substring($FILE_NM.val().lastIndexOf('.'), $FILE_NM.val().length).toUpperCase();
+
+        //    if ($M_CONTENT_TYPE.val() == 'M' || extension == '.MP4' ) {
+
+        //        var URL  = window.URL || window.webkitURL;
+        //        var file = document.getElementById('FILE_NM').files[0];
+        //        var type = file.type;
+
+        //        var fileURL = URL.createObjectURL(file);
+
+        //        // 선택한 버튼의 동영상 경로를 불러옴
+        //        $("#MOVIE_PREVIEW").attr("src", fileURL);
+        //        var video = document.getElementById("MOVIE");
+        //        video.load();
+
+        //        // 동영상 로드 완료 이벤트
+        //        video.addEventListener('loadedmetadata', function () {
+
+        //            // 동영상 플레이 시작 시간
+        //            video.currentTime = Math.floor(video.duration * 0.4);
+
+        //            // 동영상 재생
+        //            video.play();
+
+        //            // 동영상 재생은 했지만 바로 재생 화면이 보이지 않으므로 2초 뒤에 화면을 캡처
+        //            setTimeout(function () {
+
+        //                video.pause();
+
+        //                var canvasImage = capture('MOVIE', 'thumbnailCanvas', 0.25);
+        //                var img_b64 = canvasImage.toDataURL('image/png');
+
+        //                $THUMBNAIL_URL.val(img_b64);
+        //                $VIDEO_DURATION.val(video.duration);
+
+        //            }, 2000);
+
+        //        }, false);
+        //    }
+        //});
+
+        // 컨텐츠 업로드 팝업의 컨텐츠 타입 변경 이벤트 함수
+        $M_CONTENT_TYPE.change(function () {
+
+            $('#FILE_AREA').css('display', 'none');
+            $('#TEXT_AREA').css('display', 'none');
+            $('#URL_AREA').css('display',  'none');
+
+            switch ($(this).val().toUpperCase()) {
+                case 'T':
+                    $('#TEXT_AREA').css('display', 'table-row');
+                    break;
+                case 'U':
+                    $('#URL_AREA').css('display', 'table-row');
+                    break;
+                case 'I':
+                case 'B':
+                case 'H':
+                    $('#FILE_AREA').css('display', 'table-row');
+                    $('#FILE_NM').attr('accept', 'image/*');
+                    break;
+                case 'M':
+                    $('#FILE_AREA').css('display', 'table-row');
+                    $('#FILE_NM').attr('accept', 'video/mp4,video/x-m4v,video/*');
+                    break;
+            }
+        });
+
+        // 팝업창 컨텐츠 삭제 버튼
+        $btnDelete.click(function () {
+            deleteContents();
+        });
+
+        // 최초 조회
+        searchContentsPage(1);
+    </script>
+}

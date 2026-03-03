@@ -1,0 +1,635 @@
+﻿@model DisplayModel
+
+@{
+    ViewBag.Title = "스케줄 관리";
+}
+
+@section styles
+{
+    @*<link rel="stylesheet" type="text/css" href="~/Content/schedule/jquery-ui-custom-1.11.2.min.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/schedule/calenstyle.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/schedule/calenstyle-jquery-ui-override.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/schedule/calenstyle-iconfont.css" />
+        <link rel="stylesheet" type="text/css" href="~/Content/schedule/CalEventList.css" />*@
+
+    @Styles.Render("~/Content/css/schedule")
+
+    <style type="text/css">
+        .calendarContOuter { width: 100%; height: 100%; margin: 0px auto; font-size: 14px; }
+        .cElemDatePicker   { font-size: 14px; }
+
+        .jhs { 
+            background-attachment: scroll;
+            background-clip: border-box;
+            background-color: rgb(154, 122, 169);
+            background-image: none;
+            background-origin: padding-box;
+            background-position-x: 0%;
+            background-position-y: 0%;
+            background-repeat-x:;
+            background-repeat-y:;
+            background-size: auto;
+            border-bottom-color: rgb(255, 255, 255);
+            border-bottom-left-radius: 50%;
+            border-bottom-right-radius: 50%;
+            border-bottom-style: solid;
+            border-bottom-width: 2px;
+            border-collapse: collapse;
+            border-image-outset: 0px;
+            border-image-repeat: stretch;
+            border-image-slice: 100%;
+            border-image-source: none;
+            border-image-width: 1;
+            border-left-color: rgb(255, 255, 255);
+            border-left-style: solid;
+            border-left-width: 2px;
+            border-right-color: rgb(255, 255, 255);
+            border-right-style: solid;
+            border-right-width: 2px;
+            border-top-color: rgb(255, 255, 255);
+            border-top-left-radius: 50%;
+            border-top-right-radius: 50%;
+            border-top-style: solid;
+            border-top-width: 2px;
+            box-sizing: border-box;
+            color: rgb(0, 0, 0);
+            display: inline-block;
+            font-family: Arial;
+            font-size: 14px;
+            width: 20px;
+            height: 20px;
+            line-height: 12px;
+            margin-bottom: 5px;
+            margin-left: 0px;
+            margin-right: 0px;
+            margin-top: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+            padding-right: 0px;
+            padding-top: 0px;
+            text-align: center;
+            text-size-adjust: 100%;
+            user-select: none;
+            -webkit-border-horizontal-spacing: 0px;
+            -webkit-border-vertical-spacing: 0px;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+            vertical-align: middle;
+        }
+    </style>
+}
+
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>스케줄링 > </span><strong>스케줄</strong></h1>
+    </div>
+}
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap" style="margin-bottom:10px;">
+            <div class="f_l">스케줄 우선 순위 : <i class="fa fa-moon-o" style="color:#bbab81; font-size:20px;"></i> > <i class="fa fa-exclamation-triangle" style="color:#bbab81; font-size:20px;"></i> > <span class="jhs" style="background: #bbab81; "></span></div>
+            <div class="f_r" style="margin-top:3px;">
+
+                @Html.DropDownListFor(model => model.DISPLAY_SELECTED, Model.DISPLAY_LIST, new { @id = "DISPLAYS", @class = "bul_wrap_s" })
+                <a class="a_btn btn_style1" href="javascript:isFirstSearch = true; searchScheduleCal();">조회</a>
+                <a class="a_btn btn_style1" href="javascript:manageSchedule.popups.showJBSchedule('I');">등록</a>
+            </div>
+        </div>
+        <div class="calendarArea">
+            <div class="calendarContOuter"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="jbSchedule" class="popup" style="display: none;">
+    @Html.Partial("ManageSchedule")
+</div>
+
+<div id="jbTemplate" class="popup11" style="display: none">
+    <div class="popup_subCnt">
+        <div class="bul_wrap">
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:currentPageNo = 1; searchTemplate();"><em></em>조회</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for="TXT_TEMPLATE_NM"><em></em>템플릿 이름</label>
+            <input type="text" id="TXT_TEMPLATE_NM">
+        </div>
+        <ul id="templateArea" class="popup_conList"></ul>
+        <ul class="paging"></ul>
+        <div class="step_button">
+            <p class="a_btn_wrap">
+                <a class="a_btn btn_style3" href="javascript:applyTemplate();">확인</a>
+                <a class="a_btn btn_style3" href="javascript:jbTemplate.close(); void 0">취소</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    @*<script type="text/javascript" src="~/Scripts/schedule/jquery-ui-custom-1.11.2.min.js" charset="utf-8"></script>
+        <script type="text/javascript" src="~/Scripts/schedule/calenstyle.js" charset="utf-8"></script>
+        <script type="text/javascript" src="~/Scripts/Views/manage-schedule.js"></script>*@
+
+    @Scripts.Render("~/bundles/schedule")
+
+    <script type="text/javascript">
+
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function ScheduleModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.SCHEDULE_ID     = '';
+            this.SCHEDULE_TYPE   = '';
+            this.SCHEDULE_NM     = '';
+            this.SCHEDULE_DESC   = '';
+            this.TEMPLATE_ID     = '';
+            this.START_DATE      = '';
+            this.END_DATE        = '';
+            this.START_TIME      = '';
+            this.END_TIME        = '';
+            this.PLAY_TIME       = '';
+            this.MON_YN          = '';
+            this.TUE_YN          = '';
+            this.WED_YN          = '';
+            this.THU_YN          = '';
+            this.FRI_YN          = '';
+            this.SAT_YN          = '';
+            this.SUN_YN          = '';
+            this.DISPLAY_ID      = '';
+        }
+
+        function TemplateModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.TEMPLATE_ID     = '';
+            this.TEMPLATE_NM     = '';
+            this.PAGE_CNT        = '8';
+            this.PAGE_NO         = '';
+        }
+
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        $templateArea    = $('#templateArea');
+        $TXT_TEMPLATE_NM = $('#TXT_TEMPLATE_NM');
+        $DISPLAYS        = $('#DISPLAYS');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var jbTemplate = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            isolateScroll      : false,
+            overlay            : false,
+            attach             : '#myModal',
+            title              : '템플릿 선택',
+            content            : $('#jbTemplate'),
+            closeButton        : 'title',
+            width              : "51%",
+            height             : "64%",
+            minWidth           : 730,
+            minHeight          : 620,
+            responsiveMinWidth : 730,
+            responsiveMinHeight: 620,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        // 템플릿 검색 팝업
+        function showJBTemplate() {
+
+            templateSelectedIds = {};   // 선택한 템플릿 목록 초기화
+            currentPageNo       = 1;    // 템플릿 검색 페이지 번호 1페이지로 초기화
+
+            searchTemplate();           // 템플릿 검색
+            jbTemplate.open();          // 템플릿 팝업 오픈
+        }
+
+        // 스케줄 팝업의 검색 버튼 클릭 이벤트 추가
+        manageSchedule.elements.$btnSearchTemplate.click(showJBTemplate);
+
+        /******** 팝업 창 정의 끝 ********/
+        /*********************************/
+
+        // 단일 스케줄 조회
+        function searchSchedule(id) {
+
+            simpleAjax('@Url.Action("GetSchedule", "Schedule")', { scheduleModel: { SCHEDULE_ID: id } }).done(function (data) {
+
+                manageSchedule.addSelectedTemplate(data.Table2, id);
+
+                manageSchedule.elements.$SCHEDULE_ID.val(data.Table[0].SCHEDULE_ID);
+                manageSchedule.elements.$ROLLING_YN.val(data.Table[0].ROLLING_YN);
+                manageSchedule.elements.$URL.val(data.Table[0].URL);
+                manageSchedule.elements.$SCHEDULE_TYPE.val(data.Table[0].SCHEDULE_TYPE);
+                manageSchedule.elements.$SCHEDULE_NM.val(data.Table[0].SCHEDULE_NM);
+                manageSchedule.elements.$SCHEDULE_DESC.val(data.Table[0].SCHEDULE_DESC);
+                manageSchedule.elements.$START_DATE.val(data.Table[0].START_DATE);
+                manageSchedule.elements.$END_DATE.val(data.Table[0].END_DATE);
+                manageSchedule.elements.$START_TIME.val(data.Table[0].START_TIME);
+                manageSchedule.elements.$END_TIME.val(data.Table[0].END_TIME);
+
+                manageSchedule.elements.$MON_YN.prop("checked", data.Table[0].MON_YN == 'Y' ? true : false);
+                manageSchedule.elements.$TUE_YN.prop("checked", data.Table[0].TUE_YN == 'Y' ? true : false);
+                manageSchedule.elements.$WED_YN.prop("checked", data.Table[0].WED_YN == 'Y' ? true : false);
+                manageSchedule.elements.$THU_YN.prop("checked", data.Table[0].THU_YN == 'Y' ? true : false);
+                manageSchedule.elements.$FRI_YN.prop("checked", data.Table[0].FRI_YN == 'Y' ? true : false);
+                manageSchedule.elements.$SAT_YN.prop("checked", data.Table[0].SAT_YN == 'Y' ? true : false);
+                manageSchedule.elements.$SUN_YN.prop("checked", data.Table[0].SUN_YN == 'Y' ? true : false);
+
+                manageSchedule.elements.$jgDisplay.jqGrid('clearGridData');
+                manageSchedule.elements.$jgDisplay[0].addJSONData({ rows: data.Table1 });
+
+                $(manageSchedule.elements.$btnUpdateTemplate).show().attr('href', '@Url.Action("managetemplate", "template")' + '?type=U&id=' + data.Table[0].TEMPLATE_ID);
+
+            });
+        }
+
+        /***********************************************************************************************************************************/
+        /************************************************ 템플릿 관련 변수 및 함수 *********************************************************/
+        /***********************************************************************************************************************************/
+
+        var currentPageNo       = 1;       // 조회 페이지
+        var totalPageCnt        = 0;       // 총 페이지 수
+        var templateData        = {};      // 템플릿 조회 결과
+        var templateSelectedIds = {};      // 선택된 템플릿 목록
+        var templatesearching   = false;   // 템플릿 조회중이면 true 아니면 fasle
+
+        // 템플릿 조회
+        function searchTemplate() {
+
+            templatesearching = true;
+
+            var templateModel = new TemplateModel();
+            templateModel.TEMPLATE_NM = $TXT_TEMPLATE_NM.val();
+            templateModel.PAGE_NO     = currentPageNo;
+
+            simpleAjax('@Url.Action("getTemplatePageList", "Template")', { templateModel: templateModel }, false, (currentPageNo == 1 ? false : true)).done(function (data) {
+                // 2019-05-14 컨텐츠 조회 데이터 변조 체크
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                // 1 페이지 조회시 초기화
+                if (currentPageNo == 1) {
+
+                    $templateArea.scrollTop(0);  // 스크롤 최상위로 이동
+                    $templateArea.empty();       // 템플릿 결과 화면 초기화
+                    templateData = {};           // 템플릿 결과 데이터 초기화
+
+                    // 검색 결과 없을 경우
+                    if (data.Table.length <= 0) {
+                        $templateArea.append($('<p class="date_n">데이터가 없습니다.</p>'));
+                        return false;
+                    }
+                }
+
+                totalPageCnt = data.Table1[0].TOT_PAGE_COUNT;  // 총 페이지 수 할당
+                var template = '';
+
+                for (var i = 0; i < data.Table.length; i++) {
+                    template += '<li class="transition">';
+                    template += '<h1>';
+                    template += '<div class="f_l"><label for="' + data.Table[i].TEMPLATE_ID + '">';
+                    template += '<input type="checkbox" id="' + data.Table[i].TEMPLATE_ID + '" name="template" />';
+                    template += '<p>' + data.Table[i].TEMPLATE_ID + '<strong>' + data.Table[i].TEMPLATE_NM + '</strong></p>';
+                    template += '</label></div>';
+                    template += '<div class="f_r"><i class="fa fa-pen"></i></div>';
+                    template += '</h1>';
+                    template += '<div>';
+                    template += '<img src="' + data.Table[i].THUMBNAIL_NM + '" onclick="updateTemplate(' + data.Table[i].TEMPLATE_ID + ')" />';
+                    template += '</div >';
+                    template += '<table>';
+                    template += '<tr><td>작성자</td><td>' + data.Table[i].REG_ID + '</td></tr>';
+                    template += '<tr><td>템플릿 설명</td><td>' + data.Table[i].TEMPLATE_DESC + '</td></tr>';
+                    template += '<tr><td>해상도</td><td>' + data.Table[i].SCREEN_W_H + '</td></tr>';
+                    template += '</table>';
+                    template += '</div>';
+                    template += '</li>';
+
+                    templateData[data.Table[i].TEMPLATE_ID] = data.Table[i];
+                }
+
+                var $template = $(template);
+
+                $template.find('img').on('error', function () {
+                    $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/thumbnail_icon_2.png" alt=""></div>');
+                });
+
+                $templateArea.append($template);
+
+                $('input[type="checkbox"][name="template"]').click(function () {
+
+                    if ($(this).prop('checked')) {
+
+                        $(this).prop('checked', true).parents('.transition').addClass('list_click');
+                        templateSelectedIds[$(this).attr('id')] = true;
+                    }
+                    else {
+
+                        $(this).parents('.transition').removeClass('list_click');
+                        delete templateSelectedIds[$(this).attr('id')];
+                    }
+                });
+
+                currentPageNo++;              // 조회 완료시 현재 페이지 번호 증가
+                templatesearching = false;    // 조회 완료시 조회중 상태값 false로 변경
+            });
+        }
+
+        // 템플릿 팝업 확인 버튼 클릭시 실행 함수
+        function applyTemplate() {
+
+            var templateSelectedData = [];
+
+            for (templateSelectedId in templateSelectedIds) {
+                templateSelectedData.push(templateData[templateSelectedId]);
+            }
+
+            manageSchedule.addSelectedTemplate(templateSelectedData);
+            jbTemplate.close();
+        }
+
+        $templateArea.on('scroll', function () {
+            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 10) {
+
+                if (!(totalPageCnt == (currentPageNo - 1))) {
+                    if (!templatesearching) {
+                        searchTemplate(currentPageNo);
+                    }
+                }
+            }
+        });
+
+        /***********************************************************************************************************************************/
+        /***********************************************************************************************************************************/
+
+        var oCal1;
+        var isFirstSearch = true;
+
+        var currentvisibleView = 'WeekView';  // DetailedMonthView (월), WeekView (주), DayView (일), AgendaView (목록)
+
+        if (localStorage) {
+            currentvisibleView = localStorage.getItem("currentvisibleView") ? localStorage.getItem("currentvisibleView") : 'WeekView';
+        }
+
+        var historyvisibleView = '';
+
+        // 재조회할 경우 시작일, 종료일을 할당할 변수
+        var searchStartDate    = '';          
+        var searchEndDate      = '';
+
+        function searchScheduleCal() {
+
+            $(".calendarContOuter").CalenStyle({
+                initialize: function () {
+                    oCal1 = this;
+                },
+                visibleView  : currentvisibleView,
+                calDataSource: [{
+                    sourceId       : "s1",
+                    sourceFetchType: "DATERANGE",
+                    sourceType     : "FUNCTION",
+                    source         : function (fetchStartDate, fetchEndDate, durationStartDate, durationEndDate, oConfig, loadViewCallback) {
+
+                        var calObj = this;
+
+                        if (isFirstSearch) {
+                            
+                            calObj.incrementDataLoadingCount(1);
+
+                            var startDate = new Date(fetchStartDate);
+                            var endDate   = new Date(fetchEndDate);
+
+                            var scheduleModel = new ScheduleModel();
+                            scheduleModel.START_DATE = startDate.getFullYear() + '-' + ("0" + (startDate.getMonth() + 1)).slice(-2) + '-' + startDate.getDate();
+                            scheduleModel.END_DATE   = endDate.getFullYear()   + '-' + ("0" + (endDate.getMonth()   + 1)).slice(-2) + '-' + endDate.getDate();
+                            scheduleModel.DISPLAY_ID = $DISPLAYS.val();
+
+                            var period = getPeriod(currentvisibleView, new Date());
+
+                            scheduleModel.START_DATE = period.START_DATE;
+                            scheduleModel.END_DATE   = period.END_DATE;
+
+                            simpleAjax('@Url.Action("getSchedules", "Schedule")', { scheduleModel: scheduleModel }, true, false).done(function (data) {
+                                if (data.ERROR_MSG != null) {
+                                    alert(data.ERROR_MSG);
+
+                                    if (data.ERR_CODE == "9998") {
+                                        window.location.href = '@Url.Action("logout", "account")';
+                                        return;
+                                    }
+                                }
+                                if (data) {
+
+                                    // calObj.parseDataSource("eventSource", data, durationStartDate, durationEndDate, loadViewCallback, oConfig, false);
+                                    calObj.parseDataSource("eventSource", data, new Date(scheduleModel.START_DATE), new Date(scheduleModel.END_DATE), loadViewCallback, oConfig, false);
+                                }
+                            });
+                        }
+                        else {
+
+                            if (searchStartDate && searchEndDate) {
+                                var scheduleModel = new ScheduleModel();
+                                scheduleModel.START_DATE = searchStartDate;
+                                scheduleModel.END_DATE   = searchEndDate;
+                                scheduleModel.DISPLAY_ID = $DISPLAYS.val();
+
+                                simpleAjax('@Url.Action("getSchedules", "Schedule")', { scheduleModel: scheduleModel }, true, false).done(function (data) {
+                                    if (data.ERROR_MSG != null) {
+                                    alert(data.ERROR_MSG);
+
+                                        if (data.ERR_CODE == "9998") {
+                                            window.location.href = '@Url.Action("logout", "account")';
+                                            return;
+                                        }
+                                    }
+
+                                    if (data) {
+                                        calObj.parseDataSource("eventSource", data, new Date(scheduleModel.START_DATE), new Date(scheduleModel.END_DATE), loadViewCallback, oConfig, false);
+                                    }
+
+                                    searchStartDate = '';
+                                    searchEndDate   = '';
+                                    oCal1.refreshView();
+                                });
+                            }
+                        }
+
+                        isFirstSearch = false;
+                    }
+                }],
+                visibleViewChanged: function (visibleView, selectedDate, highlightDates) {
+
+                    currentvisibleView = visibleView;
+
+                    if (localStorage) {
+                        localStorage.setItem("currentvisibleView", visibleView);
+                    }
+
+                    var period = getPeriod(currentvisibleView, selectedDate);
+
+                    searchStartDate = period.START_DATE;
+                    searchEndDate   = period.END_DATE;
+                    oCal1.reloadData();
+                },
+                eventClicked: function (visibleView, sElemSelector, oEvent) { var thisObj = this; manageSchedule.popups.showJBSchedule("U", oEvent.identifier); },
+                previousButtonClicked: function (selectedDate, highlightDates) {
+
+                    var period = getPeriod(currentvisibleView, selectedDate);
+
+                    searchStartDate = period.START_DATE;
+                    searchEndDate   = period.END_DATE;
+                    oCal1.reloadData();
+                },
+                nextButtonClicked: function (selectedDate, highlightDates) {
+
+                    var period = getPeriod(currentvisibleView, selectedDate);
+
+                    searchStartDate = period.START_DATE;
+                    searchEndDate   = period.END_DATE;
+                    oCal1.reloadData();
+                }
+            });
+        }
+
+        // DetailedMonthView (월), WeekView (주), DayView (일), AgendaView (목록)
+        function getPeriod(view, standardDate) {
+
+            var rtnObj = {
+                START_DATE: '',
+                END_DATE: ''
+            };
+
+            if (typeof standardDate.getMonth !== 'function') {
+                standardDate = new Date(standardDate);
+            }
+
+            switch (view) {
+                case 'DetailedMonthView':
+                    rtnObj.START_DATE = standardDate.getFullYear() + '-' + pad(standardDate.getMonth() + 1, 2) + '-' + '01';
+                    rtnObj.END_DATE   = standardDate.getFullYear() + '-' + pad(standardDate.getMonth() + 1, 2) + '-' + (new Date(standardDate.getFullYear(), standardDate.getMonth() + 1, 0)).getDate();
+
+                    break;
+                case 'WeekView':
+                    var arrWeekDate = getWeek(standardDate);
+
+                    rtnObj.START_DATE = arrWeekDate[0];
+                    rtnObj.END_DATE   = arrWeekDate[6];
+                    break;
+                case 'DayView':
+
+                    rtnObj.START_DATE = standardDate.getFullYear() + '-' + pad(standardDate.getMonth() + 1, 2) + '-' + pad(standardDate.getDate(), 2);
+                    rtnObj.END_DATE   = standardDate.getFullYear() + '-' + pad(standardDate.getMonth() + 1, 2) + '-' + pad(standardDate.getDate(), 2);
+
+                    break;
+                case 'AgendaView':
+                    var arrWeekDate = getWeek(standardDate);
+
+                    rtnObj.START_DATE = arrWeekDate[0];
+                    rtnObj.END_DATE   = arrWeekDate[6];
+                    break;
+            }
+
+            return rtnObj;
+        }
+
+        function getWeek(currentDay) {
+            
+            var theYear      = currentDay.getFullYear();
+            var theMonth     = currentDay.getMonth();
+            var theDate      = currentDay.getDate();
+            var theDayOfWeek = currentDay.getDay() == 0 ? 7 : currentDay.getDay();   // 1: 월요일, 2: 화요일, 3: 수요일, 4: 목요일, 5: 금요일, 6: 토요일, 7: 일요일
+
+            var thisWeek = [];
+
+            for (var i = 1; i <= 7; i++) {
+
+                var resultDay = new Date(theYear, theMonth, theDate + (i - theDayOfWeek));
+
+                var yyyy = resultDay.getFullYear();
+                var mm = Number(resultDay.getMonth()) + 1;
+                var dd = resultDay.getDate();
+
+                mm = String(mm).length === 1 ? '0' + mm : mm;
+                dd = String(dd).length === 1 ? '0' + dd : dd;
+
+                thisWeek[i - 1] = yyyy + '-' + mm + '-' + dd;
+            }
+
+            return thisWeek.sort();
+        }
+
+        $(document).ready(function () {
+            searchScheduleCal();
+
+            // console.log(localStorage.getItem('scheduleId'));
+            // console.log(document.referrer);
+            // console.log(document.referrer.toUpperCase().indexOf('MANAGETEMPLATE'));
+
+            if (localStorage && localStorage.getItem('scheduleId') && document.referrer.toUpperCase().indexOf('MANAGETEMPLATE') >= 0) {
+                // console.log('팝업 띄워야 됨');
+
+                manageSchedule.popups.showJBSchedule("U", localStorage.getItem('scheduleId'));
+            }
+            else {
+                // console.log('팝업 안 띄워도 됨');
+            }
+
+            localStorage.setItem('scheduleId', '');
+            
+            var isPopupOpen = getUrlParam()['POPUP'] ? getUrlParam()['POPUP'] : false;
+            if (isPopupOpen) {
+                //쿠키가 없다면? 팝업을 띄움
+                if (getCookie("POPUP_OPEN") != "true")
+                    window.open("../Home/OpenModelPopup", "windowpopup", "width=470,height=400");
+            }
+        });
+
+        //parameter 정보
+        function getUrlParam() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+                vars[key] = unescape(value);
+            });
+            return vars;
+        }
+
+        // 쿠키 가져오기
+        function getCookie(cName) {
+            cName = cName + '=';
+            var cookieData = document.cookie;
+            var start = cookieData.indexOf(cName);
+            var cValue = '';
+            if (start != -1) {
+                start += cName.length;
+                var end = cookieData.indexOf(';', start);
+                if (end == -1) end = cookieData.length;
+                cValue = cookieData.substring(start, end);
+            }
+            return unescape(cValue);
+        }
+    </script>
+}
+

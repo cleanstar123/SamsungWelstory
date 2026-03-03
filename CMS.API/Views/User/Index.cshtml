@@ -1,0 +1,442 @@
+﻿
+@{
+    ViewBag.Title = "사용자";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>시스템관리 > </span><strong>사용자</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="hidActionType" />
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">사용자</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:searchUser();"><em></em>조회</a>
+                <a class="a_btn btn_style1" href="javascript:showJBUser('I');">생성</a>
+                <a class="a_btn btn_style1" href="javascript:$hidActionType.val('D'); manageUser();">삭제</a>
+            </div>
+        </div>
+
+        <div class="search_area">
+            <label for=""><em></em>사용자명</label>
+            <input type="text" id="USER_NM" />
+            <label for=""><em></em>권한</label>
+            <select id="GROUP_CD">
+                <option value="">전체</option>
+                <option value="10001">관리자</option>
+                <option value="10002">영양사</option>
+            </select>
+        </div>
+
+        <div class="sub_cnt_g">
+            <h3 class="bul_arr2">사용자 목록</h3>
+            <div class="groupArea grid_ej">
+                <table id="jgUser"></table>
+                <div id="jgpUser"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- 팝업 -->
+
+<!-- 회원 생성/수정 -->
+<div id="jbUser" class="popup13" style="display:none;">
+    <div class="popup_area">
+        <div class="popup_contents">
+            <table>
+                <tr>
+                    <td>레스토랑</td>
+                    <td>
+                        <input type="text" id="M_RESTAURANT_CODE" class="w_m2 w_m_c" disabled>
+                        <input type="text" id="M_RESTAURANT_NAME" class="w_m2" disabled>
+                        <a class="a_btn btn_style3" id="btnSearchRestaurantPopup" href="javascript:showJBRestaurant();">검색</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>아이디</td>
+                    <td><input type="text" id="M_USER_ID" maxlength="20"></td>
+                </tr>
+                <tr>
+                    <td>이름</td>
+                    <td><input type="text" id="M_USER_NM" maxlength="20"></td>
+                </tr>
+                <tr>
+                    <td>권한</td>
+                    <td>
+                        <select id="M_GROUP_CD" class="">
+                            <option value="10001" selected>관리자</option>
+                            <option value="10002">영양사</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>사용 유무</td>
+                    <td>
+                        <select id="M_USE_YN" class="">
+                            <option value="Y" selected>Y</option>
+                            <option value="N">N</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="step_button">
+            <a class="a_btn btn_style3" href="javascript:manageUser();">저장</a>
+            <a class="a_btn btn_style3" href="javascript:jbUser.close(); void 0">취소</a>
+        </div>
+    </div>
+</div>
+
+<!-- 레스토랑 검색 -->
+<div id="jbRestaurant" class="popup14" style="display:none;">
+    <div class="popup_area">
+        <div class="popup_subCnt">
+            <div class="bul_wrap">
+                <div class="f_r"><a class="a_btn btn_style1" href="javascript:searchRestaurant();">검색</a></div>
+            </div>
+            <div class="search_area">
+                <label for=""><em></em>레스토랑명</label>
+                <input type="text" id="RESTAURANT_NM" onkeyup="if (window.event.keyCode == 13) { searchRestaurant(); }" maxlength="15">
+                <div class="grid_ej">
+                    <table id="jgRestaurant"></table>
+                </div>
+            </div>
+        </div>
+        <div class="step_button">
+            <a class="a_btn btn_style3" href="javascript:applyRestaurnat();">확인</a>
+            <a class="a_btn btn_style3" href="javascript:jbRestaurant.close(); void 0">취소</a>
+        </div>
+    </div>
+</div>
+
+<!--// 팝업 -->
+
+@section scripts
+{
+    <script>
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function UserModel() {
+            this.RESTAURANT_CODE = '';
+            this.RESTAURANT_NM   = '';
+            this.USER_ID         = '';
+            this.USER_NM         = '';
+            this.GROUP_CD        = '';      /* 권한 */
+            this.USE_YN          = '';
+        };
+
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        var $jgUser            = $('#jgUser');
+        var $jgRestaurant      = $('#jgRestaurant');
+
+        var $hidActionType     = $('#hidActionType');
+        var $USER_NM           = $('#USER_NM');
+        var $GROUP_CD          = $('#GROUP_CD');
+        var $RESTAURANT_NM     = $('#RESTAURANT_NM');
+        var $M_RESTAURANT_CODE = $('#M_RESTAURANT_CODE');
+        var $M_RESTAURANT_NAME = $('#M_RESTAURANT_NAME');
+        var $M_USER_ID         = $('#M_USER_ID');
+        var $M_USER_NM         = $('#M_USER_NM');
+        var $M_GROUP_CD        = $('#M_GROUP_CD');
+        var $M_USE_YN          = $('#M_USE_YN');
+
+        var $btnSearchRestaurantPopup = $('#btnSearchRestaurantPopup');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+        function initUser() {
+
+            $M_RESTAURANT_CODE.val('');
+            $M_RESTAURANT_NAME.val('');
+            $M_USER_ID.val('');
+            $M_USER_NM.val('');
+            $M_GROUP_CD.val('10001');
+            $M_USE_YN.val('Y');
+        }
+
+        function initRestaurant() {
+
+            $RESTAURANT_NM.val('');
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+        var jbUser = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            createOnInit       : true,
+            attach             : '#myModal',
+            title              : '사용자',
+            content            : $('#jbUser'),
+            closeButton        : 'title',
+            width              : "25%",
+		    height             : "20%",
+		    minWidth           : 610, 
+		    minHeight          : 220,
+            responsiveMinWidth : 610,
+            responsiveMinHeight: 220,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        var jbRestaurant = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            overlay            : false,
+            isolateScroll      : false,
+            attach             : '#myModal',
+            title              : '레스토랑',
+            content            : $('#jbRestaurant'),
+            closeButton        : 'title',
+            width              : "30%",
+            height             : "25%",
+            minWidth           : 760,
+            minHeight          : 400,
+            responsiveMinWidth : 760,
+            responsiveMinHeight: 400,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+        function showJBUser(actionType, rowId) {
+
+            initUser();
+
+            $hidActionType.val(actionType);
+
+            if (actionType.toUpperCase() == 'U') {
+                $M_RESTAURANT_CODE.val($jgUser.jqGrid('getRowData', rowId).RESTAURANT_CODE);
+                $M_RESTAURANT_NAME.val($jgUser.jqGrid('getRowData', rowId).RESTAURANT_NM);
+                $M_USER_ID.val($jgUser.jqGrid('getRowData', rowId).USER_ID);
+                $M_USER_NM.val($jgUser.jqGrid('getRowData', rowId).USER_NM);
+                $M_GROUP_CD.val($jgUser.jqGrid('getRowData', rowId).GROUP_CD);
+                $M_USE_YN.val($jgUser.jqGrid('getRowData', rowId).USE_YN);
+                $M_USER_ID.attr("disabled", true);
+            }
+            else
+                $M_USER_ID.attr("disabled", false);
+
+            jbUser.open();
+            $btnSearchRestaurantPopup.focus();
+        }
+
+        function showJBRestaurant() {
+
+            initRestaurant();
+            searchRestaurant();
+            jbRestaurant.open();
+            $RESTAURANT_NM.focus();
+
+            $('.grid_ej table').each(function () {
+                $(this).setGridWidth($(this).closest('.grid_ej').width());
+                $(this).setGridHeight($(this).closest('.grid_ej').height() - 30);
+            });
+        }
+
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+
+        $jgUser.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '아이디',        name: 'USER_ID',         width: 100, sortable: false },
+                { label: '이름',          name: 'USER_NM',         width: 100, align: 'center', sortable: false },
+                { label: '레스토랑 코드', name: 'RESTAURANT_CODE', width: 70,  align: 'center', sortable: false  },
+                { label: '레스토랑 이름', name: 'RESTAURANT_NM',   width: 150, sortable: false  },
+                { label: '권한 코드',     name: 'GROUP_CD',        width: 50,  align: 'center', sortable: false },
+                { label: '권한',          name: 'GROUP_CD_NM',     width: 80, sortable: false },
+                { label: '사용유무',      name: 'USE_YN',          width: 50,  align: 'center', sortable: false },
+                { label: '생성자',        name: 'REG_ID',          width: 80, sortable: false  },
+                { label: '생성일',        name: 'REG_DTM',         width: 80, sortable: false  },
+                { label: '수정자',        name: 'MOD_ID',          width: 80, sortable: false  },
+                { label: '수정일',        name: 'MOD_DTM',         width: 80, sortable: false  },
+                {
+                    label: '수정', width: 50, formatter: function (cellvalue, options, USER_ID) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="showJBUser(' + "'U', '" + options.rowId + "'" + ')" value="수정">';
+                    },
+                    align: 'center',
+                    sortable: false
+                },
+                @if(ViewBag.USER_ROLE == "10001")
+                {
+                    <text>
+                {
+                    label: '비밀번호', width: 50, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="initUserPass(' + "'" + rowobject.USER_NM + "'," + "'" + rowobject.USER_ID + "'" + ')" value="초기화">';
+                    },
+                    align: 'center',
+                    sortable: false
+                }
+                    </text>
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            pager: "#jqGridPager",
+            sortable: false
+        });
+
+        $jgRestaurant.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '레스토랑 코드', name: 'RESTAURANT_CODE', width: 80, align: 'center', sortable: false },
+                { label: '레스토랑 이름', name: 'RESTAURANT_NAME', width: 100, sortable: false }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all'
+        });
+
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        function searchUser() {
+            var userModel = new UserModel();
+            userModel.USER_NM  = $USER_NM.val();
+            userModel.GROUP_CD = $GROUP_CD.val();
+
+            simpleAjax('@Url.Action("list", "user")', { userModel: userModel }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+                else {
+                    //console.log(data);
+
+                    $jgUser.jqGrid('clearGridData');
+                    $jgUser[0].addJSONData(data);
+                }                
+            });
+        }
+
+        function searchRestaurant() {
+
+            simpleAjax('@Url.Action("getRestaurantList", "user")', { restaurant: $RESTAURANT_NM.val() }).done(function (data) {
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+
+                    return;
+                }
+
+                $jgRestaurant.jqGrid('clearGridData');
+                $jgRestaurant[0].addJSONData(data);
+            });
+        }
+
+        function manageUser() {
+
+            var userModel = new UserModel();
+
+            if ($hidActionType.val() == 'D') {
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+
+                userModel.USER_ID = $jgUser.jqGrid('getRowData', $jgUser.jqGrid('getGridParam', 'selrow')).USER_ID;
+            }
+            else {
+                userModel.USER_ID         = $M_USER_ID.val();
+                userModel.RESTAURANT_CODE = $M_RESTAURANT_CODE.val();
+                userModel.RESTAURANT_NM   = $M_RESTAURANT_NAME.val();
+                userModel.USER_NM         = $M_USER_NM.val();
+                userModel.GROUP_CD        = $M_GROUP_CD.val();
+                userModel.USE_YN          = $M_USE_YN.val();
+            }
+
+            simpleAjax('@Url.Action("ManageUser", "user")', { TYPE: $hidActionType.val(), userModel: userModel }).done(function (data) {
+
+                if (data.ERR_CODE == "0") {
+                    resultMessage($hidActionType.val(), searchUser);
+                    jbUser.close();
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+            });
+        }
+
+        function initUserPass(userNm, userId) {
+            if (confirm(userNm + '님의 비밀번호를 초기화 하시겠습니까?')) {
+
+                simpleAjax('@Url.Action("initpass", "user")', { userModel: { USER_ID: userId } }).done(function (data) {
+
+                    if (data.ERR_CODE == "0") {
+                        alert('정상적으로 비밀번호가 초기화 되었습니다.')
+                        searchUser();
+                    }
+                    else {
+                        alert(data.ERROR_MSG);
+
+                        if (data.ERR_CODE == "9998")
+                            window.location.href = '@Url.Action("logout", "account")';
+                    }
+                });
+            }
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        function applyRestaurnat() {
+            $M_RESTAURANT_CODE.val($jgRestaurant.jqGrid('getRowData', $jgRestaurant.jqGrid('getGridParam', 'selrow')).RESTAURANT_CODE);
+            $M_RESTAURANT_NAME.val($jgRestaurant.jqGrid('getRowData', $jgRestaurant.jqGrid('getGridParam', 'selrow')).RESTAURANT_NAME);
+
+            jbRestaurant.close();
+        }
+
+        // 최초 조회
+        searchUser();
+
+
+    </script>
+}

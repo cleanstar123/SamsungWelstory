@@ -1,0 +1,813 @@
+<!doctype html>
+<html>
+ <head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=1920, user-scalable=yes"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>삼성전자_만족도형(입구)_가로형</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+	$(document).ready(function(){
+		var total=$('.menuList').length;
+		if ( total <= 9 ){
+			$('.menuList').css({'height':'312px'})
+			$('.menuList .menuImage').css({'top':'63px'})
+			$('.menuList .menuName').css({'bottom':'57px'})
+			$('.menuList .satisfaction').css({'top':'59px'})
+		}
+		else {
+			$('.menuList').css({'height':'230px'})
+			$('.menuList .menuImage').css({'top':'19px'})
+			$('.menuList .menuName').css({'bottom':'15px'})
+			$('.menuList .satisfaction').css({'top':'19px'})
+		}
+	});
+</script>
+<script>
+	$(document).ready(function(){
+		var total=$('.ranking_li').length;
+		if ( total == 12 ){
+			$('.ranking_li').css({'height':'8.33333%'})
+		}
+		else if ( total == 11 ){
+			$('.ranking_li').css({'height':'9.090909%'})
+		}
+		else if ( total == 10 ){
+			$('.ranking_li').css({'height':'10%'})
+		}
+		else if ( total == 9 ){
+			$('.ranking_li').css({'height':'11.11111%'})
+		}
+	});
+</script>
+<style type="text/css">
+	@font-face {font-family:'NanumBarunGothic';font-style:normal;src:url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.eot');src:local(※), url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.woff') format('woff'),url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.ttf') format('truetype');}
+	* {margin:0;padding:0;list-style:none;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;-o-box-sizing:border-box;box-sizing:border-box;}
+	html,body {position:relative;width:100%;height:100%;display:flex;}
+	a {text-decoration:none;color:inherit;}
+	#layer {position:relative;width:100%;height:100%;min-width:1920px;min-height:1080px;margin:0 auto;font-family:'NanumBarunGothic', '돋움', '굴림', sans-serif;line-height:normal;}
+	.menu_wrap {position:relative;width: 80%;height: 100%;float: left;}
+	.ranking_wrap {display: block;position: relative;width: 20%;height: 100%;float: left;display: block;}
+	.title {height: 75px;line-height: 75px;text-align: center;color: #fff;font-size: 32px;font-family:'NanumBarunGothic', '돋움', '굴림', sans-serif;}
+	.menu, .ranking {width: 100%;position: absolute;top: 75px;bottom: 0;margin: auto;}
+	.menu_wrap .title {background-color: #f17207;}
+	.ranking_wrap .title {background-color: #21232f;}
+	.menu {padding: 20px;background: #e9ecef;position: absolute;z-index: 000;}
+	.ranking {background-color: #31333f;padding: 20px 0;}
+	.menuList {position:relative;float: left;width:32.6666%;height:230px;margin-right: 1%;margin-bottom: 1%;min-height: 0px;background-color:#fff;box-shadow:2px 2px 3px 0px #cacaca;--borderWidth: 3px;position: relative;border-radius: var(--borderWidth);}
+	.menuList.choice:after {content: '';position: absolute;top: calc(-1 * var(--borderWidth));left: calc(-1 * var(--borderWidth));height: calc(100% + var(--borderWidth) * 2);width: calc(100% + var(--borderWidth) * 2);background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);border-radius: calc(2 * var(--borderWidth));z-index: -1;animation: animatedgradient 2s 2 linear;background-size: 300% 300%;}
+	@keyframes animatedgradient {
+		0% {
+			background-position: 0% 50%;
+		}
+		50% {
+			background-position: 100% 50%;
+		}
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+	.fadeIn2 {animation-name:fadeIn2; -webkit-animation-name: fadeIn2;animation-duration: 1s;-webkit-animation-duration: 1s;animation-timing-function: ease-in-out;-webkit-animation-timing-function: ease-in-out;visibility: visible !important;}
+	@keyframes fadeIn2 {
+		0% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			transform: scale(0);
+			opacity: 0.0;
+		}
+		60% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			transform: scale(1.1);
+		}
+		80% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			transform: scale(0.9);
+			opacity: 1;
+		}
+		100% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+	@-webkit-keyframes fadeIn2 {
+		0% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			-webkit-transform: scale(0);
+			opacity: 0.0;
+		}
+		60% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			-webkit-transform: scale(1.1);
+		}
+		80% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			-webkit-transform: scale(0.9);
+			opacity: 1;
+		}
+		100% {
+			background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+			-webkit-transform: scale(1);
+			opacity: 1;
+		}
+	}
+	.menu_wrap .menuList:nth-child(3n+0) {margin-right: 0;}
+	.menu_wrap .menuList:nth-child(4),.layer_wrap .menuList:nth-child(5),.layer_wrap .menuList:nth-child(6) {margin-bottom: 0;}
+/*	.menu_wrap .menuList:after{content:"";display:block;clear:both;}*/
+	.menuList > div {align-items:center;justify-content:center;background-color:#e6e6e6;border:1px solid #bebebe;color:#555;font-weight:900;}
+	.menuList > div:not(.satisfaction) {display:flex;}
+	.menuList .area_name {position:absolute;top:5px;right:5px;font-size:12px;color:#444;word-wrap:break-word;}
+	.menuList .area_explain {width:100%;color:#444;text-align:center;word-wrap:break-word;font-size:15px !important;}
+	.menuList span.tit_val {display:none}
+	.menuImage {position:absolute !important;top: 19px;left: 20px;width: 245px;height: 142px;}
+	.menuImage img {max-width:245px;max-height:142px;}
+	.menuName {position: absolute !important;width:245px;height:40px;bottom: 15px;left: 20px;}
+	.menuName .tit_val {letter-spacing:-2px;font-size:21px;text-align: center;}
+	.satisfaction {position: absolute;width:200px;height:195px;background-color:transparent !important;text-align:center;border:0 !important;top: 19px;right: 15px;}
+	.satisfaction > div {position:relative;margin-top: 2%;height: 18.4%;color: #494949;}
+	.satisfaction > div:first-child {margin: 0%;}
+	.satisfaction > div > div {float: left;width: 70%;height: 100%;margin-right: 5%;}
+	.satisfaction > div > div > p {height:50%;background-repeat:no-repeat;background-position:0 top;}
+	.satisfaction > div.satisfactionType1 > div > p {background-image: url('images/star5.png');background-size: 75px;}
+	.satisfaction > div.satisfactionType2 > div > p {background-image: url('images/star4.png');background-size: 60px;}
+	.satisfaction > div.satisfactionType3 > div > p {background-image: url('images/star3.png');background-size: 45px;}
+	.satisfaction > div.satisfactionType4 > div > p {background-image: url('images/star2.png');background-size: 30px;}
+	.satisfaction > div.satisfactionType5 > div > p {background-image: url('images/star1.png');background-size: 15px;}
+	.satisfaction > div > div > .graph {width: 100%;height: 11px;margin-top: 5px;background-color: #e2e2e2;border-radius:50px;position: relative;}
+	.satisfaction > div > div > .graph .bar {width: 0%;max-width:100%;height: 100%;position: absolute;top: 0;background-color: #ffcd01;border-radius:50px;left: 0;z-index: 1;}
+	.satisfaction .score {float: left;width:25%;height: 100%;line-height: 40px;font-size: 22px;font-weight:bold;text-align:right;}
+	.menuList .active,.menuList .active .area_explain {background-color:transparent !important;border-color:transparent !important;text-align:center;}
+	.menuList .active .area_name,.menuList .active span.tit_blk {display:none;}
+	.menuList .active span.tit_val {display:block;}
+	.menuList .select {border:1px solid #f7960c !important;background-color:#ffc36e !important;}
+	.ranking li {font-size: 30px;height: 8.3333%;display: flex;align-items:center;color: #fff;padding: 0 30px;}
+	.ranking li span {margin-right: 5%;font-size: 30px;}
+	.ranking li p {font-size: 22px;}
+	
+	/* system 레이어 */
+	.frame_r .content .sub_cnt_tem {width:100%;}
+	.frame_r .content .sub_cnt_tem .layer_wrap .menuList {min-height: 300px;}
+	.frame_r .content .sub_cnt_tem #layer {min-width:1560px;}
+	.frame_r .content .sub_cnt_tem .menu_wrap {width: 100%;}
+	.frame_r .content .sub_cnt_tem .ranking_wrap {display: none;}
+	.frame_r .content .sub_cnt_tem .title {font-size: 25px;}
+	.frame_r .content .sub_cnt_tem .layer_wrap .menuList {width: 32%;padding: 90px 20px 20px 350px;margin-right: 2%;}
+	.frame_r .content .sub_cnt_tem .layer_wrap .menuList:nth-child(3n+0) {margin-right: 0;}
+	.frame_r .content .sub_cnt_tem .layer_ranking {display: none;}
+</style>
+</head>
+<body>
+<input type="hidden" id="LAYOUT_HV_TYPE" value="H">
+<input type="hidden" id="LAYOUT_H_BY_V" value="1x1">
+<input type="hidden" id="SCREEN_X" value="1920">
+<input type="hidden" id="SCREEN_Y" value="1080">
+<div id="layer">
+	<div class="menu_wrap">
+		<h1 class="title">메뉴 선호도</h1>
+		<div class="menu">
+			<!-- 첫번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA1</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA1</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 두번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA2</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA2</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 세번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA3</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA3</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA3" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 네번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 다섯번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA5</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA5</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA5" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 여섯번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA6</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA6</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA6" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 일곱번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA7</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA7</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA7" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 여덟번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA8</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA8</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA8" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 아홉번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA9</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA9</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA9" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 열번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA10</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA10</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA10" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 열한번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA11</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA11</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA11" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+			<!-- 열두번째 메뉴 -->
+			<div class="menuList">
+				<div class="menuImage"><p class="area_name">CA12</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="image"></span></p></div>
+				<div class="menuName"><p class="area_name">CA12</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="28"></span></p></div>
+				<div class="satisfaction">
+					<div class="satisfactionType1">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="score1">0</span>
+					</div>
+					<div class="satisfactionType2">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="score2">0</span>
+					</div>
+					<div class="satisfactionType3">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="score3">0</span>
+					</div>
+					<div class="satisfactionType4">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="score4">0</span>
+					</div>
+					<div class="satisfactionType5">
+						<div>
+							<p></p>
+							<div class="graph">
+								<div class="bar"></div>
+							</div>
+						</div>
+						<span class="score" data-contents-area-id="CA12" data-contents-area-type="product" data-product-category="score5">0</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="ranking_wrap">
+		<h1 class="title">실시간 선호 메뉴</h1>
+		<ul class="ranking">
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+    		<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+    		<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+   			<li class="ranking_li"><span></span><p class="menu_title" data-contetns-area-length="28"></p></li>
+		</ul>
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>공지사항</title>
+  <style>
+	* { margin:0;}
+    a { text-decoration: none; color:inherit; }
+	.p_cnt {position: relative;text-align: center;font-size: 12px;}
+	.p_cnt img {margin:50px auto 30px;}
+	.p_cnt p {color: #555;line-height: 16px;}
+	.p_cnt p:nth-child(2) {font-weight: bold;margin-bottom: 20px;}
+	.p_cnt p:nth-child(2) span {color: #f7960c;text-decoration: underline;}
+	.p_cnt p:last-child {font-weight: bold;}
+	.p_cnt ul {width: 430px;position: absolute;left: 0;right: 0;margin: auto;text-align: left;font-weight: bold;}
+	.p_cnt ul li {margin: 15px 0;}
+	.SFooter {position: absolute;left: 0;right:0;bottom:0;background-color: #323232;width: 100%;height: 40px;line-height: 40px;color: #fff;font-size: 12px;}
+	.SFooter input[type="checkbox"] {margin: 0;vertical-align: middle;}
+	.SFooter a:hover {color:#ffffff;text-decoration: none;}
+	.SFooter .btn_style3 {margin-left: 30px;box-shadow:none;padding: 2px 5px !important;background: linear-gradient(#fcfcfc,#e8e8e8);border:1px solid #b6b6b6;color: #525969;font-weight: bold;cursor: pointer;}
+	.SFooter a.btn_style3:hover {background: linear-gradient(#fefefc,#fff8e2);border: 1px solid #f29335;color: #525969;font-weight: bold;text-decoration:none;}
+	.SFooter_cnt {width: 250px;margin: auto;}
+  </style>
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#isPopupOpen").change(function () {
+                checkPopupOpen();
+            });
+
+            $("#PopupMsg").click(function () {
+                if ($("#isPopupOpen").is(":checked")) {
+                    $("input:checkbox[id='isPopupOpen']").prop("checked", false);
+                    checkPopupOpen();
+                }
+                else {
+                    $("input:checkbox[id='isPopupOpen']").prop("checked", true);
+                    checkPopupOpen();
+                }
+            })
+
+            $("#btnClose").click(function () {
+                window.open('about:blank', '_self').self.close();
+            });
+        });
+
+        function checkPopupOpen() {
+            if ($("#isPopupOpen").is(":checked")) {
+                setCookie("POPUP_OPEN", "true", 7);
+            }
+            else {
+                setCookie("POPUP_OPEN", "true", -1);
+            }
+        }
+
+        // 쿠키 생성
+        function setCookie(cName, cValue, cDay) {
+            var expire = new Date();
+            expire.setDate(expire.getDate() + cDay);
+            cookies = cName + '=' + escape(cValue) + '; path=/ '; // 한글 깨짐을 막기위해 escape(cValue)를 합니다.
+            if (typeof cDay != 'undefined') cookies += ';expires=' + expire.toGMTString() + ';';
+            document.cookie = cookies;
+        }
+    </script>
+
+</head>
+<body>
+    <div class="p_cnt">
+        <img src="../images/notice.png" alt="">
+        <ul>
+            <li>내&nbsp;&nbsp;&nbsp;용 : SDS 전산장비 센터 이전 작업으로 관계사 내 외부시스템 접속 불가</li>
+            <li>일&nbsp;&nbsp;&nbsp;정 : 2019년 11월 17일, 00:00~20:00</li>
+            <li>영향도 : 작업시간 내 DID 홈페이지 및 Client 사용 불가</li>
+            <li>담당자 : PI파트 김상진프로 (☎: 031-5171-1920)</li>
+        </ul>
+    </div>
+    <div class="SFooter">
+        <div class="SFooter_cnt">
+            <input type="checkbox" id="isPopupOpen" />
+            <a alt="일주일동안 이 창을 열지 않기" id="PopupMsg">일주일동안 이 창을 열지 않기</a>
+            <a class="a_btn btn_style3" id="btnClose" alt="닫기">닫기</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="viewport" content="width=1920, user-scalable=yes" />-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <style type="text/css">
+       * {margin:0;padding:0;list-style:none;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;-o-box-sizing:border-box;box-sizing:border-box;}
+       html,body {position:relative;width:100%;height:100%;}
+       iframe {position:relative;width:100%;height:100%; border:0px; overflow: hidden;}
+    </style> 
+</head>
+<body style="margin:0; overflow:hidden;">
+    <input type="hidden" id="RESTAURANT_CODE" value="{RESTAURANT_CODE}" />
+    <input type="hidden" id="SCHEDULE_ID"     value="{SCHEDULE_ID}" />
+    <iframe></iframe>
+    <script src="/Scripts/jquery-3.3.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            
+            if (window.screen.width >= window.screen.height) {
+                $('iframe').css('min-width', 1920);
+                $('iframe').css('min-height', 1080);
+                $('head').append($('<meta name="viewport" content="width=1920, user-scalable=yes">'));
+            }
+            else {
+                $('iframe').css('min-width', 1080);
+                
+                $('head').append($('<meta name="viewport" content="width=1080, user-scalable=yes">'));
+            }
+
+            if ($('#RESTAURANT_CODE').val() && $('#SCHEDULE_ID').val()) {
+
+                var templates = [];
+
+                function Template(TEMPLATE_URL, PLAY_TIME) {
+                    this.TEMPLATE_URL = TEMPLATE_URL;
+                    this.PLAY_TIME = PLAY_TIME;
+                }
+
+                var arrTimeOut = [];
+
+                function rollingPlay() {
+
+                    for (var i = 0; i < arrTimeOut.length; i++) {
+                        clearTimeout(arrTimeOut[i]);
+                    }
+
+                    arrTimeOut = [];
+
+                    var playtime = 0;
+
+                    for (var i = 0; i < templates.length; i++) {
+
+                        playtime += (i == 0 ? 0 : templates[i - 1].PLAY_TIME);
+
+                        (function (i, url, playtime) {
+
+                            var timeOut = setTimeout(function () {
+
+                                $('iframe').attr('src', url + '?date=' + Date.now());
+
+                            }, (playtime) * 1000);
+
+                            arrTimeOut.push(timeOut);
+
+                        }(i, templates[i].TEMPLATE_URL, playtime));
+
+                    }
+                }
+
+                var request = $.ajax({
+                    url: "/Welmenu/GetScheduleTemplateMapList",
+                    method: "POST",
+                    dataType: "json",
+                    async: true,
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ RESTAURANT_CODE: $('#RESTAURANT_CODE').val(), SCHEDULE_ID: $('#SCHEDULE_ID').val() })
+                });
+
+                request.done(function (data) {
+                    console.log(data);
+
+                    for (var i = 0; i < data.Table.length; i++) {
+                        templates.push(new Template(data.Table[i].TEMPLATE_URL, data.Table[i].PLAY_TIME));
+                    }
+
+                    rollingPlay();
+                    setInterval(function () { rollingPlay() }, data.Table1[0].TOT_PLAY_TIME * 1000);
+                });
+
+                request.fail(function (jqXHR, textStatus) {
+                    console.log("요청 실패: " + textStatus);
+                    return false;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

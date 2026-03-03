@@ -1,0 +1,143 @@
+﻿@model ReportCodeModel
+
+@{
+    ViewBag.Title = "혼잡도 리포트";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>리포트 > </span><strong>혼잡도 리포트</strong></h1>
+    </div>
+}
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">혼잡도 리포트</h3>
+        </div>
+
+        <div class="sub_cnt_g" style="margin-top:20px;">
+            <div class="subCnt_report">
+                <div class="bul_arr3">
+                    <h3 class="bul_arr2 f_l">혼잡도</h3>
+                    <div class="f_r">
+                        <input class="cal s_date" type="date" /> ~ <input class="cal e_date" type="date" />
+                        @Html.DropDownListFor(model => model.TIME_SELECTED, Model.TIME_LIST, new { @id = "mTimeList", @class = "reportddr" })
+                        <a class="a_btn btn_style2" href="javascript:congestionReport();"><em></em>조회</a>
+                    </div>
+                </div>
+                <div class="groupArea grid_ej" id="charts_div">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['corechart'] });
+       
+        /*****************************************************************/
+        var table;
+        var table1;
+        var date;
+
+        var $ddlS_date = $('.s_date');
+        var $ddlE_date = $('.e_date');
+        var $interval = $('#mTimeList');
+        /*****************************************************************/
+
+        $(document).ready(function () {
+            var date = new Date();
+            var nowDate = date.getFullYear() + '-' + pad(date.getMonth() + 1, 2) + '-' + pad(date.getDate(), 2);
+            var yesterday = new Date(date.getTime() - (3 * 24 * 60 * 60 * 1000));
+            yesterday = yesterday.getFullYear() + '-' + pad(yesterday.getMonth() + 1, 2) + '-' + pad(yesterday.getDate(), 2);
+
+            $ddlS_date.val(yesterday);
+            $ddlE_date.val(nowDate);
+
+            
+        })
+        window.onload = function () {
+            congestionReport();
+        }
+        function CongestionTermModel() {
+            this.RESTAURANT_CODE    = '@ViewBag.RESTAURANT_CD';
+            this.S_DATE = '';
+            this.E_DATE = '';
+            this.INTERVAL = '';
+        };
+
+        function drawVisualization() {
+            var result = [];
+            var result2 = [];
+            var column = [];    //구글 차트에 들어갈 데이터의 첫컬럼. 시각/영역이름1/영역이름2/....
+            var ind = 0;
+            var day = 1;
+
+            var options = {
+                title:"",
+                vAxis: { title: '혼잡도' },
+                hAxis: { title: '시간' },
+                series: { 5: { type: 'line' } }
+            };
+
+            column.push('시각');
+            for (var i in table) {
+                column.push(table[i].AREA_NM);
+            }
+            result2.push(JSON.parse(JSON.stringify(column)));
+            
+            for (j = 0; j < (table1.length / table.length) ; j++) {
+                result.length = 0;
+                result.push((table1[table.length * j].COLLECT_TIME).substr(-4, 2) + ":" + (table1[table.length * j].COLLECT_TIME).substr(-2));
+
+                for (i = 0; i < table.length; i++) {
+                    result.push(table1[table.length * j + i].COUNT);
+                    ind++;
+                }
+                result2.push(JSON.parse(JSON.stringify(result)));
+                if (ind == (table1.length * day / date)) {
+                    newdiv = document.createElement('div');
+                    newdiv.id = 'sample' + day;
+                    newdiv.className = 'add';
+                    document.getElementById('charts_div').prepend(newdiv);
+                    options.title = (table1[table.length * j].COLLECT_TIME).substr(0,8);
+                    var data = google.visualization.arrayToDataTable(result2);
+                    var chart = new google.visualization.ComboChart(document.getElementById('sample' + day));
+                    chart.draw(data, options);
+                    day++;
+                    result2.length = 0;
+                    result2.push(column);
+                }
+            }
+             
+        }
+
+        function congestionReport() {
+            if ((new Date($ddlE_date.val()) - new Date($ddlS_date.val())) / (60 * 60 * 24 *1000) > 8) {
+                alert('최대 조회 일수는 7일 입니다.');
+                return;
+            }
+            $('#charts_div').empty();
+            var congestionTermModel = new CongestionTermModel();
+            congestionTermModel.S_DATE = ($ddlS_date.val()).replace(/[^0-9]/g, "");
+            congestionTermModel.E_DATE = ($ddlE_date.val()).replace(/[^0-9]/g, "");
+            congestionTermModel.INTERVAL = $interval.val();
+            simpleAjax('@Url.Action("CongestionSection", "report")', { congestionTermModel: congestionTermModel }).done(function (data) {
+                table = data.Table;
+                table1 = data.Table1;
+                date = data.Table[0].DAT;
+                drawVisualization();
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+            });
+        }
+        
+    </script>
+}

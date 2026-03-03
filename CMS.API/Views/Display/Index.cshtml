@@ -1,0 +1,455 @@
+﻿@model DisplayModel
+
+@{
+    ViewBag.Title = "디스플레이";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>시스템관리 > </span><strong>디스플레이</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="hidActionType" />
+
+<div class="container_e">
+    <div class="content_grid">
+        <div class="bul_wrap">
+            <h3 class="bul_arr f_l">디스플레이</h3>
+            <div class="f_r">
+                <a class="a_btn btn_style2" href="javascript:searchDisplay();"><em></em>조회</a>
+                <a class="a_btn btn_style1" href="javascript:showModalDisplay('I');">생성</a>
+                <a class="a_btn btn_style1" href="javascript:manageDisplay('D');">삭제</a>
+            </div>
+        </div>
+        <div class="search_area">
+            <label for=""><em></em>디스플레이 아이디</label>
+            <input type="text" id="txtDisplayId" />
+            <label for=""><em></em>디스플레이 이름</label>
+            <input type="text" id="txtDisplayNm" />
+        </div>
+
+        <div class="sub_cnt_g">
+            <h3 class="bul_arr2">디스플레이 목록</h3>
+            <div class="groupArea grid_ej">
+                <table id="jgDisplay"></table>
+                <div id="jgpDisplay"></div>
+            </div>
+        </div>
+
+        <div id="jbDisplay" class="popup6" style="display: none;">
+
+            <input type="hidden" id="mhidDisplayId" />
+            <div class="popup_area">
+                <div class="popup_contents">
+                    <table>
+                        <tr>
+                            <td>디스플레이 이름</td>
+                            <td><input type="text" id="mtxtDisplayNm" maxlength="60"></td>
+                        </tr>
+                        <tr>
+                            <td>디스플레이 설명</td>
+                            <td><input type="text" id="mtxtDisplayDesc" maxlength="60"></td>
+                        </tr>
+                        <tr>
+                            <td>디스플레이 넓이</td>
+                            <td><input type="text" id="mtxtDisplayW"></td>
+                        </tr>
+                        <tr>
+                            <td>디스플레이 높이</td>
+                            <td><input type="text" id="mtxtDisplayH"></td>
+                        </tr>
+                        <tr>
+                            <td>IP</td>
+                            <td><input type="text" id="mtxtDisplayIp"></td>
+                        </tr>
+                        <tr>
+                            <td>MAC</td>
+                            <td><input type="text" id="mtxtDisplayMac"></td>
+                        </tr>
+                        <tr>
+                            <td>운영체제</td>
+                            <td>
+                                @Html.DropDownListFor(model => model.DISPLAY_OS_LIST_SELECTED, Model.DISPLAY_OS_LIST, new { @id = "mselDisplayOs" })
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>사용유무</td>
+                            <td>
+                                @Html.DropDownListFor(model => model.USE_YN_SELECTED, Model.USE_YN_LIST, new { @id = "mselDisplayUseYn" })
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="step_button">
+                    <a class="a_btn btn_style3" href="javascript:manageDisplay($hidActionType.val());">저장</a>
+                    <a class="a_btn btn_style3" href="javascript:jbDisplay.close(); void 0">취소</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    
+    <script>
+        /*********************************/
+        /* 변수 선언 및 클래스 정의 시작 */
+
+        function DisplayModel() {
+            this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+            this.DISPLAY_ID      = '';
+            this.DISPLAY_NM      = '';
+            this.DISPLAY_DESC    = '';
+            this.SCREEN_W        = '';
+            this.SCREEN_H        = '';
+            this.DISPLAY_OS      = '';
+            this.DISPLAY_IP      = '';
+            this.DISPLAY_MAC     = '';
+            this.USE_YN          = '';
+            this.REG_ID          = '';
+            this.REG_DTM         = '';
+            this.MOD_ID          = '';
+            this.MOD_DTM         = '';
+        };
+
+        /* 변수 선언 및 클래스 정의 끝   */
+        /*********************************/
+
+
+        /*********************************/
+        /***** jquery 요소 정의 시작 *****/
+
+        var $hidActionType     = $('#hidActionType');
+
+        var $jgDisplay         = $('#jgDisplay');
+
+        var $dialogFormDisplay = $('#dialog-form-display');
+
+        var $txtDisplayId      = $('#txtDisplayId');
+        var $txtDisplayNm      = $('#txtDisplayNm');
+
+        var $mhidDisplayId     = $('#mhidDisplayId');
+        var $mtxtDisplayNm     = $('#mtxtDisplayNm');
+        var $mtxtDisplayDesc   = $('#mtxtDisplayDesc');
+        var $mtxtDisplayW      = $('#mtxtDisplayW');
+        var $mtxtDisplayH      = $('#mtxtDisplayH');
+        var $mtxtDisplayIp     = $('#mtxtDisplayIp');
+        var $mtxtDisplayMac    = $('#mtxtDisplayMac');
+        var $mselDisplayOs     = $('#mselDisplayOs');
+        var $mselDisplayUseYn  = $('#mselDisplayUseYn');
+
+        /****** jquery 요소 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /***** 초기화 함수 정의 시작 *****/
+
+        function initDisplayModal() {
+
+            $mhidDisplayId.val('');
+            $hidActionType.val('');
+            $mtxtDisplayNm.val('');
+            $mtxtDisplayDesc.val('');
+            $mtxtDisplayW.val('');
+            $mtxtDisplayH.val('');
+            $mtxtDisplayIp.val('');
+            $mtxtDisplayMac.val('');
+            $mselDisplayOs.val('AOS');
+            $mselDisplayUseYn.val('Y');
+        }
+
+        /****** 초기화 함수 정의 끝 ******/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 팝업 창 정의 시작 *******/
+
+
+        var jbDisplay = new jBox('Modal', {
+            draggable          : 'title',
+            dragOver           : false,
+            closeOnEsc         : true,
+            attach             : '#myModal',
+            title              : '디스플레이 관리',
+            content            : $('#jbDisplay'),
+            closeButton        : 'title',
+            width              : "20%",
+            height             : "30%",
+            minWidth           : 550,
+            minHeight          : 330,
+            responsiveMinWidth : 550,
+            responsiveMinHeight: 330,
+            responsiveWidth    : false,
+            responsiveHeight   : false
+        });
+
+
+        function showModalDisplay(actionType, rowid) {
+
+            // 컨트롤 초기화
+            initDisplayModal();
+
+            $hidActionType.val(actionType);
+
+            if (actionType.toUpperCase() == "U") {
+
+                $mhidDisplayId.val($jgDisplay.jqGrid('getRowData',    rowid).DISPLAY_ID);
+                $mtxtDisplayNm.val($jgDisplay.jqGrid('getRowData',    rowid).DISPLAY_NM);
+                $mtxtDisplayDesc.val($jgDisplay.jqGrid('getRowData',  rowid).DISPLAY_DESC);
+                $mtxtDisplayW.val($jgDisplay.jqGrid('getRowData',     rowid).SCREEN_W);
+                $mtxtDisplayH.val($jgDisplay.jqGrid('getRowData',     rowid).SCREEN_H);
+                $mtxtDisplayIp.val($jgDisplay.jqGrid('getRowData',    rowid).DISPLAY_IP);
+                $mtxtDisplayMac.val($jgDisplay.jqGrid('getRowData',   rowid).DISPLAY_MAC);
+                $mselDisplayOs.val($jgDisplay.jqGrid('getRowData',    rowid).DISPLAY_OS);
+                $mselDisplayUseYn.val($jgDisplay.jqGrid('getRowData', rowid).USE_YN);
+            }
+
+            jbDisplay.open();
+        }
+
+
+        /******* 팝업 창 정의 끝 *********/
+        /*********************************/
+
+
+        /*********************************/
+        /******* 그리드 정의 시작 ********/
+
+
+        $jgDisplay.jqGrid({
+            regional: 'en',
+            datatype: "json",
+            autowidth: true,
+            shrinkToFit: true,
+            colModel: [
+                { label: '상태',          name: 'STATUS',            width: 50, align: 'center', sortable: false, formatter: function(cellvalue, options, rowobject) { return  cellvalue.toUpperCase() == 'ON' ? '<strong style="color:green;">' + cellvalue + '</strong>' : '<strong style="color:red;">' + cellvalue + '</strong>' } },
+                { label: '아이디',        name: 'DISPLAY_ID',        width: 50, align: 'center', sortable: false},
+                { label: '이름',          name: 'DISPLAY_NM',        width: 200, sortable: false },
+                { label: '설명',          name: 'DISPLAY_DESC',      width: 200, sortable: false },
+                { label: '해상도 넓이',   name: 'SCREEN_W',          width: 60,  sortable: false },
+                { label: '해상도 높이',   name: 'SCREEN_H',          width: 60,  sortable: false },
+                { label: '운영체제',      name: 'DISPLAY_OS',        width: 100, align: 'center', sortable: false },
+                { label: 'IP',            name: 'DISPLAY_IP',        width: 100, align: 'center', sortable: false },
+                { label: 'MAC',           name: 'DISPLAY_MAC',       width: 100, align: 'center', sortable: false },
+                { label: '사용유무',      name: 'USE_YN',            width: 50,  align: 'center', sortable: false },
+                { label: '생성자',        name: 'REG_ID',            width: 80,  sortable: false },
+                { label: '생성일',        name: 'REG_DTM',           width: 100, align: 'center', sortable: false },
+                { label: '수정자',        name: 'MOD_ID',            width: 80,  sortable: false },
+                { label: '수정일',        name: 'MOD_DTM',           width: 100, align: 'center', sortable: false },
+                { label: '마지막 접속일', name: 'LAST_CONNECT_DATE', width: 100, align: 'center', sortable: false },
+                {
+                    label: '수정', width: 70, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="showModalDisplay(' + "'U', '" + options.rowId + "'" + ')" value="수정" />';
+                    },
+                    width: 50,
+                    align: 'center',
+                    sortable: false
+                },
+                @if(ViewBag.USER_ROLE == "10001")
+                {
+                    <text>
+                {
+                    label: '재시작', width: 70, formatter: function (cellvalue, options, rowobject) {
+                        return '<input type="button" class="a_btn btn_style3" onclick="restartDisplay(' + "'" + rowobject.DISPLAY_ID + "'" + ')" value="재시작" />';
+                    },
+                    width: 50,
+                    align: 'center',
+                    sortable: false
+                }
+                    </text>
+                }
+            ],
+            viewrecords: true, // show the current page, data rang and total records on the toolbar
+            height: 200,
+            rowNum: 'all',
+            //pager: "#jgpDisplay",
+            multiselect: true,
+            beforeSelectRow: checkboxSelect
+        });
+
+
+        /******** 그리드 정의 끝 *********/
+        /*********************************/
+
+        /*********************************/
+        /****** CRUD 함수 정의 시작 ******/
+
+        // 디스플레이 조회
+        function searchDisplay() {
+
+            var displayModel = new DisplayModel();
+            displayModel.DISPLAY_ID = $txtDisplayId.val();
+            displayModel.DISPLAY_NM = $txtDisplayNm.val();
+
+            simpleAjax('@Url.Action("displays", "display")', { displayModel: displayModel }).done(function (data) {
+                // 2019-05-14 컨텐츠 조회 데이터 변조 체크
+                if (data.ERROR_MSG != null) {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                $jgDisplay.jqGrid('clearGridData');
+                $jgDisplay[0].addJSONData({ rows: data.Table });
+            });
+        }
+
+        // 디스플레이 저장/수정/삭제
+        function manageDisplay(actionType) {
+
+            // 정합성 체크
+            if (actionType.toUpperCase() !== "D") {
+
+                if (!$mtxtDisplayNm.val()) {
+                    alert('디스플레이 이름을 입력하세요.');
+                    $mtxtDisplayNm.focus();
+                    return;
+                }
+
+                if (!$mtxtDisplayW.val()) {
+                    alert('디스플레이 가로 해상도를 입력하세요.');
+                    $mtxtDisplayW.focus();
+                    return;
+                }
+
+                if (!$mtxtDisplayH.val()) {
+                    alert('디스플레이 세로 해상도를 입력하세요.');
+                    $mtxtDisplayH.focus();
+                    return;
+                }
+
+                if (!$mtxtDisplayIp.val()) {
+                    alert('디스플레이 아이피를 입력하세요.');
+                    $mtxtDisplayIp.focus();
+                    return;
+                }
+
+                if (!$mtxtDisplayMac.val()) {
+                    alert('디스플레이 MAC을 입력하세요.');
+                    $mtxtDisplayMac.focus();
+                    return;
+                }
+
+            }
+            else {
+
+                if (!$jgDisplay.jqGrid('getGridParam', 'selrow')) {
+                    alert('선택된 디스플레이가 없습니다.');
+                    return;
+                }
+
+                if (!confirm(deleteConfirmMessage))
+                    return;
+            }
+
+            var data = {
+                TYPE: actionType,
+                displayModels: []
+            };
+
+            if (actionType.toUpperCase() !== "D") {
+
+                // console.log($mselDisplayUseYn.val());
+
+                var displayModel = new DisplayModel();
+
+                displayModel.DISPLAY_ID   = $mhidDisplayId.val();
+                displayModel.DISPLAY_NM   = $mtxtDisplayNm.val();
+                displayModel.DISPLAY_DESC = $mtxtDisplayDesc.val();
+                displayModel.SCREEN_W     = $mtxtDisplayW.val();
+                displayModel.SCREEN_H     = $mtxtDisplayH.val();
+                displayModel.DISPLAY_OS   = $mselDisplayOs.val();
+                displayModel.DISPLAY_IP   = $mtxtDisplayIp.val();
+                displayModel.DISPLAY_MAC  = $mtxtDisplayMac.val();
+                displayModel.USE_YN       = $mselDisplayUseYn.val();
+
+                data.displayModels.push(displayModel);
+            }
+            else {
+
+                var arrSel = $jgDisplay.jqGrid('getGridParam', 'selarrrow');
+
+                for (var i = 0; i < arrSel.length; i++) {
+                    var displayModel = new DisplayModel();
+                    displayModel.DISPLAY_ID = $jgDisplay.jqGrid('getRowData', arrSel[i]).DISPLAY_ID;
+                    data.displayModels.push(displayModel);
+                }
+            }
+
+            simpleAjax('@Url.Action("displaymanage", "display")', data).done(function (data) {
+
+                if (data.ERR_CODE == "0") {
+                    resultMessage(actionType, searchDisplay);
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+
+                jbDisplay.close();
+            });
+        }
+
+        function restartDisplay(displayId) {
+
+            if (!confirm('디스플레이 아이디 : ' + displayId + ' 를 재시작 하시겠습니까?')) {
+                return;
+            }
+
+            var displayModel = new DisplayModel();
+            displayModel.DISPLAY_ID = displayId;
+
+            simpleAjax('@Url.Action("displayrestart", "display")', { displayModel: displayModel }).done(function (data) {
+
+                
+
+                if (data.ERR_CODE == "0") {
+                    alert('정상적으로 반영되었습니다.');
+                }
+                else {
+                    alert(data.ERROR_MSG);
+
+                    if (data.ERR_CODE == "9998")
+                        window.location.href = '@Url.Action("logout", "account")';
+                }
+            });
+        }
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+        new Cleave($mtxtDisplayIp, {
+            delimiter: '',
+            blocks: [15]
+        });
+
+        new Cleave($mtxtDisplayMac, {
+            delimiter: '-',
+            blocks: [2, 2, 2, 2, 2, 2]
+        });
+
+        new Cleave($mtxtDisplayW, {
+            delimiter: '',
+            numericOnly: true,
+            blocks: [4]
+        });
+
+        new Cleave($mtxtDisplayH, {
+            delimiter: '',
+            numericOnly: true,
+            blocks: [4]
+        });
+
+        // 최초 조회
+        searchDisplay();
+
+    </script>
+}

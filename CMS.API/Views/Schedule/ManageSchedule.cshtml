@@ -1,0 +1,102 @@
+﻿
+@{
+    ViewBag.Title = "스케줄";
+}
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span>스케줄링 > 스케줄 > </span><strong>스케줄 관리</strong></h1>
+    </div>
+}
+
+
+<input type="hidden" id="SCHEDULE_ID" />
+<input type="hidden" id="ROLLING_YN" />
+<input type="hidden" id="URL" />
+
+<div class="popup_area">
+    <div class="popup_contents">
+        <table>
+            <tr>
+                <td>템플릿 목록</td>
+                <td colspan="3">
+                    <a class="a_btn btn_style3 tem_btn f_r" id="btnSearchTemplate">검색</a>
+                    <ul class="tem_name_list" id="selectedTemplateArea"></ul>
+                </td>
+            </tr>
+            <tr>
+                <td>스케줄 타입</td>
+                <td colspan="3">
+                    <select id="SCHEDULE_TYPE">
+                        <option value="1">일반</option>
+                        <option value="2">긴급</option>
+                        <option value="3">제어</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>스케줄 이름</td>
+                <td colspan="3"><input type="text" id="SCHEDULE_NM" maxlength="60" /></td>
+            </tr>
+            <tr>
+                <td>스케줄 설명</td>
+                <td colspan="3"><input type="text" id="SCHEDULE_DESC" maxlength="60" /></td>
+            </tr>
+            <tr>
+                <td>시작일</td>
+                <td><input type="text" id="START_DATE" name="fromDate" class="fromDate table_input"></td>
+                <td class="table_title">시작시간</td>
+                <td><input type="text" id="START_TIME" value="09:00" /></td>
+            </tr>
+            <tr>
+                <td>종료일</td>
+                <td><input type="text" id="END_DATE" name="fromDate" class="fromDate table_input"></td>
+                <td class="table_title">종료시간</td>
+                <td><input type="text" id="END_TIME" value="12:00" /></td>
+            </tr>
+            <tr>
+                <td>
+                    요일
+                </td>
+                <td colspan="3">
+                    <label for="MON_YN" class="day_text f_l">월<input type="checkbox" id="MON_YN" class="f_l"></label>
+                    <label for="TUE_YN" class="day_text f_l">화<input type="checkbox" id="TUE_YN" class="f_l"></label>
+                    <label for="WED_YN" class="day_text f_l">수<input type="checkbox" id="WED_YN" class="f_l"></label>
+                    <label for="THU_YN" class="day_text f_l">목<input type="checkbox" id="THU_YN" class="f_l"></label>
+                    <label for="FRI_YN" class="day_text f_l">금<input type="checkbox" id="FRI_YN" class="f_l"></label>
+                    <label for="SAT_YN" class="day_text f_l">토<input type="checkbox" id="SAT_YN" class="f_l"></label>
+                    <label for="SUN_YN" class="day_text f_l">일<input type="checkbox" id="SUN_YN" class="f_l"></label>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="gridTiltle_area">
+        <div class="popup_grid1 grid_ej">
+            <table id="jgGroup"></table>
+            <div id="jgpGroup"></div>
+        </div>
+        <div class="popup_grid2 grid_ej">
+            <table id="jgDisplayMap"></table>
+            <div id="jgpDisplayMap"></div>
+        </div>
+        <div class="subCnt_btn">
+            <div class="subCntBtn_wrap">
+                <img src="../images/sub/btn_right.png" alt="" id="btnAddDisplay">
+                <img src="../images/sub/btn_left.png" alt="" id="btnRemoveDisplay">
+            </div>
+        </div>
+        <div class="popup_grid3 grid_ej">
+            <table id="jgDisplay"></table>
+            <div id="jgpDisplay"></div>
+        </div>
+    </div>
+
+    <div class="step_button">
+        @*<a class="a_btn btn_style3" id="btnManageScheduleSave">저장</a>
+        <a class="a_btn btn_style3" id="btnManageScheduleUpdate">수정</a>
+        <a class="a_btn btn_style3" id="btnManageScheduleDelete">삭제</a>
+        <a class="a_btn btn_style3" id="btnManageScheduleCancel">취소</a>*@
+    </div>
+</div>

@@ -1,0 +1,95 @@
+﻿
+
+
+
+ 
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=1080, user-scalable=yes">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>일반형(입구)_가로형_1X1</title>
+
+<style type="text/css">
+	@font-face {font-family:'NanumBarunGothic';font-style:normal;src:url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.eot');src:local(※), url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.woff') format('woff'),url('https://weldid.welstory.com:8443/fonts/NanumBarunGothic.ttf') format('truetype');}
+	* {margin:0;padding:0;list-style:none;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;-o-box-sizing:border-box;box-sizing:border-box;}
+	html,body {position:relative;width:100%;height:100%;}
+	a {text-decoration:none;color:inherit;}
+	#layer {position:relative;width:100%;height:100%;min-width:1920px;min-height:1080px;padding:5% 9% 4.8% 9%;margin:0 auto;font-family:'NanumBarunGothic', '돋움', '굴림', sans-serif;background-image:url('images/bg_ho.jpg');line-height:normal;}
+	.layer_wrap {position:relative;width:100%;height:100%;}
+	.layer_wrap .menuList {position:relative;width:100%;height:100%;min-height:850px;margin:auto;padding: 360px 70px 140px 840px;background-color:#fff;box-shadow:4px 4px 10px 2px #bebcb6;}
+	.layer_wrap .menuList:after{content:"";display:block;clear:both;}
+	.menuList > div {position:relative;display:flex;align-items:center;justify-content:center;background-color:#e6e6e6;border:1px solid #bebebe;color:#555;font-weight:900;}
+	.menuList .area_name {position:absolute;top:5px;right:5px;font-size:12px;color:#444;word-wrap:break-word;}
+	.menuList .area_explain {width:100%;color:#444;text-align:center;word-wrap:break-word;}
+	.menuList span.tit_val {display:none}
+	.sticker {position:absolute !important;top:-25px;left:0;width: 250px !important;height: 320px !important;z-index:10;font-size:14px;background-color:#a4a4a4 !important;border:1px solid #767676 !important;color:#444;}
+	.sticker img {width:100%;height:100%;position: absolute;top: 0;left: 0;}
+	.menu_logo {position:absolute !important;top:0;left:0;width:100% !important;height:auto !important;padding: 3% 0;background-color:#e9e7e6;font-size:14px;border:0 !important;}
+	.menu_logo .area_explain {width: 520px;height: 120px;background-color:#e6e6e6;border:1px solid #bebebe;display:flex;align-items:center;justify-content:center;}
+	.menu_logo img {max-width:520px;max-height:120px;}
+	.menuImage {position:absolute !important;top: 280px;left:80px;width: 710px;height: 550px;font-size:14px;}
+	.menuImage img {width:710px;height:550px;}
+	.sticker2 {width: 30% !important;height: 440px;font-size:14px;position: absolute !important;top: 335px;left: 176.5px;background-color:rgba(164,164,164,0.7) !important;border:1px solid #767676 !important;color:#444;display:flex;align-items:flex-start !important;justify-content:flex-start !important;z-index: 11;}
+	.menuList .sticker2.active {z-index: 9 !important;left: 167.5px;}
+	.sticker2.active img {width:710px;height:550px;position: absolute;top: -61px;left: -92px;}
+	.menuList .sticker2 .area_explain {text-align: left !important;position: absolute !important;top: 5px !important; left: 5px !important;}
+	.menuName {width:100%;height:143px; font-size:65px;}
+	.menuName .area_explain {letter-spacing:2px;}
+	.menuNameEng {height:70px;width:100%;margin-top: 0.2em;font-size:35px;color:#5d5c5e;font-weight:normal !important;}
+	.menuAdd,.menuKcal {color:#7b7c7f;text-align:left;}
+	.menuAdd {height:66px;margin-top:1em;font-size:33px;}
+	.menuKcal {height:32px;margin-top:0.6em;font-size:30px;}
+	.menuAdd .area_explain,.menuKcal .area_explain {text-align:left;font-weight:normal;}
+	.menuList .active,.menuList .active .area_explain {background-color:transparent !important;border-color:transparent !important;text-align:left;}
+	.menuList .menu_logo.active {background-color: #e6e6e6 !important;}
+	.menuList .menuPrice.active .area_explain{text-align:right;}
+	.menuList .active .area_name,.menuList .active span.tit_blk {display:none;}
+	.menuList .active span.tit_val {display:block;}
+	.menuList .menuImage.active .area_explain .tit_val {text-align:center;}
+	.menuList .menuNameEng.active .area_explain, .menuList .menuKcal.active .area_explain {color:#7f8083;font-weight:normal;}
+	.menuList > div.menuNameEng.active {align-items:flex-start !important;justify-content:flex-start !important;}
+	.menuList .select,.menuList .menu_logo.select .area_explain{border:1px solid #f7960c !important;background-color:#ffc36e !important;}
+	.menuList .menu_logo.select {border:0 !important;}
+	/* system 레이어 */
+	.frame_r .content .sub_cnt_tem {width:100%;background-image:url('images/bg_ho.jpg');}
+	.frame_r .content .sub_cnt_tem #layer {min-width:1560px;min-height:761px;padding: 2.75% 9%;background-image:none;}
+	.frame_r .content .sub_cnt_tem .layer_wrap .menuList {padding: 260px 70px 140px 720px;min-height:250px;}
+	.frame_r .content .sub_cnt_tem .layer_wrap .menuList:before {height: 16em;}
+	.frame_r .content .sub_cnt_tem .sticker {top:-16px;width: 180px !important;height: 240px !important;}
+	.frame_r .content .sub_cnt_tem .menu_logo .area_explain {width:500px;height:80px;}
+	.frame_r .content .sub_cnt_tem .menu_logo img {width:300px;height:70px;}
+	.frame_r .content .sub_cnt_tem .menuImage {width: 600px;height: 400px;margin:-50px auto;}
+	.frame_r .content .sub_cnt_tem .menuImage img {width:500px;height:400px;}
+	.frame_r .content .sub_cnt_tem .sticker2 {width: 400px !important;height: 300px !important;top: 280px;left: 180px;}
+	.frame_r .content .sub_cnt_tem .sticker2.active {left: 180px;}
+	.frame_r .content .sub_cnt_tem .sticker2 img {width: 500px;height: 400px;position: absolute;top: -56px;left: -56px;}
+	.frame_r .content .sub_cnt_tem .menuName {height: 114px;margin: 0 auto;font-size: 50px;}
+	.frame_r .content .sub_cnt_tem .menuNameEng {height: 80px;margin: 0.25em auto 0 auto;font-size: 35px;}
+	.frame_r .content .sub_cnt_tem .menuPrice {height:37px;margin:0.5em auto 0 auto;font-size:40px;}
+	.frame_r .content .sub_cnt_tem .menuAdd,.frame_r .content .sub_cnt_tem .menuKcal {letter-spacing: -0.5px;}
+	.frame_r .content .sub_cnt_tem .menuAdd {height: 70px;margin-top:0.7em;font-size: 30px;}
+	.frame_r .content .sub_cnt_tem .menuKcal {height: 30px;margin-top:0.2em;font-size: 25px;}
+</style>
+
+
+<input type="hidden" id="LAYOUT_HV_TYPE" value="V">
+<input type="hidden" id="LAYOUT_H_BY_V" value="1x4">
+<input type="hidden" id="SCREEN_X" value="1920">
+<input type="hidden" id="SCREEN_Y" value="1080">
+<div id="layer" style="display: none;">
+	<div class="layer_wrap">
+		<!-- 첫번째 메뉴 -->
+		<div class="menuList">
+			<div class="sticker active" style="cursor: pointer; visibility: hidden;"><p class="area_name">CA1</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(배지)</span><span class="tit_val" data-contents-area-id="CA1" data-contents-area-type="badge"></span></p></div>
+			<div class="menu_logo active" style="cursor: pointer;"><p class="area_name">CA2</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(헤드라인)</span><span class="tit_val" data-contents-area-id="CA2" data-contents-area-type="head"><img src="http://112.217.190.203:9001/upload/template/REST000196/428/images/스냅스낵.png" alt=""></span></p></div>
+			<div class="menuImage active" style="cursor: pointer;"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="image"><img src="http://112.106.28.50/data/manager/recipe/E5BY/20190619/s20181017173241.png" alt=""></span></p></div>
+			<div class="sticker2 active" style="cursor: pointer; visibility: hidden;"><p class="area_name">CA3</p><p class="area_explain"><span class="tit_blk">컨텐츠 영역<br>(상황 배지)</span><span class="tit_val" data-contents-area-id="CA3" data-contents-area-type="badge"></span></p></div>
+			<div class="menuName active" style="cursor: pointer;"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">음식명</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="22">참치김치</span></p></div>
+			<div class="menuNameEng active" "="" style="cursor: pointer;"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">ENG Title</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="ename" data-contetns-area-length="66">&nbsp;</span></p></div>
+			<div class="menuAdd active" style="cursor: pointer;"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">부찬</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="sidedish" data-contetns-area-length="60">&nbsp;</span></p></div>
+			<div class="menuKcal active" style="cursor: pointer;"><p class="area_name">CA4</p><p class="area_explain"><span class="tit_blk">칼로리 Kcal</span><span class="tit_val" data-contents-area-id="CA4" data-contents-area-type="product" data-product-category="kcal" data-contetns-area-length="8">칼로리 843 Kcal</span></p></div>
+		</div>
+
+	</div>
+<script type="text/javascript" src="/Scripts/jquery-3.3.1.min.js"></script><script type="text/javascript" src="/Scripts/loadscript.js"></script></div>
+
+            

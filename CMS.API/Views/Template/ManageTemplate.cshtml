@@ -1,0 +1,1552 @@
+﻿@model TemplateModel
+
+@{
+    ViewBag.Title = "템플릿 관리";
+}
+
+
+@section navi
+{
+    <div class="current">
+        <img src="../images/home.png" alt=""><h1><span> 템플릿 관리 > 템플릿> </span><strong>템플릿 관리</strong></h1>
+    </div>
+}
+
+<input type="hidden" id="LAYOUT_ID" value="@Model.layoutModel.LAYOUT_ID" />
+<input type="hidden" id="TEMPLATE_ID" value="" />
+
+<div class="container_tem">
+    <div class="frame_l">
+        <div class="info">
+            <h1><em class="arrow_ico"></em>레이아웃 정보</h1>
+            <table>
+                <tr>
+                    <td>이름</td>
+                    <td id="">@Model.layoutModel.LAYOUT_NM</td>
+                </tr>
+                <tr>
+                    <td>설명</td>
+                    <td id="">@Model.layoutModel.LAYOUT_DESC</td>
+                </tr>
+                <tr>
+                    <td>해상도</td>
+                    <td id="">@Model.layoutModel.SCREEN_W_H</td>
+                </tr>
+                <tr>
+                    <td>형태</td>
+                    <td>@(Model.layoutModel.LAYOUT_HV_TYPE == "H" ? "가로" : "세로") </td>
+                </tr>
+                <tr>
+                    <td>가로x세로</td>
+                    <td>@Model.layoutModel.LAYOUT_H_BY_V</td>
+                </tr>
+            </table>
+            <h1><em class="arrow_ico"></em>컨텐츠 영역 정보</h1>
+            <select id="selContentsType" class="">
+                <option value="">전체</option>
+                <option value="P">메뉴</option>
+                <option value="B">뱃지</option>
+                <option value="H">제목</option>
+                <option value="I">이미지</option>
+                <option value="M">동영상</option>
+                <option value="T">텍스트</option>
+                <option value="U">URL</option>
+                <option value="D">날짜</option>
+            </select>
+
+            @foreach (LayoutDetailModel layoutDetailModel in Model.layoutDetailModels)
+            {
+                <ul data-side-id="@layoutDetailModel.LAYOUT_SEQ" data-side-type="@layoutDetailModel.CONTENT_TYPE">
+                    <li class="info_title">
+                        <div>
+                            <strong>@layoutDetailModel.CONTENT_TYPE_NM</strong> 영역 (@layoutDetailModel.LAYOUT_SEQ)
+                        </div>
+                        <div><img src="../images/common/plus.png" alt="" class="ico_btn" onclick="manageTemplate.showPopup('@layoutDetailModel.CONTENT_TYPE', '@layoutDetailModel.LAYOUT_SEQ')"></div>
+                    </li>
+                    <ul class="connection-contents"></ul>
+                </ul>
+            }
+            <div id="textarea"></div>
+        </div>
+    </div>
+    <div class="frame_r">
+        <div class="content">
+            <div class="bul_wrap">
+                <h3 class="bul_arr f_l">
+                    @(ViewBag.type == "U" ? "템플릿 수정" : "템플릿 생성")
+                </h3>
+                <div class="f_r">
+
+                    @if (ViewBag.type == "U")
+                    {
+                        <a class="a_btn btn_style2" href="javascript:manageTemplate.popups.showJBTemplate();">수정</a>
+                        <a class="a_btn btn_style1" href="javascript:manageTemplate.deleteTemplate('@Model.TEMPLATE_ID');">삭제</a>
+                    }
+                    else
+                    {
+                        <a class="a_btn btn_style2" href="javascript:manageTemplate.popups.showJBTemplate();">저장</a>
+                    }
+                </div>
+            </div>
+            <div id="templateArea" class="sub_cnt_tem">
+
+                @if (ViewBag.type == "U")
+                {
+                    { this.GetOutputWriter().Write(File.ReadAllText(Path.Combine(Model.FILE_PATH, Model.FILE_NM))); }
+                }
+                else
+                {
+                    { this.GetOutputWriter().Write(File.ReadAllText(Server.MapPath(string.Format("/upload/layout/{0}/{1}", Model.layoutModel.LAYOUT_ID, Model.layoutModel.FILE_NM)))); }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@* 메뉴 게시 연결 팝업 *@
+<div id="gbDisplay1" class="popup1" style="display: none">
+
+    <!-- 게시 메뉴 연결 01 Step -->
+    <div class="pop_sc_1">
+        <div class="popup_subCnt">
+            <div class="bul_wrap">
+                <div class="f_r">
+                    <a class="a_btn btn_style2" href="javascript:manageWelMenu.searchWelmenu();"><em></em>조회</a>
+                </div>
+            </div>
+            <div class="search_area">
+                <label for=""><em></em>게시일</label>
+                <input type="text" id="MENU_DT" name="fromDate" class="fromDate table_input">
+                <label for=""><em></em>끼니유형</label>
+                <select id="MEAL_TYPE">
+                    <option value="1">조식</option>
+                    <option value="2">중식</option>
+                    <option value="3">석식</option>
+                    <option value="4">야식</option>
+                    <option value="5">간식</option>
+                    <option value="6">기타식</option>
+                </select>
+            </div>
+            <!-- 컨텐츠 결과 화면 -->
+            <ul id="welMenuResultArea" class="popup_conList"></ul>
+            <!--// 컨텐츠 결과 화면 -->
+        </div>
+        <div class="step_button">
+            <p class="a_btn_wrap">
+                <a class="a_btn btn_style3" href="javascript:manageWelMenu.popups.nextStep();">다음 단계</a>
+                <a class="a_btn btn_style3" href="javascript:manageWelMenu.popups.jbWelMenu.close(); void 0">취소</a>
+            </p>
+        </div>
+    </div>
+    <!--// 게시 메뉴 연결 01 Step -->
+    <!-- 게시 메뉴 연결 02 Step -->
+    <div class="pop_sc_2">
+        <div class="popup_area">
+            <div class="popup_contents">
+                <table>
+                    <tr>
+                        <td>이미지</td>
+                        <td>
+                            <div class="image_area">
+                                <img id="M_PHOTO_CD" alt="" />
+                            </div>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>이미지 변경</td>
+                        <td><input type="file" id="localfile" onchange="previewFile()" style="padding-left: 0px;" accept="image/*" /></td>
+                    </tr>
+                    <tr>
+                        <td>음식명</td>
+                        <td>
+                            <input type="text" id="M_MENU_NM">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>영문 음식명</td>
+                        <td><input type="text" id="M_MENU_NM_ENG"></td>
+                    </tr>
+                    <tr>
+                        <td>가격</td>
+                        <td><input type="text" id="M_MENU_PRICE"></td>
+                    </tr>
+                    <tr>
+                        <td>부찬</td>
+                        <td><input type="text" id="M_SIDE_DISH"></td>
+                    </tr>
+                    <tr>
+                        <td>칼로리</td>
+                        <td><input type="text" id="M_MENU_KCAL"></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="step_button">
+                <p class="a_btn_wrap">
+                    <a class="a_btn btn_style3" href="javascript:manageWelMenu.popups.prevStep();">이전 단계</a>
+                    <a class="a_btn btn_style3" href="javascript:manageWelMenu.popups.apply();">연결</a>
+                    <a class="a_btn btn_style3" href="javascript:manageWelMenu.popups.jbWelMenu.close(); void 0">취소</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!--// 게시 메뉴 연결 02 Step -->
+
+    <canvas id="localImageCanvas" style="display:none;"></canvas>
+</div>
+
+
+@* 컨텐츠 연결 팝업 *@
+<div id="jbContents" class="popup1" style="display: none">
+
+    <div class="pop_sc_1">
+        <div class="popup_subCnt">
+            <div class="bul_wrap">
+                <div class="f_r">
+                    <a class="a_btn btn_style2" href="javascript:manageContents.searchContetns(1);"><em></em>조회</a>
+                </div>
+            </div>
+            <div class="search_area">
+                <label for=""><em></em>컨텐츠 타입</label>
+                <select id="CONTENT_TYPE" disabled>
+                    <option value="B">뱃지</option>
+                    <option value="H">헤드라인</option>
+                    <option value="I">이미지</option>
+                    <option value="M">동영상</option>
+                    <option value="U">URL</option>
+                    <option value="T">텍스트</option>
+                </select>
+                <label for=""><em></em>컨텐츠 이름</label>
+                <input type="text" id="CONTENT_NM">
+
+            </div>
+            <!-- 컨텐츠 결과 화면 -->
+            <ul id="contentsResultArea" class="popup_conList popup_conList2"></ul>
+            <!--// 컨텐츠 결과 화면 -->
+            <ul class="paging"></ul>
+        </div>
+        <div class="step_button">
+            <p class="a_btn_wrap">
+                <a class="a_btn btn_style3" href="javascript:manageContents.popups.apply();">연결</a>
+                <a class="a_btn btn_style3" href="javascript:manageContents.popups.jbContents.close(); void 0">취소</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<div id="jbTemplate" class="popup10" style="display:none;">
+    <div class="popup_area">
+        <div class="popup_contents">
+            <table>
+                <tr>
+                    <td>템플릿 이름</td>
+                    <td><input type="text" id="M_TEMPLATE_NM" value="@Model.TEMPLATE_NM" maxlength="60"></td>
+                </tr>
+                <tr>
+                    <td>템플릿 설명</td>
+                    <td><input type="text" id="M_TEMPLATE_DESC" value="@Model.TEMPLATE_DESC" maxlength="60"></td>
+                </tr>
+            </table>
+        </div>
+        <div class="step_button">
+            @if (ViewBag.type == "U")
+            {
+                <a class="a_btn btn_style3" href="javascript:manageTemplate.saveTemplate('U');">수정</a>
+            }
+            else
+            {
+                <a class="a_btn btn_style3" href="javascript:manageTemplate.saveTemplate('I');">저장</a>
+            }
+            <a class="a_btn btn_style3" href="javascript:manageTemplate.popups.jbTemplate.close(); void 0">취소</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts
+{
+    <script>
+
+        // 레이아웃의 이미지 경로를 수정
+        $(document).ready(function () {
+
+            if ('@ViewBag.type' == 'I') {
+                // 스타일로 background-image 를 설정한 경우 경로 수정
+                $('#templateArea, #templateArea *').each(function () {
+
+                    if ($(this).css('background-image') != 'none') {
+
+                        var names = $(this).css('background-image').split('/');
+                        var name = names[names.length - 1].replace('")', "");
+
+                        $(this).css('background-image', "url('" + '/upload/layout/' + '@Model.layoutModel.LAYOUT_ID' + '/images/' + name + "')");
+                    }
+                });
+
+                /* 이미지 경로 수정 */
+                $('#layer img').each(function () {
+                    var src = $(this).attr('src');
+                    var names = src.split('/');
+                    var name = names[names.length - 1];
+
+                    $(this).attr('src', '/upload/layout/' + '@Model.layoutModel.LAYOUT_ID' + '/images/' + name);
+                });
+            }
+            else { /* 템플릿 수정일 경우 */
+
+                $('#templateArea').each(function () {
+
+                    if ($(this).css('background-image') != 'none') {
+
+                        var names = $(this).css('background-image').split('/');
+                        var name = names[names.length - 1].replace('")', "");
+
+                        $(this).css('background-image', "url('" + '/upload/layout/' + '@Model.layoutModel.LAYOUT_ID' + '/images/' + name + "')");
+                    }
+                });
+            }
+        });
+
+
+        // 현재 컨텐츠 연결 상태 (W : 메뉴게시, C : 시스템 컨텐츠, L : 로컬)
+        var connectionType = '';
+
+
+        /* 템플릿 관리 */
+        var manageTemplate = (function () {
+
+            return {
+                contetnsAreaId: '',
+                contetnsAreaType: '',
+                contentsAreaInfo: {},    // 현재 레이아웃의 컨텐츠 영역 정보를 관리
+                // 모델 정의
+                models: {
+                    // 템플릿 기본 정보
+                    TemplateModel: function() {
+                        this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+                        this.TEMPLATE_ID     = '@Model.TEMPLATE_ID';
+                        this.TEMPLATE_NM     = '';
+                        this.TEMPLATE_DESC   = '';
+                        this.TEMPLATE_HTML   = '';
+                        this.LAYOUT_ID       = '@Model.layoutModel.LAYOUT_ID';
+                        this.SCREEN_W        = '@Model.layoutModel.SCREEN_W';
+                        this.SCREEN_H        = '@Model.layoutModel.SCREEN_H';
+                    },
+                    // 템플릿 컨텐츠 연결 정보
+                    TemplateMapModel: function () {
+                        this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+                        this.TEMPLATE_ID     = '';
+                        this.LAYOUT_ID       = '';
+                        this.CONTENT_SEQ     = '';
+                        this.CONTENT_ID      = '';
+                        this.CONTENT_TYPE    = '';
+                        this.CONNECTION_TYPE = '';
+                        this.CONNECTION_NM   = '';
+                        this.IS_UPDATE       = true;
+                    }
+                },
+                // 화면에서 사용하는 요소 정의
+                elements: {
+                    $selContentsType : $('#selContentsType'),
+                    $M_TEMPLATE_NM   : $('#M_TEMPLATE_NM'),
+                    $M_TEMPLATE_DESC : $('#M_TEMPLATE_DESC')
+                },
+                // 요소 초기화 함수
+                init: function () {
+                    if('@ViewBag.type' == 'I') {
+                        manageTemplate.elements.$M_TEMPLATE_NM.val('');
+                        manageTemplate.elements.$M_TEMPLATE_DESC.val('');
+                    }
+                    else {
+                        manageTemplate.elements.$M_TEMPLATE_NM.val("@Model.TEMPLATE_NM");
+                        manageTemplate.elements.$M_TEMPLATE_DESC.val("@Model.TEMPLATE_DESC");
+                    }
+
+                },
+                popups: {
+                    jbTemplate: new jBox('Modal', {
+                        draggable          : 'title',
+                        dragOver           : false,
+                        closeOnEsc         : true,
+                        isolateScroll      : false,
+                        attach             : '#myModal',
+                        title              : '템플릿 저장',
+                        content            : $('#jbTemplate'),
+                        closeButton        : 'title',
+                        width              : "15%",
+                        height             : "10%",
+                        minWidth           : 450,
+                        minHeight          : 150,
+                        responsiveMinWidth : 450,
+                        responsiveMinHeight: 150,
+                        responsiveWidth    : false,
+                        responsiveHeight   : false
+                    }),
+                    showJBTemplate: function () {
+                        manageTemplate.init();
+                        manageTemplate.popups.jbTemplate.open();
+                        manageTemplate.elements.$M_TEMPLATE_NM.focus();
+                    }
+                },
+                // 컨텐츠 영역 클릭시 팝업 호출 (메뉴게시 팝업, 컨텐츠 팝업 판단)
+                showPopup: function (contentsAreaType, contentsSeq) {
+
+                    // 날짜 영역의 경우 팝업 열지 않음
+                    if (contentsAreaType == 'D') {
+                        return;
+                    }
+
+                    manageTemplate.contetnsAreaId   = contentsSeq;       // 현재 선택된 컨텐츠 영역 아이디를 할당
+                    manageTemplate.contetnsAreaType = contentsAreaType;  // 현재 선택된 컨텐츠 영역 타입을 할당
+
+                    // 메뉴 컨텐츠 영역일 경우
+                    if (manageTemplate.contetnsAreaType == 'P') {
+                        connectionType = 'W';
+                        manageWelMenu.popups.showJBWelMenu(contentsAreaType, contentsSeq);
+                    }
+                    // 일반 컨텐츠 영역일 경우
+                    else {
+                        connectionType = 'C';
+                        manageContents.popups.showJBContetns();
+                    }
+                },
+                // 레이아웃 정보 셋팅 함수
+                setContetnsAreaInfo: function () {
+
+                    // 생성일 경우 레이아웃 정보 셋팅
+                    if ('@ViewBag.type' == 'I') {
+                        $('[data-contents-area-id]').each(function () {
+
+                            var contentsAreaId =       $(this).data('contents-area-id');                      // 컨텐츠 영역 아이디
+                            var contentsAreaType =     $(this).data('contents-area-type');                    // 컨텐츠 영역 타입
+                            var contentsAreaElements = $('[data-contents-area-id="' + contentsAreaId + '"]'); // 모든 컨텐츠 영역
+
+                            // 컨텐츠 영역 정보
+                            manageTemplate.contentsAreaInfo[contentsAreaId] = {
+                                type          : contentsAreaType,
+                                elements      : contentsAreaElements,
+                                connectionData: {},
+                                connectionType: ''
+                            };
+
+                            // console.log(contentsAreaId, contentsAreaType);
+
+                            $(this).parent().parent().mouseover(function () { $(contentsAreaElements).parent().parent().addClass('select'); });
+                            $(this).parent().parent().mouseout(function ()  { $(contentsAreaElements).parent().parent().removeClass('select'); });
+
+                            // 컨텐츠 영역 클릭시 해당하는 연결 팝업 호출
+                            $(this).parent().parent().click(function () {
+
+                                // 날짜 형식의 경우 팝업 제외
+                                if (contentsAreaType.toUpperCase().substring(0, 1) == 'D')
+                                    return;
+
+                                manageTemplate.showPopup(contentsAreaType.toUpperCase().substring(0, 1), contentsAreaId);
+                            });
+
+                            $(this).parent().parent().css('cursor', 'pointer');
+
+                        });
+                    }
+                    // 수정일 경우 템플릿 정보 셋팅
+                    else {
+                        var templateMapModels = @Html.Raw(Json.Encode(Model.templateMapModels));
+
+                        var templateMapData = {};
+
+                        for (var i = 0; i < templateMapModels.length; i++) {
+                            templateMapData[templateMapModels[i].LAYOUT_SEQ] = templateMapModels[i];
+                        }
+
+                        // console.log(templateMapData);
+
+                        $('[data-contents-area-id]').each(function () {
+
+                            var contentsAreaId       = $(this).data('contents-area-id');                                 // 컨텐츠 영역 아이디
+                            var contentsAreaType     = $(this).data('contents-area-type');                               // 컨텐츠 영역 타입
+                            var contentsAreaTypeCode = $(this).data('contents-area-type').toUpperCase().substring(0, 1); // 컨텐츠 영역 타입
+                            var contentsAreaElements = $('[data-contents-area-id="' + contentsAreaId + '"]');            // 모든 컨텐츠 영역
+
+                            var contentsData              = {};
+                            var connectionType            = '';
+                            var TEMPLATE_CONTENTS_FILE_NM = '';
+
+                            // 연결 정보가 있을 경우
+                            if (templateMapData[contentsAreaId]) {
+
+                                connectionType = templateMapData[contentsAreaId].CONNECTION_TYPE;
+
+                                if (templateMapData[contentsAreaId].CONNECTION_TYPE == 'C') {
+
+                                    contentsData = new manageContents.models.ContentsModel();
+                                    contentsData.CONTENT_ID   = templateMapData[contentsAreaId].CONTENT_ID;
+                                    contentsData.CONTENT_NM   = templateMapData[contentsAreaId].CONNECTION_NM;
+                                    TEMPLATE_CONTENTS_FILE_NM = templateMapData[contentsAreaId].FILE_NM;
+                                }
+                                else if (templateMapData[contentsAreaId].CONNECTION_TYPE == 'W' || templateMapData[contentsAreaId].CONNECTION_TYPE == 'L') {
+
+                                    // console.log(templateMapData[contentsAreaId].CONNECTION_TYPE);
+
+                                    contentsData = new manageWelMenu.models.WelmenuModel();
+                                    contentsData.SEQ       = templateMapData[contentsAreaId].CONTENT_ID;
+                                    contentsData.MENU_NM   = templateMapData[contentsAreaId].CONNECTION_NM;
+
+                                    // console.log(contentsAreaId);
+                                    // console.log('333', $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="price"]').text());
+
+                                    contentsData.MENU_NM_ENG = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="ename"]').text().trim();
+                                    contentsData.MENU_PRICE  = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="price"]').text().trim().replace('\\ ', '');
+                                    contentsData.SIDE_DISH   = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="sidedish"]').text().trim().replace('부찬 : ', '');
+                                    contentsData.MENU_KCAL   = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="kcal"]').text().trim().replace('칼로리 ', '').replace('Kcal', '');
+                                    contentsData.MENU_DT     = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="score1"]').attr('data-menu-dt');
+                                    contentsData.MEAL_TYPE   = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="score1"]').attr('data-meal-type');
+                                    contentsData.MENU_CODE   = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="score1"]').attr('data-menu-cd');
+                                    contentsData.COURSE_TYPE = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="score1"]').attr('data-course');
+                                    contentsData.HALL_NO     = $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category="score1"]').attr('data-hall-no');
+                                }
+
+                                console.log(contentsData);
+
+                                $('[data-side-id="' + contentsAreaId + '"][data-side-type="' + contentsAreaTypeCode + '"] .connection-contents').empty().append('<li class="info_content"><div>' + templateMapData[contentsAreaId].CONNECTION_NM + '</div><div><img src="../images/common/minus.png" alt="" class="ico_btn" onclick="manageTemplate.unconnectContetns(' + "'" + contentsAreaId + "', " + "'" + contentsAreaTypeCode + "'" + ')"></div></li>');
+                            }
+                            else {
+
+                                if (contentsAreaType.toUpperCase() == 'PRODUCT') {
+
+                                    for (var i = 0; i < contentsAreaElements.length; i++) {
+
+                                        var productCategory = $(contentsAreaElements[i]).data('product-category').toUpperCase().substring(0, 5);
+
+                                        if (productCategory.toUpperCase() != 'SCORE') {
+
+                                            $(contentsAreaElements[i]).parent().parent().removeClass('active').css('visibility', 'visible');
+
+                                            if (productCategory != 'IMAGE') {
+                                                $(contentsAreaElements[i]).html("");
+                                            }
+                                        }
+                                        else {
+                                            // 2019-04-24 평가점수 Image
+                                            $(contentsAreaElements[i]).parent().parent().removeClass('active').css('visibility', 'visible');
+                                        }
+                                    }
+                                }
+                                else {
+                                    $(contentsAreaElements[0]).parent().parent().removeClass('active').css('visibility', 'visible');
+                                }
+                            }
+
+                            // 컨텐츠 영역 정보
+                            manageTemplate.contentsAreaInfo[contentsAreaId] = {
+                                type                     : contentsAreaType,
+                                elements                 : contentsAreaElements,
+                                connectionData           : contentsData,
+                                connectionType           : connectionType,
+                                originConnectionData     : contentsData,
+                                originConnectionType     : connectionType,
+                                TEMPLATE_CONTENTS_FILE_NM: TEMPLATE_CONTENTS_FILE_NM
+                            };
+
+                            // 컨텐츠 영역 이벤트 추가 (TEXT의 경우 달라서 일단 예외 처리)
+                            $(this).parent().parent().mouseover(function () { $(contentsAreaElements).parent().parent().addClass('select'); });
+                            $(this).parent().parent().mouseout(function () { $(contentsAreaElements).parent().parent().removeClass('select'); });
+
+                            // 컨텐츠 영역 클릭시 해당하는 연결 팝업 호출
+                            $(this).parent().parent().click(function () {
+                                manageTemplate.showPopup(contentsAreaType.toUpperCase().substring(0, 1), contentsAreaId);
+                            });
+
+                            $(this).parent().parent().css('cursor', 'pointer');
+
+                        });
+                    }
+                },
+                // 컨텐츠 영역과 컨텐츠 연결 해제 함수
+                unconnectContetns: function (contentsAreaId, contentsAreaType) {
+
+                    console.log(contentsAreaId, contentsAreaType);
+
+                    $('#templateArea [data-contents-area-id="' + contentsAreaId + '"]').parent().parent().removeClass('active').css('visibility', 'visible');
+                    $('#templateArea [data-contents-area-id="' + contentsAreaId + '"]').empty().append('&nbsp;');
+                    $('[data-contents-area-id="' + contentsAreaId + '"][data-product-category*="score"]').text('0').removeAttr('data-restaurant-code').removeAttr('data-menu-dt').removeAttr('data-meal-type').removeAttr('data-menu-cd').removeAttr('data-course').removeAttr('data-hall-no');
+
+                    $('[data-side-id="' + contentsAreaId + '"][data-side-type="' + contentsAreaType + '"] .connection-contents').empty(); // 좌측 연결 정보 초기화
+
+                    manageTemplate.contentsAreaInfo[contentsAreaId].connectionData = {};   // 연결된 컨텐츠 데이터
+                    manageTemplate.contentsAreaInfo[contentsAreaId].connectionType = '';   // 컨텐츠 연결 방식(W : 메뉴게시, C : 컨텐츠, L: 로컬)
+                },
+                // 컨텐츠 영역과 컨텐츠 연결 함수
+                connectContents: function (contentsType, contetnsData) {
+
+                    try {
+                        var elements = manageTemplate.contentsAreaInfo[manageTemplate.contetnsAreaId].elements;  // 연결 컨텐츠 영역 정보
+
+                        if (contentsType == 'P' && connectionType == 'W') {
+
+                            //if (!manageWelMenu.welMenuId) {
+                            //    alert('게시 메뉴를 선택해 주세요.');
+                            //    return false;
+                            //}
+
+                            for (var i = 0; i < elements.length; i++) {
+
+                                switch ($(elements[i]).data('product-category').toUpperCase()) {
+                                    case 'IMAGE':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).empty();
+                                        $(elements[i]).append($('<img src="' + $('#M_PHOTO_CD').attr('src') + '" alt="" />'));
+                                        break;
+                                    case 'NAME':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_NM ? contetnsData.MENU_NM : '&nbsp;');
+                                        break;
+                                    case 'ENAME':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_NM_ENG ? contetnsData.MENU_NM_ENG : '&nbsp;');
+                                        break;
+                                    case 'PRICE':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_PRICE ? '\\ ' + contetnsData.MENU_PRICE : '&nbsp;');
+                                        break;
+                                    case 'SIDEDISH':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.SIDE_DISH ? '부찬 : ' + contetnsData.SIDE_DISH : '&nbsp;');
+                                        break;
+                                    case 'KCAL':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_KCAL ? '칼로리 ' + contetnsData.MENU_KCAL + ' Kcal' : '&nbsp;');
+                                        break;
+                                    case 'SCORE1':
+                                    case 'SCORE2':
+                                    case 'SCORE3':
+                                    case 'SCORE4':
+                                    case 'SCORE5':
+                                        // 2019-04-24 평가점수 Image
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).parent().parent().css('visibility', 'visible');
+
+                                        $(elements[i]).attr('data-restaurant-code', '@ViewBag.RESTAURANT_CD');
+                                        $(elements[i]).attr('data-menu-dt',   contetnsData.MENU_DT);
+                                        $(elements[i]).attr('data-meal-type', contetnsData.MEAL_TYPE);
+                                        $(elements[i]).attr('data-menu-cd',   contetnsData.MENU_CODE);
+                                        $(elements[i]).attr('data-course',    contetnsData.COURSE_TYPE);
+                                        $(elements[i]).attr('data-hall-no',   contetnsData.HALL_NO);
+                                        break;
+                                }
+                            }
+                        }
+                        // 메뉴를 로컬 이지를 연결 했을 경우
+                        else if (contentsType == 'P' && connectionType == 'L') {
+
+
+                            for (var i = 0; i < elements.length; i++) {
+
+                                switch ($(elements[i]).data('product-category').toUpperCase()) {
+                                    case 'IMAGE':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).empty();
+                                        $(elements[i]).append($('<img src="' + $('#M_PHOTO_CD').attr('src') + '" alt="" />'));
+
+
+                                        break;
+                                    case 'NAME':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_NM ? contetnsData.MENU_NM : '&nbsp;');
+                                        break;
+                                    case 'ENAME':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_NM_ENG ? contetnsData.MENU_NM_ENG : '&nbsp;');
+                                        break;
+                                    case 'PRICE':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_PRICE ? '\\ ' + contetnsData.MENU_PRICE : '&nbsp;');
+                                        break;
+                                    case 'SIDEDISH':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.SIDE_DISH ? '부찬 : ' + contetnsData.SIDE_DISH : '&nbsp;');
+                                        break;
+                                    case 'KCAL':
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).html(contetnsData.MENU_KCAL ? '칼로리 ' + contetnsData.MENU_KCAL + ' Kcal' : '&nbsp;');
+                                        break;
+                                    case 'SCORE1':
+                                    case 'SCORE2':
+                                    case 'SCORE3':
+                                    case 'SCORE4':
+                                    case 'SCORE5':
+                                        // 2019-04-24 평가점수 Image
+                                        $(elements[i]).parent().parent().addClass('active');
+                                        $(elements[i]).parent().parent().css('visibility', 'visible');
+
+                                        $(elements[i]).attr('data-restaurant-code', '');
+                                        $(elements[i]).attr('data-menu-dt',   '');
+                                        $(elements[i]).attr('data-meal-type', '');
+                                        $(elements[i]).attr('data-menu-cd',   '');
+                                        $(elements[i]).attr('data-course',    '');
+                                        $(elements[i]).attr('data-hall-no',   '');
+                                        break;
+                                }
+                            }
+                        }
+                        // 컨텐츠 영역이 뱃지, 헤드라인, 이미지고 시스템 컨텐츠와 연결시
+                        else if ((contentsType == 'B' || contentsType == 'H' || contentsType == 'I') && connectionType == 'C') {
+                            $(elements[0]).parent().parent().addClass('active');
+                            $(elements[0]).empty();
+                            $(elements[0]).append($('<img src="' + contetnsData.FILE_URL + '" alt="" />'));
+                        }
+                        else if (contentsType == 'M' && connectionType == 'C') {
+                            $(elements[0]).parent().parent().addClass('active');
+                            $(elements[0]).empty();
+                            $(elements[0]).append($('<video controls autoplay loop><source src="' + contetnsData.FILE_URL + '"></video>'));
+                        }
+                        else if (contentsType == 'U' && connectionType == 'C') {
+                            $(elements[0]).parent().parent().addClass('active');
+                            $(elements[0]).empty();
+                            $(elements[0]).append($('<iframe src="' + contetnsData.FILE_URL + (contetnsData.FILE_URL.toUpperCase().indexOf('YOUTUBE') <= 0 ? '' : '?amp;autoplay=1&amp;loop=1') + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>'));
+                        }
+                        else if (contentsType == 'T' && connectionType == 'C') {
+                            $(elements[0]).parent().parent().addClass('active');
+                            $(elements[0]).empty();
+                            $(elements[0]).append(contetnsData.TEXT_HTML);
+                        }
+
+                        // 왼쪽의 컨텐츠 영역 정보에 연결된 컨텐츠 정보를 넣는다.
+                        $('[data-side-id="' + manageTemplate.contetnsAreaId + '"][data-side-type="' + contentsType + '"] .connection-contents').empty().append('<li class="info_content"><div>' + (contetnsData.MENU_NM || contetnsData.CONTENT_NM || '로컬 파일') + '</div><div><img src="../images/common/minus.png" alt="" class="ico_btn" onclick="manageTemplate.unconnectContetns(' + "'" + manageTemplate.contetnsAreaId + "', " + "'" + contentsType + "'" + ')"></div></li>');
+
+                        manageTemplate.contentsAreaInfo[manageTemplate.contetnsAreaId].connectionData = contetnsData;     // 연결된 컨텐츠 데이터
+                        manageTemplate.contentsAreaInfo[manageTemplate.contetnsAreaId].connectionType = connectionType;   // 컨텐츠 연결 방식(W : 메뉴게시, C : 컨텐츠, L: 로컬)
+                    }
+                    catch (e) {
+                        alert('컨텐츠 연결중 오류가 발생하였습니다,\n 에러 메세지 : ' + e.message);
+                    }
+                    finally {
+                        manageWelMenu.popups.jbWelMenu.close();
+                        manageContents.popups.jbContents.close();
+                    }
+                },
+                // 템플릿 저장
+                saveTemplate: function (actionType) {
+
+                    if (!manageTemplate.elements.$M_TEMPLATE_NM.val()) {
+                        alert('템플릿 이름을 입력하세요.');
+                        manageTemplate.elements.$M_TEMPLATE_NM.focus();
+                        return;
+                    }
+
+                    // 01. 컨텐츠와 연결되지 않은 영역 제거
+                    manageTemplate.removeContentsAreaWrapper();
+
+                    //console.log($('#templateArea').html());
+
+                    // 생성일 경우만 스크립트 추가
+                    // 수정일 경우는 이미 스크립트가 추가 되어 있음.
+                    if ("@ViewBag.type" == 'I') {
+                        // 02. 메뉴 평가 레이아웃일 경우 해당 스크립트 삽입
+                        // var path = location.protocol + '//' + location.hostname + (location.port ? ':' + location.port : '');
+                        // var path = '{TEMPLATE_PATH}';
+                        var pathjquery = /*path +*/ '/Scripts/' + 'jquery-3.3.1.min.js';
+                        var pathjs     = /*path +*/ '/Scripts/' + 'loadscript.js';
+
+                        var s = document.createElement("script");
+                        s.type = "text/javascript";
+                        s.src = pathjquery;
+
+                        $("#layer").append(s);
+
+                        s = document.createElement("script");
+                        s.type = "text/javascript";
+                        s.src = pathjs;
+
+                        $("#layer").append(s);
+                    }
+
+                    // 03. 이미지 URL 재정의 (같은 경로에 이미지 파일을 저장할 계획)
+                    $('#templateArea *').each(function () {
+
+                        var url = $(this).css('background-image');
+
+                        if (url != 'none' && url.indexOf('upload/template') < 0) {
+
+                            var names = $(this).css('background-image').split('/');
+                            var name  = names[names.length - 1].replace('")', "");
+
+                            $(this).css('background-image', "url('{TEMPLATE_PATH}/" + name + "')");
+                        }
+
+                    });
+
+
+                    $('#layer img').each(function () {
+
+                        var url = $(this).attr('src');
+
+                        // 컨텐츠 연결 방식이 W, L 일 경우 이미지 주소를 변경하지 않음
+                        // 컨텐츠 연결 방식이 C일 경우 이미지 주소를 변경
+
+                        if (url.indexOf('upload/contents') >= 0) {
+                            var fileName = url.substring(url.lastIndexOf('/') + 1);
+                            $(this).attr('src', '{TEMPLATE_PATH}/' + fileName);
+                        }
+                    });
+
+                    // 04. 레이어 디스플레이 none 처리
+                    $('#layer').css('display', 'none');
+
+                    // 05. 템플릿 HTML 저장
+
+                    var templateModel = new manageTemplate.models.TemplateModel();
+
+                    templateModel.TEMPLATE_NM   = manageTemplate.elements.$M_TEMPLATE_NM.val();
+                    templateModel.TEMPLATE_DESC = manageTemplate.elements.$M_TEMPLATE_DESC.val();
+                    templateModel.TEMPLATE_HTML = $('#templateArea').html();
+
+                    var templateMapModels = [];
+
+                    for (var id in manageTemplate.contentsAreaInfo) {
+
+                        if (manageTemplate.contentsAreaInfo[id].connectionType) {
+
+                            var templateMapModel = new manageTemplate.models.TemplateMapModel();
+
+                            templateMapModel.LAYOUT_SEQ      = id;
+                            templateMapModel.CONNECTION_TYPE = manageTemplate.contentsAreaInfo[id].connectionType;
+
+                            // 메뉴 게시 연결일 경우
+                            if (manageTemplate.contentsAreaInfo[id].connectionType == 'W') {
+                                templateMapModel.CONTENT_ID        = manageTemplate.contentsAreaInfo[id].connectionData.SEQ;
+                                templateMapModel.CONNECTION_NM     = manageTemplate.contentsAreaInfo[id].connectionData.MENU_NM;
+                            }
+                            else if (manageTemplate.contentsAreaInfo[id].connectionType == 'C') {
+                                templateMapModel.CONTENT_ID        = manageTemplate.contentsAreaInfo[id].connectionData.CONTENT_ID;       // 연결된 컨텐츠 아이디
+                                templateMapModel.CONTENT_TYPE      = manageTemplate.contentsAreaInfo[id].connectionData.CONTENT_TYPE;     // 연결된 컨텐츠 타입
+                                templateMapModel.CONNECTION_NM     = manageTemplate.contentsAreaInfo[id].connectionData.CONTENT_NM;       // 연결된 컨텐츠 이름
+                                templateMapModel.CONTENT_FILE_PATH = manageTemplate.contentsAreaInfo[id].connectionData.FILE_PATH;        // 연결된 컨텐츠 파일 경로
+                                templateMapModel.CONTENT_FILE_NM   = manageTemplate.contentsAreaInfo[id].connectionData.FILE_NM;          // 연결된 컨텐츠 파일 이름
+                                templateMapModel.FILE_NM           = manageTemplate.contentsAreaInfo[id].TEMPLATE_CONTENTS_FILE_NM;       // 템플릿과 연결되어 저장된 경로
+
+                                if (manageTemplate.contentsAreaInfo[id].originConnectionType && manageTemplate.contentsAreaInfo[id].originConnectionData) {
+                                    if (manageTemplate.contentsAreaInfo[id].originConnectionType == manageTemplate.contentsAreaInfo[id].connectionType &&
+                                        manageTemplate.contentsAreaInfo[id].originConnectionData.CONTENT_ID == manageTemplate.contentsAreaInfo[id].connectionData.CONTENT_ID) {
+
+                                        templateMapModel.IS_UPDATE = false;
+                                    }
+                                }
+                            }
+                            else if (manageTemplate.contentsAreaInfo[id].connectionType == 'L') {
+                                templateMapModel.CONTENT_ID        = manageTemplate.contentsAreaInfo[id].connectionData.SEQ;
+                                templateMapModel.CONNECTION_NM     = manageTemplate.contentsAreaInfo[id].connectionData.MENU_NM;
+                            }
+
+                            templateMapModels.push(templateMapModel);
+                        }
+                    }
+
+                    //console.log(templateMapModels);
+                    //return;
+
+                    manageTemplate.popups.jbTemplate.close();
+
+                    var formData = new FormData();
+                    formData.append('TYPE', actionType);
+                    formData.append('templateModel', JSON.stringify(templateModel));
+                    formData.append('templateMapModels', JSON.stringify(templateMapModels));
+
+                    simplefileUploadAjax('@Url.Action("uploadfile", "template")', formData).done(function (data) {
+
+                        var data = JSON.parse(data);
+
+                        if (data.ERR_CODE == "0") {
+                            resultMessage(actionType, function () {
+
+                                if (localStorage && localStorage.getItem('scheduleId')) {
+                                    location.href = '@Url.Action("index", "Schedule")';
+                                }
+                                else {
+                                    location.href = '@Url.Action("index", "template")';
+                                }
+
+                            });
+                        }
+                        else {
+                            if (data.ERROR_MSG) {
+                                alert(data.ERROR_MSG);
+                                if (data.ERR_CODE == "9998") {
+                                    location.href = '@Url.Action("logout", "account")';
+                                    return;
+                                }
+                            }
+                            else
+                                alert('오류가 발생하였습니다.');
+
+                            location.reload();
+                        }
+                    });
+
+                    @*simpleAjax('@Url.Action("saveTemplate", "template")', { TYPE: actionType, templateModel: templateModel, templateMapModels: templateMapModels }).done(function (data) {
+
+                        if (data.ERR_CODE == "0") {
+                            resultMessage(actionType, function () {
+                                location.href = '@Url.Action("index", "template")';
+                            });
+                        }
+                        else {
+                            if (data.ERROR_MSG)
+                                alert(data.ERROR_MSG);
+                            else
+                                alert('오류가 발생하였습니다.');
+
+                            location.reload();
+                        }
+                    });*@
+                },
+                deleteTemplate: function (id) {
+
+                    if (!confirm(deleteConfirmMessage))
+                        return;
+
+                    var templateModel = new manageTemplate.models.TemplateModel();
+
+                    simpleAjax('@Url.Action("DeleteTemplate", "template")', { templateModel: templateModel }).done(function (data) {
+
+                        if (data.ERR_CODE == "0") {
+                            resultMessage('D', function () {
+                                location.href = '@Url.Action("index", "template")';
+                            });
+                        }
+                        else {
+                            if (data.ERROR_MSG) {
+                                alert(data.ERROR_MSG);
+
+                                if (data.ERR_CODE == "9998") {
+                                    window.location.href = '@Url.Action("logout", "account")';
+                                    return;
+                                }
+                            }
+                            else
+                                alert('오류가 발생하였습니다.');
+
+                            location.reload();
+                        }
+                    });
+
+                },
+                // 컨텐츠 영역 표시 부분을 모두 제거하는 함수
+                removeContentsAreaWrapper: function () {
+
+                    for (var id in manageTemplate.contentsAreaInfo) {
+
+                        // 연결 정보가 없을 경우 컨텐츠 영역 제거
+                        if (!manageTemplate.contentsAreaInfo[id].connectionType) {
+
+                            var contentsAreatype = manageTemplate.contentsAreaInfo[id].type.toUpperCase();
+                            var contetnsAreaEle = manageTemplate.contentsAreaInfo[id].elements;
+
+
+                            // 메뉴 타입의 경우만 요소가 여러개임
+                            if (contentsAreatype == 'PRODUCT') {
+
+                                for (var i = 0; i < contetnsAreaEle.length; i++) {
+
+                                    var productCategory = $(contetnsAreaEle[i]).data('product-category').toUpperCase().substring(0, 5);
+
+                                    // 메뉴 타입중 카테고리중 SCORE는 제외
+                                    if ($(contetnsAreaEle[i]).data('product-category').toUpperCase().substring(0, 5) != 'SCORE') {
+                                        $(contetnsAreaEle[i]).parent().parent().addClass('active').removeClass('select').css('visibility', 'hidden');
+
+                                        // 텍스트의 경우 빈값을 넣어줌
+                                        if (productCategory != 'IMAGE') {
+                                            $(contetnsAreaEle[i]).html('&nbsp;');
+                                        }
+                                    }
+                                    else {
+                                        // 2019-04-24 평가점수 Image
+                                        $(contetnsAreaEle[i]).parent().parent().css('visibility', 'hidden');
+                                    }
+                                }
+                            }
+                            else {
+
+                                $(contetnsAreaEle[0]).parent().parent().addClass('active').removeClass('select');
+                                if (contentsAreatype != 'DATE') {
+                                    $(contetnsAreaEle[0]).parent().parent().css('visibility', 'hidden');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        })();
+
+
+        var manageWelMenu = (function () {
+
+            return {
+                welMenuData: {},     // 조회된 게시 메뉴 데이터
+                welMenuId: '',       // 선택된 게시 메뉴 아이디
+                models: {
+                    // 게시 메뉴 모델
+                    WelmenuModel: function() {
+                        this.RESTAURANT_CODE = '@ViewBag.RESTAURANT_CD';
+                        this.MENU_DT         = '';
+                        this.MEAL_TYPE       = '';
+                        this.PHOTO_CD        = '';
+                        this.MENU_NM         = '';
+                        this.MENU_NM_ENG     = '';
+                        this.MENU_PRICE      = '';
+                        this.MENU_KCAL       = '';
+                        this.SIDE_DISH       = '';
+                        this.HALL_NO         = '';
+                        this.MENU_TYPE       = '';
+                        this.COURSE_TYPE     = '';
+                        this.MENU_CODE       = '';
+                        this.SEQ             = '';
+                    }
+                },
+                // 화면에서 사용하는 요소 정의
+                elements: {
+                    $welMenuResultArea: $('#welMenuResultArea'),     // 게시 메뉴 결과 영역
+                    $MENU_DT          : $('#MENU_DT'),
+                    $MEAL_TYPE        : $('#MEAL_TYPE'),
+                    $M_PHOTO_CD       : $('#M_PHOTO_CD'),
+                    $M_MENU_NM        : $('#M_MENU_NM'),
+                    $M_MENU_NM_ENG    : $('#M_MENU_NM_ENG'),
+                    $M_MENU_PRICE     : $('#M_MENU_PRICE'),
+                    $M_SIDE_DISH      : $('#M_SIDE_DISH'),
+                    $M_MENU_KCAL      : $('#M_MENU_KCAL')
+                },
+                // 요소 초기화 함수
+                init: function () {
+                    $('#gbDisplay1 .pop_sc_1').css('display', 'block');
+                    $('#gbDisplay1 .pop_sc_2').css('display', 'none');
+                    manageWelMenu.welMenuId = '';
+                    manageWelMenu.elements.$MENU_DT.val(nowDate());
+                    manageWelMenu.elements.$M_PHOTO_CD.attr('src', '');
+                    manageWelMenu.elements.$M_MENU_NM.val('');
+                    manageWelMenu.elements.$M_MENU_NM_ENG.val('');
+                    manageWelMenu.elements.$M_MENU_PRICE.val('');
+                    manageWelMenu.elements.$M_SIDE_DISH.val('');
+                    manageWelMenu.elements.$M_MENU_KCAL.val('');
+
+                    $('#localfile').val('');
+
+                    connectionType = 'W';
+
+                    var d = new Date();
+                    var hour = d.getHours();
+                    var minute = d.getMinutes();
+
+                    // 05 ~ 09 : 조식
+                    // 09 ~ 15 : 중식
+                    // 15 ~ 20 : 석식
+                    // 야식
+
+                    // 조식
+                    if ((hour >= 5 && hour <= 8)) {
+                        manageWelMenu.elements.$MEAL_TYPE.val('1');
+                    }
+                    // 중식
+                    else if (hour >= 9 && hour <= 14) {
+                        manageWelMenu.elements.$MEAL_TYPE.val('2');
+                    }
+                    // 석식
+                    else if (hour >= 15 && hour <= 19) {
+                        manageWelMenu.elements.$MEAL_TYPE.val('3');
+                    }
+                    // 야식
+                    else {
+                        manageWelMenu.elements.$MEAL_TYPE.val('4');
+                    }
+                },
+                // 팝업 정의
+                popups: {
+                    // 게시 메뉴 팝업 정의
+                    jbWelMenu: new jBox('Modal', {
+                        draggable          : 'title',
+                        dragOver           : false,
+                        closeOnEsc         : true,
+                        isolateScroll      : false,
+                        attach             : '#myModal',
+                        title              : '게시메뉴 연결',
+                        content            : $('#gbDisplay1'),
+                        closeButton        : 'title',
+                        width              : "61%",
+                        height             : "64%",
+                        minWidth           : 1170,
+                        minHeight          : 620,
+                        responsiveMinWidth : 1170,
+                        responsiveMinHeight: 620,
+                        responsiveWidth    : false,
+                        responsiveHeight   : false
+                    }),
+                    // 게시 메뉴 팝업 열기 (연결할 레이아웃의 컨텐츠 영역 정보를 받음 (컨텐츠 영역 타입, 컨텐츠 영역 아이디))
+                    showJBWelMenu: function (contentsAreaType, contentsSeq) {
+
+                        manageWelMenu.init();                     // 게시 메뉴 초기화
+                        manageWelMenu.searchWelmenu();            // 게시 메뉴 조회
+
+                        // 메뉴가 연결된 컨텐츠 영역일 경우는 두번째 단계를 보여 주며 연결 정보를 바인딩 한다.
+                        if (!isEmpty(manageTemplate.contentsAreaInfo[contentsSeq].connectionData)) {
+
+                            $('#gbDisplay1 .pop_sc_1').css('display', 'none');
+                            $('#gbDisplay1 .pop_sc_2').css('display', 'block');
+
+                            var connectionData = manageTemplate.contentsAreaInfo[contentsSeq].connectionData;
+
+                            manageWelMenu.elements.$M_PHOTO_CD.attr('src', $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="image"] img').attr('src'));
+                            manageWelMenu.elements.$M_MENU_NM.val(connectionData.MENU_NM);
+                            manageWelMenu.elements.$M_MENU_NM_ENG.val(connectionData.MENU_NM_ENG);
+                            manageWelMenu.elements.$M_MENU_PRICE.val(connectionData.MENU_PRICE);
+                            manageWelMenu.elements.$M_SIDE_DISH.val(connectionData.SIDE_DISH);
+                            manageWelMenu.elements.$M_MENU_KCAL.val(connectionData.MENU_KCAL);
+
+                            manageWelMenu.welMenuId = connectionData.SEQ;
+                            manageWelMenu.welMenuData[connectionData.SEQ] = connectionData;
+
+                            connectionType = manageTemplate.contentsAreaInfo[contentsSeq].connectionType;
+
+                            //if ($('[data-contents-area-id="' + contentsSeq + '"][data-product-category="image"] img').attr('src') == connectionData.PHOTO_CD) {
+                            //    connectionType = 'W';
+                            //}
+                            //else {
+                            //    connectionType = 'L';
+                            //}
+                        }
+
+                        manageWelMenu.elements.$M_MENU_NM.attr('maxlength',     $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="name"]').data('contetns-area-length'));
+                        manageWelMenu.elements.$M_MENU_NM_ENG.attr('maxlength', $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="ename"]').data('contetns-area-length'));
+                        manageWelMenu.elements.$M_MENU_PRICE.attr('maxlength',  $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="price"]').data('contetns-area-length'));
+                        manageWelMenu.elements.$M_SIDE_DISH.attr('maxlength',   $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="sidedish"]').data('contetns-area-length') * 1 -4);
+                        manageWelMenu.elements.$M_MENU_KCAL.attr('maxlength',   $('[data-contents-area-id="' + contentsSeq + '"][data-product-category="kcal"]').data('contetns-area-length'));
+
+                        manageWelMenu.popups.jbWelMenu.open();    // 게시 메뉴 팝업 열기
+
+                    },
+                    // 게시 메뉴 연결시 다음 단계 버튼 이벤트
+                    nextStep: function () {
+
+                        if (!manageWelMenu.welMenuId) {
+                            if (!confirm('게시 메뉴를 선택하지 않고 다음 단계 진행시 메뉴 평가 기능을 사용할 수 없습니다. 그래도 진행하시겠습니까?'))
+                                return;
+                            else {
+                                // 메뉴 게시와 연결하지 않고 다음 단계로 넘어가게되면 로컬 연결로 설정 된다.
+                                connectionType = 'L';
+                            }
+                        }
+                        // 게시 메뉴 선택 후 진행
+                        else {
+                            var welMenuData = manageWelMenu.welMenuData[manageWelMenu.welMenuId]; // 연결할 게시 메뉴 정보
+
+                            manageWelMenu.elements.$M_PHOTO_CD.attr('src', welMenuData.PHOTO_CD);
+                            manageWelMenu.elements.$M_MENU_NM.val(welMenuData.MENU_NM);
+                            manageWelMenu.elements.$M_MENU_NM_ENG.val(welMenuData.MENU_NM_ENG);
+                            manageWelMenu.elements.$M_MENU_PRICE.val(welMenuData.MENU_PRICE);
+                            manageWelMenu.elements.$M_SIDE_DISH.val(welMenuData.SIDE_DISH);
+                            manageWelMenu.elements.$M_MENU_KCAL.val(welMenuData.MENU_KCAL);
+
+                        }
+
+                        $('#gbDisplay1 .pop_sc_1').css('display', 'none');
+                        $('#gbDisplay1 .pop_sc_2').css('display', 'block');
+                    },
+                    // 게시 메뉴 연길시 이전 단계 버튼 이벤트
+                    prevStep: function () {
+                        $('#gbDisplay1 .pop_sc_1').css('display', 'block');
+                        $('#gbDisplay1 .pop_sc_2').css('display', 'none');
+
+                        manageWelMenu.init();                     // 게시 메뉴 초기화
+                        manageWelMenu.searchWelmenu();            // 게시 메뉴 조회
+                    },
+                    // 적용 버튼 이벤트
+                    apply: function () {
+
+                        if (connectionType == "W") {
+                            var welMenuData = manageWelMenu.welMenuData[manageWelMenu.welMenuId];
+
+                            // 단계 진행후 적용
+                            welMenuData.MENU_NM     = manageWelMenu.elements.$M_MENU_NM.val();
+                            welMenuData.MENU_NM_ENG = manageWelMenu.elements.$M_MENU_NM_ENG.val();
+                            welMenuData.MENU_PRICE  = manageWelMenu.elements.$M_MENU_PRICE.val();
+                            welMenuData.SIDE_DISH   = manageWelMenu.elements.$M_SIDE_DISH.val();
+                            welMenuData.MENU_KCAL   = manageWelMenu.elements.$M_MENU_KCAL.val();
+
+                            manageTemplate.connectContents('P', welMenuData);
+                        }
+                        else if (connectionType == "L") {
+
+                            var welMenuModel = new manageWelMenu.models.WelmenuModel();
+
+                            welMenuModel.MENU_NM     = manageWelMenu.elements.$M_MENU_NM.val();
+                            welMenuModel.MENU_NM_ENG = manageWelMenu.elements.$M_MENU_NM_ENG.val();
+                            welMenuModel.MENU_PRICE  = manageWelMenu.elements.$M_MENU_PRICE.val();
+                            welMenuModel.SIDE_DISH   = manageWelMenu.elements.$M_SIDE_DISH.val();
+                            welMenuModel.MENU_KCAL   = manageWelMenu.elements.$M_MENU_KCAL.val();
+
+                            manageTemplate.connectContents('P', welMenuModel);
+                        }
+                    }
+                },
+                // 게시 메뉴 조회
+                searchWelmenu: function () {
+
+                    var welmenuModel = new manageWelMenu.models.WelmenuModel();
+
+                    welmenuModel.MENU_DT   = manageWelMenu.elements.$MENU_DT.val();    // '20180706';
+                    welmenuModel.MEAL_TYPE = manageWelMenu.elements.$MEAL_TYPE.val();  // '2';
+
+                    simpleAjax('@Url.Action("list", "welmenu")', { welmenuModel: welmenuModel }, false).done(function (data) {
+
+                        manageWelMenu.welMenuData = {};   // 게시 메뉴 데이터 초기화
+
+                        var welmenu = '';
+
+                        if (data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                welmenu += '<li class= "transition">';
+                                welmenu += '<h1>';
+                                welmenu += '<div class="f_l"><label class="list_title" for="' + data[i].SEQ + '">';
+                                welmenu += '<input type="checkbox" name="welmenu" id="' + data[i].SEQ + '">';
+                                welmenu += '<p>' + data[i].SEQ + '<strong>' + data[i].MENU_NM + '</strong></p>';
+                                welmenu += '</label></div>';
+                                welmenu += '<div class="f_r"></div>';
+                                welmenu += '</h1>';
+                                welmenu += '<div class="conList_style2">';
+                                welmenu += '<img src="' + data[i].PHOTO_CD + '" /></div>';
+                                welmenu += '<table>';
+                                welmenu += '<tr><td>게시일자</td><td>' + data[i].MENU_DT + '</td></tr>';
+                                welmenu += '<tr><td>끼니유형</td><td>' + data[i].MEAL_TYPE_NM + '</td></tr>';
+                                welmenu += '</table>';
+                                welmenu += '</div>';
+                                welmenu += '</li>';
+
+                                manageWelMenu.welMenuData[data[i].SEQ] = data[i];
+                            }
+
+                            var $welmenu = $(welmenu);
+
+                            $welmenu.find('img').on('error', function () {
+                                $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/thumbnail_icon_1.png" alt=""></div>');
+                            });
+
+                            manageWelMenu.elements.$welMenuResultArea.empty();
+                            manageWelMenu.elements.$welMenuResultArea.append($welmenu);
+
+                            $('input[type="checkbox"][name="welmenu"]').click(function () {
+                                if ($(this).prop('checked')) {
+                                    $('input[type="checkbox"][name="welmenu"]').prop('checked', false).parents('.transition').removeClass('list_click');
+                                    $(this).prop('checked', true).parents('.transition').addClass('list_click');
+
+                                    manageWelMenu.welMenuId = $(this).attr('id');
+                                }
+                                else {
+                                    $(this).parents('.transition').removeClass('list_click');
+
+                                    manageWelMenu.welMenuId = '';
+                                }
+                            });
+                        }
+                        else {
+                            welmenu += '<p class="date_n">데이터가 없습니다.</p>';
+                            manageWelMenu.elements.$welMenuResultArea.empty();
+                            manageWelMenu.elements.$welMenuResultArea.append($(welmenu));
+                        }
+                    });
+                }
+            }
+        })();
+
+        // 게시메뉴 팝업의 끼니유형 변경시 검색 이벤트 추가
+        manageWelMenu.elements.$MEAL_TYPE.change(function () {
+            manageWelMenu.searchWelmenu();
+        });
+
+        var manageContents = (function () {
+
+            return {
+                contetnsData: {},
+                contentsId: '',
+                models: {
+                    ContentsModel: function() {
+                        this.RESTAURANT_CODE  = '@ViewBag.RESTAURANT_CD';
+                        this.CONTENT_ID       = '';
+                        this.CONTENT_NM       = '';
+                        this.CONTENT_TYPE     = '';
+                        this.TEXT_HTML        = '';
+                        this.FILE_URL         = '';
+                        this.THUMBNAIL_URL    = '';    // M 타입의 경우 BASE64 이미지 URL 할당
+                        this.VIDEO_DURATION   = '';
+                        this.PAGE_CNT         = '9';
+                        this.FILE_PATH        = '';    // 컨텐츠 저장 경로
+                        this.FILE_NM          = '';    // 컨텐츠 저장 파일명
+                    }
+                },
+                elements: {
+                    $contentsResultArea: $('#contentsResultArea'),
+                    $CONTENT_NM        : $('#CONTENT_NM'),
+                    $CONTENT_TYPE      : $('#CONTENT_TYPE')
+                },
+                init: function () {
+                    manageContents.contetnsData = {};
+                    manageContents.contentsId   = '';
+                },
+                popups: {
+                    // 컨텐츠 조회 팝업 정의
+                    jbContents: new jBox('Modal', {
+                        draggable          : 'title',
+                        dragOver           : false,
+                        closeOnEsc         : true,
+                        isolateScroll      : false,
+                        attach             : '#myModal',
+                        title              : '컨텐츠 연결',
+                        content            : $('#jbContents'),
+                        closeButton        : 'title',
+                        width              : "61%",
+                        height             : "64%",
+                        minWidth           : 1170,
+                        minHeight          : 620,
+                        responsiveMinWidth : 1170,
+                        responsiveMinHeight: 620,
+                        responsiveWidth    : false,
+                        responsiveHeight   : false
+                    }),
+                    // 컨텐츠 팝업 열기 (연결할 레이아웃의 컨텐츠 영역 정보를 받음 (컨텐츠 영역 타입, 컨텐츠 영역 아이디))
+                    showJBContetns: function () {
+
+                        manageContents.init();                      // 컨텐츠 요소 초기화
+                        manageContents.elements.$CONTENT_TYPE.val(manageTemplate.contetnsAreaType.substr(0, 1).toUpperCase());
+                        manageContents.searchContetns(1);           // 컨텐츠 조회(1 페이지)
+                        manageContents.popups.jbContents.open();    // 컨텐츠 팝업 열기
+                    },
+                    apply: function () {
+
+                        if (manageContents.contentsId) {
+                            var contetnsData = manageContents.contetnsData[manageContents.contentsId];
+                            manageTemplate.connectContents(manageContents.elements.$CONTENT_TYPE.val(), contetnsData);
+                        }
+                        // 선택된 컨텐츠가 없을 경우 연결 해제
+                        else {
+                            manageTemplate.unconnectContetns(manageTemplate.contetnsAreaId, manageTemplate.contetnsAreaType.substr(0, 1).toUpperCase());
+                            manageContents.popups.jbContents.close();
+                        }
+                    }
+                },
+                searchContetns: function (pageNo) {
+
+                    var contentsModel = new manageContents.models.ContentsModel();
+                    contentsModel.CONTENT_NM   = manageContents.elements.$CONTENT_NM.val();
+                    contentsModel.CONTENT_TYPE = manageContents.elements.$CONTENT_TYPE.val();
+                    contentsModel.PAGE_NO      = pageNo;
+
+                    simpleAjax('@Url.Action("getContentsPageList", "contents")', { contentsModel: contentsModel }).done(function (data) {
+
+                        if (pageNo == 1) {
+                            manageContents.elements.$contentsResultArea.scrollTop(0);
+                        }
+
+                        manageContents.contetnsData = {};   // 컨텐츠 데이터 초기화
+
+                        var contents = '';
+
+                        if (data.Table.length > 0) {
+                            for (var i = 0; i < data.Table.length; i++) {
+                                contents += '<li class= "transition">';
+                                contents += '<h1>';
+                                contents += '<div class="f_l"><label class="list_title" for="' + data.Table[i].CONTENT_ID + '">';
+                                contents += '<input type="checkbox" name="contents" onclick="manageContents.selectedContents(' + data.Table[i].CONTENT_ID + ')" id="' + data.Table[i].CONTENT_ID + '">';
+                                contents += '<p>' + data.Table[i].CONTENT_ID + '<strong>' + data.Table[i].CONTENT_NM + '</strong></p>';
+                                contents += '</label></div>';
+                                contents += '<div class="f_r"></div>';
+                                contents += '</h1>';
+                                contents += '<div class="conList_style1">';
+
+                                if (data.Table[i].CONTENT_TYPE == 'T') {
+                                    contents += '<div class="layerList_text">';
+                                    contents += data.Table[i].TEXT_HTML;
+                                    contents += '</div>';
+                                }
+                                else {
+
+                                    contents += '<img data-id="' + data.Table[i].CONTENT_ID + '" src="' + data.Table[i].THUMBNAIL_URL + '" />';
+
+                                    if (data.Table[i].CONTENT_TYPE == 'M') {
+
+                                        var init = Math.floor(data.Table[i].VIDEO_DURATION);
+                                        var minutes = pad(Math.floor((init / 60) % 60), 2);
+                                        var seconds = pad(init % 60, 2);
+
+
+                                        contents += '<div class="video_btn">';
+                                        contents += '<div class="play_btn"><img src="/images/sub/play.png" alt=""></div>';
+                                        contents += '<div class="time_btn">' + minutes + ' : ' + seconds + '</div>';
+                                        contents += '</div>';
+                                    }
+                                }
+
+                                contents += '</div >';
+                                contents += '<table>';
+                                contents += '<tr><td>용량</td><td>' + Math.ceil(data.Table[i].FILE_SIZE / 1028) + ' KB</td></tr>';
+                                contents += '<tr><td>타입</td><td>' + data.Table[i].CONTENT_TYPE_NM + '</td></tr>';
+                                contents += '</table>';
+                                contents += '</div>';
+                                contents += '</li>';
+
+                                manageContents.contetnsData[data.Table[i].CONTENT_ID] = data.Table[i];
+                            }
+
+                            var page_viewList = Paging(data.Table1[0].TOT_ROW_COUNT, 9, 10, pageNo, "manageContents.searchContetns");
+                            $(".paging").empty().html(page_viewList);
+
+                            var $contents = $(contents);
+
+                            $contents.find('img').on('error', function () {
+                                $(this).parent('div').empty().append('<div class="thumbnail_style1"><img src="/images/sub/thumbnail_icon_1.png" alt=""></div>');
+                            });
+
+                            manageContents.elements.$contentsResultArea.empty();
+                            manageContents.elements.$contentsResultArea.append($contents);
+
+                            $('input[type="checkbox"][name="contents"]').click(function () {
+                                if ($(this).prop('checked')) {
+                                    $('input[type="checkbox"][name="contents"]').prop('checked', false).parents('.transition').removeClass('list_click');
+                                    $(this).prop('checked', true).parents('.transition').addClass('list_click');
+                                }
+                                else {
+                                    $(this).parents('.transition').removeClass('list_click');
+                                }
+                            });
+                        }
+                        else {
+                            contents += '<p class="date_n">데이터가 없습니다.</p>';
+                            manageContents.elements.$contentsResultArea.empty();
+                            manageContents.elements.$contentsResultArea.append($(contents));
+                        }
+                    });
+                },
+                selectedContents: function (contetnsId) {
+                    manageContents.contentsId = contetnsId;
+                }
+            };
+        })();
+
+
+        // 초기화
+        manageTemplate.init();
+        manageWelMenu.init();
+        manageContents.init();
+
+        // 컨텐츠 영역 정보 셋팅
+        manageTemplate.setContetnsAreaInfo();
+
+
+        /******* CRUD 함수 정의 끝 *******/
+        /*********************************/
+
+
+        function previewFile() {
+
+            var preview = document.querySelector('img[id=M_PHOTO_CD]');
+            var file    = document.querySelector('input[id=localfile]').files[0];
+            var reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+
+                preview.src = reader.result;
+
+                var canvas = document.getElementById('localImageCanvas');
+                var ctx    = canvas.getContext('2d');
+
+                var image = new Image();
+
+                image.onload = function () {
+
+                    canvas.width  = image.width;
+                    canvas.height = image.height;
+
+                    ctx.drawImage(image, 0, 0);
+
+                    if (image.width > 668 || image.height > 458) {
+
+                        var per = 1;
+                        var reviseWidth = 0;
+                        var reviseHeight = 0;
+
+                        if (preview.width > preview.height) {
+                            per = 668 / image.width;
+                        }
+                        else {
+                            per = 458 / image.height;
+                        }
+
+                        reviseWidth  = image.width  * per;
+                        reviseHeight = image.height * per;
+
+                        tempCanvas = resample_single(canvas, reviseWidth, reviseHeight, true);
+
+                        preview.src = tempCanvas.toDataURL(document.querySelector('input[id=localfile]').files[0].type, 1.0);
+                    }
+                }
+
+                image.src = preview.src;
+
+            }, false);
+
+            if (file && file.type.indexOf('image') >= 0) {
+                reader.readAsDataURL(file);
+            }
+            //else {
+            //    alert('이미지 파일을 선택하세요.');
+            //    $('#localfile').val('');
+            //    return;
+            //}
+        }
+
+        $(manageTemplate.elements.$selContentsType).change(function () {
+            if (!$(this).val()) {
+                $('[data-side-type]').show();
+            }
+            else {
+                $('[data-side-type]').hide();
+                $('[data-side-type="' + $(this).val() + '"]').show();
+            }
+        });
+
+
+        // 왼쪽 사이드 메뉴의 컨텐츠 영역 정보에 이벤트 추가
+        $('[data-side-id][data-side-type]').mouseover(function () {
+            $(this).children('.info_title').addClass('info_title_active');
+            $('#templateArea [data-contents-area-id="' + $(this).data('side-id') + '"][data-contents-area-type="' + contentsTypeConvert($(this).data('side-type')) + '"]').parent().parent().addClass('select');
+        });
+
+        $('[data-side-id][data-side-type]').mouseout(function () {
+            $(this).children('.info_title').removeClass('info_title_active');
+            $('#templateArea [data-contents-area-id="' + $(this).data('side-id') + '"][data-contents-area-type="' + contentsTypeConvert($(this).data('side-type')) + '"]').parent().parent().removeClass('select');
+        });
+
+
+        new Cleave(manageWelMenu.elements.$M_MENU_PRICE, {
+            numeral: true
+        });
+
+        new Cleave(manageWelMenu.elements.$M_MENU_KCAL, {
+            numeral: true
+        });
+
+
+        new Cleave(manageWelMenu.elements.$M_MENU_KCAL, {
+            numeral: true
+        });
+
+        var cleave = new Cleave(manageWelMenu.elements.$MENU_DT, {
+            date: true,
+            datePattern: ['Y', 'm', 'd'],
+            delimiter: '-',
+            blocks: [4, 2, 2],
+            uppercase: true
+        });
+
+
+    </script>
+}
