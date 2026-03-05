@@ -8,7 +8,7 @@ namespace CMS.API.App_Code
 {
     public static class CommonProperties
     {
-        #region DB(Oracle) 연결 정보
+        #region DB(PostgreSQL) 연결 정보
         public static string ConnectionString          { get { return ConfigurationManager.ConnectionStrings["CMS_DB"].ToString(); } }
         #endregion
 
@@ -36,7 +36,7 @@ namespace CMS.API.App_Code
         #endregion
 
         #region 비밀번호 암호화키
-        public static string key = "RETAILTECHSAMSUNGWELSTORY";   // 암호화 키
+        public static string key = "UMACITDIDCMS2026";   // 암호화 키
         #endregion
 
         #region 특수기호 체크

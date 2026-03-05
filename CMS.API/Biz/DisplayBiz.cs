@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Data;
-
+﻿using CMS.API.App_Code;
 using CMS.API.Models;
-using CMS.API.App_Code;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
+using NpgsqlTypes;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Reflection;
 
 namespace CMS.API.Biz
 {
@@ -16,16 +18,20 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getDisplays(DisplayModel displayModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", displayModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_DISPLAY_ID",      displayModel.DISPLAY_ID),
-                                          new OracleParameter("P_DISPLAY_NM",      displayModel.DISPLAY_NM),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
+            int? displayId = null;
+            if (!string.IsNullOrEmpty(displayModel.DISPLAY_ID) && int.TryParse(displayModel.DISPLAY_ID, out int tempId))
+            {
+                displayId = tempId;
+            }
+
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", displayModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_ID",      (object)displayId ?? DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_NM",      displayModel.DISPLAY_NM ?? (object)DBNull.Value)
                                       };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_LIST", param);
+            string sql = "SELECT * FROM publicdata.pr_display_list(@P_RESTAURANT_CODE, @P_DISPLAY_ID, @P_DISPLAY_NM)";
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
         /// <summary>
@@ -40,25 +46,23 @@ namespace CMS.API.Biz
         {
             DisplayModel model = (type.ToUpper() != "D" ? displayModels[0] : new DisplayModel());
 
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",            type),
-                                          new OracleParameter("P_RESTAURANT_CODE", restaurantCode),
-                                          new OracleParameter("P_DISPLAY_ID",      model.DISPLAY_ID),
-                                          new OracleParameter("P_DISPLAY_NM",      model.DISPLAY_NM),
-                                          new OracleParameter("P_DISPLAY_DESC",    model.DISPLAY_DESC),
-                                          new OracleParameter("P_SCREEN_W",        model.SCREEN_W),
-                                          new OracleParameter("P_SCREEN_H",        model.SCREEN_H),
-                                          new OracleParameter("P_DISPLAY_IP",      model.DISPLAY_OS),
-                                          new OracleParameter("P_DISPLAY_IP",      model.DISPLAY_IP),
-                                          new OracleParameter("P_DISPLAY_MAC",     model.DISPLAY_MAC),
-                                          new OracleParameter("P_USE_YN",          model.USE_YN),
-                                          new OracleParameter("P_REG_ID",          userId),
-                                          new OracleParameter("P_XML_REQ",         type == "D" ? JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels) : null),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",            type ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_ID",      model.DISPLAY_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_NM",      model.DISPLAY_NM ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_DESC",    model.DISPLAY_DESC ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_SCREEN_W",        model.SCREEN_W ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_SCREEN_H",        model.SCREEN_H ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_OS",      model.DISPLAY_OS ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_IP",      model.DISPLAY_IP ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_MAC",     model.DISPLAY_MAC ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_USE_YN",          model.USE_YN ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_REG_ID",          userId ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ",         type == "D" ? JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels) : (object)DBNull.Value)
                                       };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_display_manage", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -68,16 +72,20 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getDisplayGroups(DisplayGroupModel displayGroupModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", displayGroupModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_DISPLAY_ID",      displayGroupModel.DISPLAY_GROUP_ID),
-                                          new OracleParameter("P_DISPLAY_NM",      displayGroupModel.DISPLAY_GROUP_NM),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
-                                      };
+            int? displayGroupId = null;
+            if (!string.IsNullOrEmpty(displayGroupModel.DISPLAY_GROUP_ID) && int.TryParse(displayGroupModel.DISPLAY_GROUP_ID, out int tempId))
+            {
+                displayGroupId = tempId;
+            }
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+            NpgsqlParameter[] param =   {
+                                              new NpgsqlParameter("P_RESTAURANT_CODE", displayGroupModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                              new NpgsqlParameter("P_DISPLAY_GROUP_ID", (object)displayGroupId ?? DBNull.Value),
+                                              new NpgsqlParameter("P_DISPLAY_GROUP_NM", displayGroupModel.DISPLAY_GROUP_NM ?? (object)DBNull.Value)
+                                        };
 
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_GROUP_LIST", param);
+            string sql = "SELECT * FROM publicdata.pr_display_group_list(@P_RESTAURANT_CODE, @P_DISPLAY_GROUP_ID, @P_DISPLAY_GROUP_NM)";
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
         /// <summary>
@@ -87,17 +95,13 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getDisplayMaps(DisplayGroupModel displayGroupModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE",  displayGroupModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_DISPLAY_GROUP_ID", displayGroupModel.DISPLAY_GROUP_ID),
-                                          new OracleParameter("CUR",                OracleDbType.RefCursor),
-                                          new OracleParameter("CUR1",               OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE",  displayGroupModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_GROUP_ID", displayGroupModel.DISPLAY_GROUP_ID ?? (object)DBNull.Value)
                                       };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-            param[param.Length - 2].Direction = ParameterDirection.Output;
-
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_MAP_LIST", param);
+            string sql = "SELECT * FROM publicdata.pr_display_map_list(@P_RESTAURANT_CODE, @P_DISPLAY_GROUP_ID)";
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
         
         /// <summary>
@@ -112,19 +116,17 @@ namespace CMS.API.Biz
         {
             DisplayGroupModel model = (type.ToUpper() == "D" ? new DisplayGroupModel() : displayGroupModels[0]);
 
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",               type),
-                                          new OracleParameter("P_RESTAURANT_CODE",    restaurantCode),
-                                          new OracleParameter("P_DISPLAY_GROUP_ID",   model.DISPLAY_GROUP_ID),
-                                          new OracleParameter("P_DISPLAY_GROUP_NM",   model.DISPLAY_GROUP_NM),
-                                          new OracleParameter("P_DISPLAY_GROUP_DESC", model.DISPLAY_GROUP_DESC),
-                                          new OracleParameter("P_REG_ID",             userId),
-                                          new OracleParameter("P_XML_REQ",            type == "D" ? JsonHelper.GetJsonToXmlString<DisplayGroupModel>(displayGroupModels) : null),
-                                          new OracleParameter("CUR",                  OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",               type ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_RESTAURANT_CODE",    restaurantCode ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_GROUP_ID",   model.DISPLAY_GROUP_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_GROUP_NM",   model.DISPLAY_GROUP_NM ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_GROUP_DESC", model.DISPLAY_GROUP_DESC ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_REG_ID",             userId ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ",            type == "D" ? JsonHelper.GetJsonToXmlString<DisplayGroupModel>(displayGroupModels) : (object)DBNull.Value)
                                       };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_GROUP_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_display_group_manage", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -136,17 +138,14 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel displayMapManage(DisplayGroupModel displayGroupModel, List<DisplayMapModel> displayMapModels, string userId)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE",  displayGroupModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_DISPLAY_GROUP_ID", displayGroupModel.DISPLAY_GROUP_ID),
-                                          new OracleParameter("P_REG_ID",           userId),
-                                          new OracleParameter("P_XML_REQ",          JsonHelper.GetJsonToXmlString<DisplayMapModel>(displayMapModels)),
-                                          new OracleParameter("CUR",                OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE",  displayGroupModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_GROUP_ID", displayGroupModel.DISPLAY_GROUP_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_REG_ID",           userId ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ",          JsonHelper.GetJsonToXmlString<DisplayMapModel>(displayMapModels) ?? (object)DBNull.Value)
                                       };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_MAP_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_display_map_manage", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -157,16 +156,13 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel displayRestart(string userId, DisplayModel displayModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE",  displayModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_DISPLAY_ID",       displayModel.DISPLAY_ID),
-                                          new OracleParameter("P_REG_ID",           userId),
-                                          new OracleParameter("CUR",                OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE",  displayModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_DISPLAY_ID",       displayModel.DISPLAY_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_REG_ID",           userId ?? (object)DBNull.Value)
                                       };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_DISPLAY.PR_DISPLAY_RESTART", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_display_restart", param).Tables[0])[0];
         }
     }
 }

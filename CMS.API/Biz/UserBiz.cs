@@ -4,7 +4,8 @@ using System.Data;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
+using NpgsqlTypes;
 using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.AspNet.Identity;
@@ -90,16 +91,16 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet userList(UserModel userModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_GROUP_CD",        userModel.GROUP_CD),
-                                          new OracleParameter("P_USER_NM",         userModel.USER_NM),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
+                                          new NpgsqlParameter("P_GROUP_CD",        userModel.GROUP_CD),
+                                          new NpgsqlParameter("P_USER_NM",         userModel.USER_NM),
+                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            DataSet dsResult = OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_LIST", param);
+            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_LIST", param);
 
             dsResult.Tables[0].TableName = "rows";
 
@@ -113,14 +114,14 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getRestaurantList(string restaurant)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_NM", restaurant),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_NM", restaurant),
+                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            DataSet dsResult = OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_FIND_RESTAURANT", param);
+            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_FIND_RESTAURANT", param);
 
             dsResult.Tables[0].TableName = "rows";
 
@@ -135,23 +136,21 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel user(string id, string password)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_USER_ID", id),
-                                          new OracleParameter("P_USER_PW", password),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_USER_ID", id),
+                                          new NpgsqlParameter("P_USER_PW", password)
                                       };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            DataSet ds = OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_LOGIN", param);
+            string sql = "SELECT * FROM publicdata.pr_user_login(@P_USER_ID, @P_USER_PW)";
+            DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             ResultModel result = new ResultModel();
 
             if (Util.IsNullDataset(ds))
             {
                 ds.Tables[0].TableName = "rows";
-                result.ERR_CODE        = "0";
-                result.DATA            = ds.Tables[0];
+                result.ERR_CODE = "0";
+                result.DATA = ds.Tables[0];
             }
 
             return result;
@@ -166,22 +165,22 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static List<ResultModel> manageUser(string TYPE, string userId, UserModel userModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",            TYPE),
-                                          new OracleParameter("P_USER_ID",         userModel.USER_ID),
-                                          new OracleParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_RESTAURANT_NM",   userModel.RESTAURANT_NM),
-                                          new OracleParameter("P_USER_NM",         userModel.USER_NM),
-                                          new OracleParameter("P_GROUP_CD",        userModel.GROUP_CD),
-                                          new OracleParameter("P_USER_PW",         userModel.USER_PW),
-                                          new OracleParameter("P_USE_YN",          userModel.USE_YN),
-                                          new OracleParameter("P_REG_ID",          userId),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",            TYPE),
+                                          new NpgsqlParameter("P_USER_ID",         userModel.USER_ID),
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
+                                          new NpgsqlParameter("P_RESTAURANT_NM",   userModel.RESTAURANT_NM),
+                                          new NpgsqlParameter("P_USER_NM",         userModel.USER_NM),
+                                          new NpgsqlParameter("P_GROUP_CD",        userModel.GROUP_CD),
+                                          new NpgsqlParameter("P_USER_PW",         userModel.USER_PW),
+                                          new NpgsqlParameter("P_USE_YN",          userModel.USE_YN),
+                                          new NpgsqlParameter("P_REG_ID",          userId),
+                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_MANAGE", param).Tables[0]);
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_MANAGE", param).Tables[0]);
         }
     }
 }

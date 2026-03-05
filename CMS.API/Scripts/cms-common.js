@@ -447,8 +447,13 @@ function contentsTypeConvert(contetnsType) {
 // 디스플레이 그룹 조회
 function searchDisplayGroup(params, successCallback) {
 
+    // RESTAURANT_CODE가 없으면 hidden input에서 가져옴
+    if (!params.RESTAURANT_CODE) {
+        params.RESTAURANT_CODE = $('#RESTAURANT_CD').val();
+    }
+
     simpleAjax(urlDisplayGroup, { displayGroupModel: params }).done(function (data) {
-        if (successCallback) 
+        if (successCallback)
             successCallback(data);
     });
 }
@@ -456,8 +461,8 @@ function searchDisplayGroup(params, successCallback) {
 // 디스플레이 그룹
 function searchDisplayMap(displayGroupId, successCallback) {
 
-    var request = simpleAjax(urlDisplayMap, { displayGroupModel: { DISPLAY_GROUP_ID: displayGroupId } }, true, true).done(function (data) {
-        if (successCallback) 
+    var request = simpleAjax(urlDisplayMap, { displayGroupModel: { RESTAURANT_CODE: $('#RESTAURANT_CD').val(), DISPLAY_GROUP_ID: displayGroupId } }, true, true).done(function (data) {
+        if (successCallback)
             successCallback(data);
     });
 }

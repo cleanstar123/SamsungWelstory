@@ -3,7 +3,8 @@ using System.Data;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace CMS.API.Biz
 {
@@ -17,15 +18,15 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getGroupCodes(string pCodeGroup, string pCodeGroupNm)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_CODE_GROUP",    pCodeGroup),
-                                          new OracleParameter("P_CODE_GROUP_NM", pCodeGroupNm),
-                                          new OracleParameter("CUR",             OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_CODE_GROUP",    pCodeGroup),
+                                          new NpgsqlParameter("P_CODE_GROUP_NM", pCodeGroupNm),
+                                          new NpgsqlParameter("CUR",             NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_LIST", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_LIST", param);
         }
 
         /// <summary>
@@ -35,14 +36,14 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getCodes(string pCodeGroup)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_CODE_GROUP", pCodeGroup),
-                                          new OracleParameter("CUR",          OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_CODE_GROUP", pCodeGroup),
+                                          new NpgsqlParameter("CUR",          NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_LIST", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_LIST", param);
         }
 
         /// <summary>
@@ -56,22 +57,22 @@ namespace CMS.API.Biz
         {
             CodeGroupModel model = (type.ToUpper() != "D" ? codeGroupModelList[0] : new CodeGroupModel());
 
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",             type),
-                                          new OracleParameter("P_CODE_GROUP",       model.CODE_GROUP),
-                                          new OracleParameter("P_CODE_GROUP_NM",    model.CODE_GROUP_NM),
-                                          new OracleParameter("P_DISPLAY_SEQ",      model.DISPLAY_SEQ),
-                                          new OracleParameter("P_CODE_GROUP_DESC",  model.CODE_GROUP_DESC),
-                                          new OracleParameter("P_CODE_GROUP_ATTR1", model.CODE_GROUP_ATTR1),
-                                          new OracleParameter("P_CODE_GROUP_ATTR2", model.CODE_GROUP_ATTR2),
-                                          new OracleParameter("P_CODE_GROUP_ATTR3", model.CODE_GROUP_ATTR3),
-                                          new OracleParameter("P_REG_ID",           userId),
-                                          new OracleParameter("P_XML_REQ",          type == "D" ? JsonHelper.GetJsonToXmlString<CodeGroupModel>(codeGroupModelList) : null),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",             type),
+                                          new NpgsqlParameter("P_CODE_GROUP",       model.CODE_GROUP),
+                                          new NpgsqlParameter("P_CODE_GROUP_NM",    model.CODE_GROUP_NM),
+                                          new NpgsqlParameter("P_DISPLAY_SEQ",      model.DISPLAY_SEQ),
+                                          new NpgsqlParameter("P_CODE_GROUP_DESC",  model.CODE_GROUP_DESC),
+                                          new NpgsqlParameter("P_CODE_GROUP_ATTR1", model.CODE_GROUP_ATTR1),
+                                          new NpgsqlParameter("P_CODE_GROUP_ATTR2", model.CODE_GROUP_ATTR2),
+                                          new NpgsqlParameter("P_CODE_GROUP_ATTR3", model.CODE_GROUP_ATTR3),
+                                          new NpgsqlParameter("P_REG_ID",           userId),
+                                          new NpgsqlParameter("P_XML_REQ",          type == "D" ? JsonHelper.GetJsonToXmlString<CodeGroupModel>(codeGroupModelList) : null),
+                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
                                       };
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_MANAGE", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -85,23 +86,23 @@ namespace CMS.API.Biz
         {
             CodeModel model = (type.ToUpper() != "D" ? codeModelList[0] : new CodeModel());
 
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",        type),
-                                          new OracleParameter("P_CODE_GROUP",  model.CODE_GROUP),
-                                          new OracleParameter("P_CODE",        model.CODE),
-                                          new OracleParameter("P_CODE_NAME",   model.CODE_NAME),
-                                          new OracleParameter("P_DISPLAY_SEQ", model.DISPLAY_SEQ),
-                                          new OracleParameter("P_CODE_DESC",   model.CODE_DESC),
-                                          new OracleParameter("P_CODE_ATTR1",  model.CODE_ATTR1),
-                                          new OracleParameter("P_CODE_ATTR2",  model.CODE_ATTR2),
-                                          new OracleParameter("P_CODE_ATTR3",  model.CODE_ATTR3),
-                                          new OracleParameter("P_REG_ID",      userId),
-                                          new OracleParameter("P_XML_REQ",     type == "D" ? JsonHelper.GetJsonToXmlString(codeModelList) : null),
-                                          new OracleParameter("CUR", OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",        type),
+                                          new NpgsqlParameter("P_CODE_GROUP",  model.CODE_GROUP),
+                                          new NpgsqlParameter("P_CODE",        model.CODE),
+                                          new NpgsqlParameter("P_CODE_NAME",   model.CODE_NAME),
+                                          new NpgsqlParameter("P_DISPLAY_SEQ", model.DISPLAY_SEQ),
+                                          new NpgsqlParameter("P_CODE_DESC",   model.CODE_DESC),
+                                          new NpgsqlParameter("P_CODE_ATTR1",  model.CODE_ATTR1),
+                                          new NpgsqlParameter("P_CODE_ATTR2",  model.CODE_ATTR2),
+                                          new NpgsqlParameter("P_CODE_ATTR3",  model.CODE_ATTR3),
+                                          new NpgsqlParameter("P_REG_ID",      userId),
+                                          new NpgsqlParameter("P_XML_REQ",     type == "D" ? JsonHelper.GetJsonToXmlString(codeModelList) : null),
+                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
                                       };
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_MANAGE", param).Tables[0])[0];
         }
     }
 }

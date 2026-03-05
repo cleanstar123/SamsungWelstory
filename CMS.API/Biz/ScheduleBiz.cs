@@ -3,7 +3,9 @@ using System.Data;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
-using Oracle.ManagedDataAccess.Client;
+using Npgsql;
+using NpgsqlTypes;
+using System;
 
 namespace CMS.API.Biz
 {
@@ -16,19 +18,19 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getSchedule(ScheduleModel scheduleModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_SCHEDULE_ID",     scheduleModel.SCHEDULE_ID),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor),
-                                          new OracleParameter("CUR_DISP",          OracleDbType.RefCursor),
-                                          new OracleParameter("CUR_TEMPLATE",      OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE),
+                                          new NpgsqlParameter("P_SCHEDULE_ID",     scheduleModel.SCHEDULE_ID),
+                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
+                                          new NpgsqlParameter("CUR_DISP",          NpgsqlDbType.Refcursor),
+                                          new NpgsqlParameter("CUR_TEMPLATE",      NpgsqlDbType.Refcursor)
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
             param[param.Length - 2].Direction = ParameterDirection.Output;
             param[param.Length - 3].Direction = ParameterDirection.Output;
 
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_ALL_LIST", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_ALL_LIST", param);
         }
 
         /// <summary>
@@ -38,17 +40,19 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static List<ScheduleResultModel> getSchedules(ScheduleModel scheduleModel)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE),
-                                          new OracleParameter("P_START_DATE",      scheduleModel.START_DATE),
-                                          new OracleParameter("P_END_DATE",        scheduleModel.END_DATE),
-                                          new OracleParameter("P_DISPLAY_ID",      scheduleModel.DISPLAY_ID),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
-                                      };
+            object displayId = string.IsNullOrEmpty(scheduleModel.DISPLAY_ID)
+                    ? (object)DBNull.Value
+                    : int.Parse(scheduleModel.DISPLAY_ID);
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+            NpgsqlParameter[] param = {
+                                              new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                              new NpgsqlParameter("P_START_DATE",      scheduleModel.START_DATE ?? (object)DBNull.Value),
+                                              new NpgsqlParameter("P_END_DATE",        scheduleModel.END_DATE ?? (object)DBNull.Value),
+                                              new NpgsqlParameter("P_DISPLAY_ID",      displayId)
+                                          };
 
-            return Util.ConvertDataTable<ScheduleResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_LIST_CAL", param).Tables[0]);
+            string sql = "SELECT * FROM publicdata.pr_schedule_list_cal(@P_RESTAURANT_CODE, @P_START_DATE, @P_END_DATE, @P_DISPLAY_ID)";
+            return Util.ConvertDataTable<ScheduleResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0]);
 
         }
 
@@ -63,19 +67,18 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel ManageSchedule(string type, string userId, string restaurantCode, List<ScheduleModel> scheduleModels, List<ScheduleTemplateMapModel> scheduleTemplateMapModels, List<DisplayModel> displayModels)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",            type),
-                                          new OracleParameter("P_RESTAURANT_CODE", restaurantCode),
-                                          new OracleParameter("P_SCHEDULE_ID",     scheduleModels[0].SCHEDULE_ID),
-                                          new OracleParameter("P_REG_ID",          userId),
-                                          new OracleParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(scheduleModels)),
-                                          new OracleParameter("P_XML_REQ_DISP",    JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels)),
-                                          new OracleParameter("P_XML_REQ_MAP",     JsonHelper.GetJsonToXmlString<ScheduleTemplateMapModel>(scheduleTemplateMapModels)),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",            type ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_SCHEDULE_ID",     scheduleModels[0].SCHEDULE_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_REG_ID",          userId ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(scheduleModels) ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ_DISP",    JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels) ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_XML_REQ_MAP",     JsonHelper.GetJsonToXmlString<ScheduleTemplateMapModel>(scheduleTemplateMapModels) ?? (object)DBNull.Value),
                                       };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_MANAGE", param).Tables[0])[0];
+            string sql = "SELECT * FROM publicdata.pr_schedule_manage(@P_TYPE, @P_RESTAURANT_CODE, @P_SCHEDULE_ID, @P_REG_ID, @P_XML_REQ, @P_XML_REQ_DISP, @P_XML_REQ_MAP)";
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0])[0];
         }
 
         /// <summary>
@@ -89,18 +92,18 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel CheckScheduleOverlap(string type, string userId, string restaurantCode, List<ScheduleModel> scheduleModels, List<DisplayModel> displayModels)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_TYPE",            type),
-                                          new OracleParameter("P_RESTAURANT_CODE", restaurantCode),
-                                          new OracleParameter("P_SCHEDULE_ID",     scheduleModels[0].SCHEDULE_ID),
-                                          new OracleParameter("P_REG_ID",          userId),
-                                          new OracleParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(scheduleModels)),
-                                          new OracleParameter("P_XML_REQ_DISP",    JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels)),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor)
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_TYPE",            type),
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode),
+                                          new NpgsqlParameter("P_SCHEDULE_ID",     scheduleModels[0].SCHEDULE_ID),
+                                          new NpgsqlParameter("P_REG_ID",          userId),
+                                          new NpgsqlParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(scheduleModels)),
+                                          new NpgsqlParameter("P_XML_REQ_DISP",    JsonHelper.GetJsonToXmlString<DisplayModel>(displayModels)),
+                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor)
                                       };
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_OVERLAP_CHECK", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_OVERLAP_CHECK", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -111,17 +114,17 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getScheduleTemplateMapList(string RESTAURANT_CODE, string SCHEDULE_ID)
         {
-            OracleParameter[] param = {
-                                          new OracleParameter("P_RESTAURANT_CODE", RESTAURANT_CODE),
-                                          new OracleParameter("P_SCHEDULE_ID",     SCHEDULE_ID),
-                                          new OracleParameter("CUR",               OracleDbType.RefCursor),
-                                          new OracleParameter("CUR_TOT",           OracleDbType.RefCursor),
+            NpgsqlParameter[] param = {
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", RESTAURANT_CODE),
+                                          new NpgsqlParameter("P_SCHEDULE_ID",     SCHEDULE_ID),
+                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
+                                          new NpgsqlParameter("CUR_TOT",           NpgsqlDbType.Refcursor),
                                       };
 
             param[param.Length - 1].Direction = ParameterDirection.Output;
             param[param.Length - 2].Direction = ParameterDirection.Output;
 
-            return OracleHelper.ExecuteDataset(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_TEMPLATE_MAP_LIST", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_TEMPLATE_MAP_LIST", param);
         }
 
     }
