@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System;
+
 
 using CMS.API.Models;
 using CMS.API.App_Code;
@@ -17,19 +19,27 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getLayoutPageList(LayoutModel layoutModel)
         {
+            // PAGE_CNT, PAGE_NO를 integer로 변환
+            int? pageCnt = null;
+            if (!string.IsNullOrEmpty(layoutModel.PAGE_CNT) && int.TryParse(layoutModel.PAGE_CNT, out int parsedCnt))
+            {
+                pageCnt = parsedCnt;
+            }
+
+            int? pageNo = null;
+            if (!string.IsNullOrEmpty(layoutModel.PAGE_NO) && int.TryParse(layoutModel.PAGE_NO, out int parsedNo))
+            {
+                pageNo = parsedNo;
+            }
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", layoutModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_LAYOUT_NM",       layoutModel.LAYOUT_NM),
-                                          new NpgsqlParameter("P_PAGE_CNT",        layoutModel.PAGE_CNT),
-                                          new NpgsqlParameter("P_PAGE_NO",         layoutModel.PAGE_NO),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
-                                          new NpgsqlParameter("CUR_COUNT",         NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = layoutModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_LAYOUT_NM", NpgsqlDbType.Varchar) { Value = layoutModel.LAYOUT_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_PAGE_CNT", NpgsqlDbType.Integer) { Value = pageCnt ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-            param[param.Length - 2].Direction = ParameterDirection.Output;
-
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "PKG_CMS_LAYOUT.PR_LAYOUT_LIST_PAGE", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list_page", param);
         }
 
         /// <summary>
@@ -39,17 +49,30 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet layoutDetail(LayoutModel layoutModel)
         {
+            // LAYOUT_ID를 integer로 변환
+            int? layoutId = null;
+            if (!string.IsNullOrEmpty(layoutModel.LAYOUT_ID) && int.TryParse(layoutModel.LAYOUT_ID, out int parsedId))
+            {
+                layoutId = parsedId;
+            }
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", layoutModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_LAYOUT_ID",       layoutModel.LAYOUT_ID),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
-                                          new NpgsqlParameter("CUR_DETAIL",        NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = layoutModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_LAYOUT_ID", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-            param[param.Length - 2].Direction = ParameterDirection.Output;
+            // 레이아웃 기본 정보 조회
+            DataSet ds = new DataSet();
+            DataTable dtLayout = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list", param).Tables[0];
+            dtLayout.TableName = "Layout";
+            ds.Tables.Add(dtLayout);
 
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "PKG_CMS_LAYOUT.PR_LAYOUT_ALL_LIST", param);
+            // 레이아웃 상세 정보 조회
+            DataTable dtDetail = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_detail_list", param).Tables[0];
+            dtDetail.TableName = "LayoutDetail";
+            ds.Tables.Add(dtDetail);
+
+            return ds;
         }
 
         /// <summary>

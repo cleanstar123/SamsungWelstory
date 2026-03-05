@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
@@ -17,20 +18,28 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getContentsPageList(ContentsModel contentsModel)
         {
+            // PAGE_CNT, PAGE_NO를 integer로 변환
+            int? pageCnt = null;
+            if (!string.IsNullOrEmpty(contentsModel.PAGE_CNT) && int.TryParse(contentsModel.PAGE_CNT, out int parsedCnt))
+            {
+                pageCnt = parsedCnt;
+            }
+
+            int? pageNo = null;
+            if (!string.IsNullOrEmpty(contentsModel.PAGE_NO) && int.TryParse(contentsModel.PAGE_NO, out int parsedNo))
+            {
+                pageNo = parsedNo;
+            }
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", contentsModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_CONTENT_NM",      contentsModel.CONTENT_NM),
-                                          new NpgsqlParameter("P_CONTENT_TYPE",    contentsModel.CONTENT_TYPE),
-                                          new NpgsqlParameter("P_PAGE_CNT",        contentsModel.PAGE_CNT),
-                                          new NpgsqlParameter("P_PAGE_NO",         contentsModel.PAGE_NO),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
-                                          new NpgsqlParameter("CUR_COUNT",         NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = contentsModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_CONTENT_NM", NpgsqlDbType.Varchar) { Value = contentsModel.CONTENT_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_CONTENT_TYPE", NpgsqlDbType.Varchar) { Value = contentsModel.CONTENT_TYPE ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_PAGE_CNT", NpgsqlDbType.Integer) { Value = pageCnt ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-            param[param.Length - 2].Direction = ParameterDirection.Output;
-
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CONTENTS.PR_CONTENT_LIST_PAGE", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_list_page", param);
         }
 
         /// <summary>
