@@ -39,7 +39,36 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
             };
 
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list_page", param);
+            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list_page", param);
+            
+            // JavaScript가 Table과 Table1을 기대하므로 분리
+            if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+            {
+                DataSet ds = new DataSet();
+                
+                // Table: 레이아웃 목록
+                DataTable dtList = result.Tables[0].Clone();
+                dtList.TableName = "Table";
+                foreach (DataRow row in result.Tables[0].Rows)
+                {
+                    dtList.ImportRow(row);
+                }
+                ds.Tables.Add(dtList);
+                
+                // Table1: 카운트 정보 (첫 번째 행의 카운트 정보만)
+                DataTable dtCount = new DataTable("Table1");
+                dtCount.Columns.Add("TOT_ROW_COUNT", typeof(int));
+                dtCount.Columns.Add("TOT_PAGE_COUNT", typeof(int));
+                DataRow countRow = dtCount.NewRow();
+                countRow["TOT_ROW_COUNT"] = result.Tables[0].Rows[0]["TOT_ROW_COUNT"];
+                countRow["TOT_PAGE_COUNT"] = result.Tables[0].Rows[0]["TOT_PAGE_COUNT"];
+                dtCount.Rows.Add(countRow);
+                ds.Tables.Add(dtCount);
+                
+                return ds;
+            }
+            
+            return result;
         }
 
         /// <summary>
@@ -63,14 +92,22 @@ namespace CMS.API.Biz
 
             // 레이아웃 기본 정보 조회
             DataSet ds = new DataSet();
-            DataTable dtLayout = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list", param).Tables[0];
-            dtLayout.TableName = "Layout";
-            ds.Tables.Add(dtLayout);
+            DataSet dsLayout = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list", param);
+            if (dsLayout.Tables.Count > 0)
+            {
+                DataTable dtLayout = dsLayout.Tables[0].Copy();
+                dtLayout.TableName = "Table";
+                ds.Tables.Add(dtLayout);
+            }
 
             // 레이아웃 상세 정보 조회
-            DataTable dtDetail = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_detail_list", param).Tables[0];
-            dtDetail.TableName = "LayoutDetail";
-            ds.Tables.Add(dtDetail);
+            DataSet dsDetail = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_detail_list", param);
+            if (dsDetail.Tables.Count > 0)
+            {
+                DataTable dtDetail = dsDetail.Tables[0].Copy();
+                dtDetail.TableName = "Table1";
+                ds.Tables.Add(dtDetail);
+            }
 
             return ds;
         }

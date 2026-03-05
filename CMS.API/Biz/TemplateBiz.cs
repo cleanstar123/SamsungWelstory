@@ -18,16 +18,27 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static TemplateModel getTemplateList(TemplateModel templateModel)
         {
+            // TEMPLATE_ID를 integer로 변환
+            int? templateId = null;
+            if (!string.IsNullOrEmpty(templateModel.TEMPLATE_ID) && int.TryParse(templateModel.TEMPLATE_ID, out int parsedId))
+            {
+                templateId = parsedId;
+            }
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID),
-                                          new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_TEMPLATE_ID", NpgsqlDbType.Integer) { Value = templateId ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_TEMPLATE_NM", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+            var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_list", param);
+            
+            if (result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
+            {
+                return templateModel; // 데이터가 없으면 원본 반환
+            }
 
-            return Util.ConvertDataTable<TemplateModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_TEMPLATE.PR_TEMPLATE_LIST", param).Tables[0])[0];
+            return Util.ConvertDataTable<TemplateModel>(result.Tables[0])[0];
         }
 
         /// <summary>
