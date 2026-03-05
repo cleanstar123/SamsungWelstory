@@ -18,19 +18,45 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getSchedule(ScheduleModel scheduleModel)
         {
-            NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_SCHEDULE_ID",     scheduleModel.SCHEDULE_ID),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor),
-                                          new NpgsqlParameter("CUR_DISP",          NpgsqlDbType.Refcursor),
-                                          new NpgsqlParameter("CUR_TEMPLATE",      NpgsqlDbType.Refcursor)
-                                      };
+            int? scheduleId = null;
+            if (!string.IsNullOrEmpty(scheduleModel.SCHEDULE_ID) && int.TryParse(scheduleModel.SCHEDULE_ID, out int tempId))
+            {
+                scheduleId = tempId;
+            }
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-            param[param.Length - 2].Direction = ParameterDirection.Output;
-            param[param.Length - 3].Direction = ParameterDirection.Output;
+            DataSet ds = new DataSet();
 
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_SCHEDULE.PR_SCHEDULE_ALL_LIST", param);
+            // 스케줄 기본 정보 조회
+            NpgsqlParameter[] paramSchedule = {
+                new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("P_SCHEDULE_ID",     (object)scheduleId ?? DBNull.Value)
+            };
+            string sqlSchedule = "SELECT * FROM publicdata.pr_schedule_info(@P_RESTAURANT_CODE, @P_SCHEDULE_ID)";
+            DataSet dsSchedule = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlSchedule, paramSchedule);
+            dsSchedule.Tables[0].TableName = "Table";
+            ds.Tables.Add(dsSchedule.Tables[0].Copy());
+
+            // 연결된 디스플레이 목록 조회
+            NpgsqlParameter[] paramDisplay = {
+                new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("P_SCHEDULE_ID",     (object)scheduleId ?? DBNull.Value)
+            };
+            string sqlDisplay = "SELECT * FROM publicdata.pr_schedule_display_list(@P_RESTAURANT_CODE, @P_SCHEDULE_ID)";
+            DataSet dsDisplay = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlDisplay, paramDisplay);
+            dsDisplay.Tables[0].TableName = "Table1";
+            ds.Tables.Add(dsDisplay.Tables[0].Copy());
+
+            // 연결된 템플릿 목록 조회
+            NpgsqlParameter[] paramTemplate = {
+                new NpgsqlParameter("P_RESTAURANT_CODE", scheduleModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("P_SCHEDULE_ID",     (object)scheduleId ?? DBNull.Value)
+            };
+            string sqlTemplate = "SELECT * FROM publicdata.pr_schedule_template_list(@P_RESTAURANT_CODE, @P_SCHEDULE_ID)";
+            DataSet dsTemplate = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlTemplate, paramTemplate);
+            dsTemplate.Tables[0].TableName = "Table2";
+            ds.Tables.Add(dsTemplate.Tables[0].Copy());
+
+            return ds;
         }
 
         /// <summary>
