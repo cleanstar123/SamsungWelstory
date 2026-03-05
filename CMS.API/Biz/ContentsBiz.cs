@@ -39,7 +39,32 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
             };
 
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_list_page", param);
+            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_list_page", param);
+
+            // JavaScript가 Table과 Table1을 기대하므로 분리
+            if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
+            {
+                DataSet ds = new DataSet();
+                
+                // Table: 컨텐츠 목록
+                DataTable dtList = result.Tables[0].Copy();
+                dtList.TableName = "Table";
+                ds.Tables.Add(dtList);
+                
+                // Table1: 카운트 정보 (첫 번째 행의 카운트 정보만)
+                DataTable dtCount = new DataTable("Table1");
+                dtCount.Columns.Add("TOT_ROW_COUNT", typeof(int));
+                dtCount.Columns.Add("TOT_PAGE_COUNT", typeof(int));
+                DataRow countRow = dtCount.NewRow();
+                countRow["TOT_ROW_COUNT"] = result.Tables[0].Rows[0]["TOT_ROW_COUNT"];
+                countRow["TOT_PAGE_COUNT"] = result.Tables[0].Rows[0]["TOT_PAGE_COUNT"];
+                dtCount.Rows.Add(countRow);
+                ds.Tables.Add(dtCount);
+                
+                return ds;
+            }
+            
+            return result;
         }
 
         /// <summary>
