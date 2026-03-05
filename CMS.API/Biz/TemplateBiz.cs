@@ -18,14 +18,14 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static TemplateModel getTemplateList(TemplateModel templateModel)
         {
-            // PostgreSQL 함수가 TEXT 타입을 받으므로 string 그대로 전달
             NpgsqlParameter[] param = {
-                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Text) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_ID", NpgsqlDbType.Text) { Value = templateModel.TEMPLATE_ID ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_NM", NpgsqlDbType.Text) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value }
-            };
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value)
+                                      };
 
-            var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_list", param);
+            string sql = "SELECT * FROM publicdata.pr_template_list(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM)";
+            var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             if (result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
             {
@@ -42,43 +42,35 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getTemplatePageList(TemplateModel templateModel)
         {
-            // PostgreSQL 함수가 TEXT 타입을 받으므로 string 그대로 전달
             NpgsqlParameter[] param = {
-                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Text) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_ID", NpgsqlDbType.Text) { Value = templateModel.TEMPLATE_ID ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_NM", NpgsqlDbType.Text) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_PAGE_CNT", NpgsqlDbType.Text) { Value = templateModel.PAGE_CNT ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Text) { Value = templateModel.PAGE_NO ?? (object)DBNull.Value }
-            };
+                                          new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_PAGE_CNT",        templateModel.PAGE_CNT ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("P_PAGE_NO",         templateModel.PAGE_NO ??(object) DBNull.Value)
+                                      };
 
             // 템플릿 목록 조회
             string sqlList = "SELECT * FROM publicdata.pr_template_list_page(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM, @P_PAGE_CNT, @P_PAGE_NO)";
-            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlList, param);
+            DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlList, param);
 
-            // JavaScript가 Table과 Table1을 기대하므로 분리
-            if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
-            {
-                DataSet ds = new DataSet();
-                
-                // Table: 템플릿 목록
-                DataTable dtList = result.Tables[0].Copy();
-                dtList.TableName = "Table";
-                ds.Tables.Add(dtList);
-                
-                // Table1: 카운트 정보 (첫 번째 행의 카운트 정보만)
-                DataTable dtCount = new DataTable("Table1");
-                dtCount.Columns.Add("TOT_ROW_COUNT", typeof(int));
-                dtCount.Columns.Add("TOT_PAGE_COUNT", typeof(int));
-                DataRow countRow = dtCount.NewRow();
-                countRow["TOT_ROW_COUNT"] = result.Tables[0].Rows[0]["TOT_ROW_COUNT"];
-                countRow["TOT_PAGE_COUNT"] = result.Tables[0].Rows[0]["TOT_PAGE_COUNT"];
-                dtCount.Rows.Add(countRow);
-                ds.Tables.Add(dtCount);
-                
-                return ds;
-            }
-            
-            return result;
+            // 페이지 카운트 조회
+            NpgsqlParameter[] paramCount =  {
+                                                new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("P_PAGE_CNT",        templateModel.PAGE_CNT ?? (object) DBNull.Value)
+                                            };
+
+            string sqlCount = "SELECT * FROM publicdata.pr_template_list_page_count(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM, @P_PAGE_CNT)";
+            DataSet dsCount = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlCount, paramCount);
+
+            // 두 결과를 하나의 DataSet으로 합침 (Table = 목록, Table1 = 카운트)
+            DataTable countTable = dsCount.Tables[0].Copy();
+            countTable.TableName = "Table1";
+            ds.Tables.Add(countTable);
+
+            return ds;
         }
 
         /// <summary>
