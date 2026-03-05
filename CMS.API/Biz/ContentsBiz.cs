@@ -52,17 +52,36 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel manageContents(string actionType, string userId, string restaurantCode, List<ContentsModel> contentsFileModels)
         {
-            NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_TYPE",            actionType),
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode),
-                                          new NpgsqlParameter("P_REG_ID",          userId),
-                                          new NpgsqlParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(contentsFileModels)),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"[manageContents] actionType: {actionType}");
+                System.Diagnostics.Debug.WriteLine($"[manageContents] userId: {userId}");
+                System.Diagnostics.Debug.WriteLine($"[manageContents] restaurantCode: {restaurantCode}");
+                System.Diagnostics.Debug.WriteLine($"[manageContents] contentsFileModels count: {contentsFileModels?.Count}");
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+                string xmlReq = JsonHelper.GetJsonToXmlString(contentsFileModels);
+                System.Diagnostics.Debug.WriteLine($"[manageContents] XML: {xmlReq}");
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CONTENTS.PR_CONTENT_MANAGE", param).Tables[0])[0];
+                NpgsqlParameter[] param = {
+                    new NpgsqlParameter("P_TYPE", NpgsqlDbType.Varchar) { Value = actionType ?? (object)DBNull.Value },
+                    new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = restaurantCode ?? (object)DBNull.Value },
+                    new NpgsqlParameter("P_REG_ID", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
+                    new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = xmlReq ?? (object)DBNull.Value }
+                };
+
+                var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_manage", param);
+                return Util.ConvertDataTable<ResultModel>(result.Tables[0])[0];
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] {ex.GetType().Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] StackTrace: {ex.StackTrace}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] InnerException: {ex.InnerException.Message}");
+                }
+                throw;
+            }
         }
 
         /// <summary>
@@ -75,15 +94,12 @@ namespace CMS.API.Biz
         public static ResultModel manageDelete(string restaurantCode, string userId, List<ContentsModel> contentsModels)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode),
-                                          new NpgsqlParameter("P_REG_ID",          userId),
-                                          new NpgsqlParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString(contentsModels)),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = restaurantCode ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_REG_ID", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
+                new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString(contentsModels) ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CONTENTS.PR_CONTENT_MANAGE_DELETE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_manage_delete", param).Tables[0])[0];
         }
     }
 }
