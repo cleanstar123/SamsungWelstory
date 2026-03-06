@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 
@@ -19,12 +19,12 @@ namespace CMS.API.Biz
         public static TemplateModel getTemplateList(TemplateModel templateModel)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value)
+                                          new NpgsqlParameter("p_restaurant_code", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_template_id",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_template_nm",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value)
                                       };
 
-            string sql = "SELECT * FROM publicdata.pr_template_list(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM)";
+            string sql = "SELECT * FROM publicdata.pr_template_list(@p_restaurant_code, @p_template_id, @p_template_nm)";
             var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             if (result.Tables.Count == 0 || result.Tables[0].Rows.Count == 0)
@@ -43,26 +43,26 @@ namespace CMS.API.Biz
         public static DataSet getTemplatePageList(TemplateModel templateModel)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_PAGE_CNT",        templateModel.PAGE_CNT ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_PAGE_NO",         templateModel.PAGE_NO ??(object) DBNull.Value)
+                                          new NpgsqlParameter("p_restaurant_code", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_template_id",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_template_nm",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_page_cnt",        templateModel.PAGE_CNT ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_page_no",         templateModel.PAGE_NO ??(object) DBNull.Value)
                                       };
 
             // 템플릿 목록 조회
-            string sqlList = "SELECT * FROM publicdata.pr_template_list_page(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM, @P_PAGE_CNT, @P_PAGE_NO)";
+            string sqlList = "SELECT * FROM publicdata.pr_template_list_page(@p_restaurant_code, @p_template_id, @p_template_nm, @p_page_cnt, @p_page_no)";
             DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlList, param);
 
             // 페이지 카운트 조회
             NpgsqlParameter[] paramCount =  {
-                                                new NpgsqlParameter("P_RESTAURANT_CODE", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
-                                                new NpgsqlParameter("P_TEMPLATE_ID",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
-                                                new NpgsqlParameter("P_TEMPLATE_NM",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
-                                                new NpgsqlParameter("P_PAGE_CNT",        templateModel.PAGE_CNT ?? (object) DBNull.Value)
+                                                new NpgsqlParameter("p_restaurant_code", templateModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("p_template_id",     templateModel.TEMPLATE_ID ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("p_template_nm",     templateModel.TEMPLATE_NM ?? (object)DBNull.Value),
+                                                new NpgsqlParameter("p_page_cnt",        templateModel.PAGE_CNT ?? (object) DBNull.Value)
                                             };
 
-            string sqlCount = "SELECT * FROM publicdata.pr_template_list_page_count(@P_RESTAURANT_CODE, @P_TEMPLATE_ID, @P_TEMPLATE_NM, @P_PAGE_CNT)";
+            string sqlCount = "SELECT * FROM publicdata.pr_template_list_page_count(@p_restaurant_code, @p_template_id, @p_template_nm, @p_page_cnt)";
             DataSet dsCount = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sqlCount, paramCount);
 
             // 두 결과를 하나의 DataSet으로 합침 (Table = 목록, Table1 = 카운트)
@@ -119,20 +119,20 @@ namespace CMS.API.Biz
             }
 
             NpgsqlParameter[] param = {
-                new NpgsqlParameter("P_TYPE", NpgsqlDbType.Varchar) { Value = type ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_ID", NpgsqlDbType.Integer) { Value = templateId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_NM", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_PATH", NpgsqlDbType.Varchar) { Value = templateModel.FILE_PATH ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_NM", NpgsqlDbType.Varchar) { Value = templateModel.FILE_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_EXT", NpgsqlDbType.Varchar) { Value = templateModel.FILE_EXT ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_SIZE", NpgsqlDbType.Integer) { Value = fileSize ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_URL", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_URL ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_DESC", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_DESC ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_LAYOUT_ID", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_THUMBNAIL_NM", NpgsqlDbType.Varchar) { Value = templateModel.THUMBNAIL_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_REG_ID", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels) ?? (object)DBNull.Value }
+                new NpgsqlParameter("p_type", NpgsqlDbType.Varchar) { Value = type ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_id", NpgsqlDbType.Integer) { Value = templateId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_nm", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_path", NpgsqlDbType.Varchar) { Value = templateModel.FILE_PATH ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_nm", NpgsqlDbType.Varchar) { Value = templateModel.FILE_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_ext", NpgsqlDbType.Varchar) { Value = templateModel.FILE_EXT ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_size", NpgsqlDbType.Integer) { Value = fileSize ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_url", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_URL ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_desc", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_DESC ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_layout_id", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_thumbnail_nm", NpgsqlDbType.Varchar) { Value = templateModel.THUMBNAIL_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels) ?? (object)DBNull.Value }
             };
 
             return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_manage_all", param).Tables[0])[0];
@@ -167,20 +167,20 @@ namespace CMS.API.Biz
             }
 
             NpgsqlParameter[] param = {
-                new NpgsqlParameter("P_TYPE", NpgsqlDbType.Varchar) { Value = type ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_ID", NpgsqlDbType.Integer) { Value = templateId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_NM", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_PATH", NpgsqlDbType.Varchar) { Value = templateModel.FILE_PATH ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_NM", NpgsqlDbType.Varchar) { Value = templateModel.FILE_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_EXT", NpgsqlDbType.Varchar) { Value = templateModel.FILE_EXT ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_FILE_SIZE", NpgsqlDbType.Integer) { Value = fileSize ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_URL", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_URL ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_TEMPLATE_DESC", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_DESC ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_LAYOUT_ID", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_THUMBNAIL_NM", NpgsqlDbType.Varchar) { Value = templateModel.THUMBNAIL_NM ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_REG_ID", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
-                new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = (object)DBNull.Value }
+                new NpgsqlParameter("p_type", NpgsqlDbType.Varchar) { Value = type ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = templateModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_id", NpgsqlDbType.Integer) { Value = templateId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_nm", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_path", NpgsqlDbType.Varchar) { Value = templateModel.FILE_PATH ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_nm", NpgsqlDbType.Varchar) { Value = templateModel.FILE_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_ext", NpgsqlDbType.Varchar) { Value = templateModel.FILE_EXT ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_file_size", NpgsqlDbType.Integer) { Value = fileSize ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_url", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_URL ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_template_desc", NpgsqlDbType.Varchar) { Value = templateModel.TEMPLATE_DESC ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_layout_id", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_thumbnail_nm", NpgsqlDbType.Varchar) { Value = templateModel.THUMBNAIL_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = (object)DBNull.Value }
             };
 
             return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_manage", param).Tables[0])[0];
@@ -197,10 +197,10 @@ namespace CMS.API.Biz
         public static ResultModel ManageTemplateMap(string type, string restaurantCode, List<TemplateMapModel> templateMapModels, string userId)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_TYPE",            type ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", restaurantCode ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_REG_ID",          userId ?? (object)DBNull.Value),
-                                          new NpgsqlParameter("P_XML_REQ",         JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels) ?? (object)DBNull.Value)
+                                          new NpgsqlParameter("p_type",            type ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_restaurant_code", restaurantCode ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_reg_id",          userId ?? (object)DBNull.Value),
+                                          new NpgsqlParameter("p_xml_req",         JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels) ?? (object)DBNull.Value)
                                       };
 
             return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_map_manage", param).Tables[0])[0];

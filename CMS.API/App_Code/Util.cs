@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -127,7 +127,8 @@ namespace CMS.API.App_Code
             {
                 foreach (PropertyInfo pro in temp.GetProperties())
                 {
-                    if (pro.Name == column.ColumnName)
+                    // 대소문자 무시하고 비교 (PostgreSQL 컬럼명은 소문자로 반환될 수 있음)
+                    if (pro.Name.Equals(column.ColumnName, StringComparison.OrdinalIgnoreCase))
                         pro.SetValue(obj, dr[column.ColumnName].ToString(), null);
                     else
                         continue;

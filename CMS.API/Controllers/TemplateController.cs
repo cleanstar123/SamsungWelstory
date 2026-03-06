@@ -127,7 +127,23 @@ namespace CMS.API.Controllers
                 return Content(JsonConvert.SerializeObject(resultModel, Formatting.Indented));
             }
             else
-                return Content(JsonConvert.SerializeObject(TemplateBiz.getTemplatePageList(templateModel), Formatting.Indented));
+            {
+                var ds = TemplateBiz.getTemplatePageList(templateModel);
+                
+                // 디버깅: 컬럼명 확인
+                if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+                {
+                    var columnNames = new List<string>();
+                    foreach (DataColumn col in ds.Tables[1].Columns)
+                    {
+                        columnNames.Add(col.ColumnName);
+                    }
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Table1 컬럼: {string.Join(", ", columnNames)}");
+                    System.Diagnostics.Debug.WriteLine($"[DEBUG] Table1 데이터: {string.Join(", ", ds.Tables[1].Rows[0].ItemArray)}");
+                }
+                
+                return Content(JsonConvert.SerializeObject(ds, Formatting.Indented));
+            }
         }
 
         [HttpPost, ValidateInput(false)]
@@ -142,6 +158,10 @@ namespace CMS.API.Controllers
 
             TemplateModel templateModel = JsonConvert.DeserializeObject<TemplateModel>(Request.Form["templateModel"]);
             List<TemplateMapModel> templateMapModels = JsonConvert.DeserializeObject<List<TemplateMapModel>>(Request.Form["templateMapModels"]);
+
+            // 디버깅: LAYOUT_ID 확인
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] LAYOUT_ID: {templateModel?.LAYOUT_ID ?? "NULL"}");
+            System.Diagnostics.Debug.WriteLine($"[DEBUG] TEMPLATE_NM: {templateModel?.TEMPLATE_NM ?? "NULL"}");
 
             //2019-10-22 XSS 공격에 대응하기 위해 넘어온 object에 대한 model 정보를 replace함
             CommonProperties.XSSCheck_TemplateModel(templateModel);
