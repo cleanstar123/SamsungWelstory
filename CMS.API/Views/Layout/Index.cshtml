@@ -1,4 +1,4 @@
-﻿
+
 @{
     ViewBag.Title = "레이아웃";
 }
@@ -406,7 +406,11 @@
                 // 레이아웃 상세
                 var layoutDetailModels = [];
 
+                console.log('=== layoutDetailModels 생성 시작 ===');
+                console.log('contentsAreaInfo:', contentsAreaInfo);
+
                 for (var contentstype in contentsAreaInfo.CONTENTSTYPES) {
+                    console.log('Processing contentstype:', contentstype, 'length:', contentsAreaInfo.CONTENTSTYPES[contentstype].length);
 
                     for (var i = 0; i < contentsAreaInfo.CONTENTSTYPES[contentstype].length; i++) {
 
@@ -418,9 +422,14 @@
                         else
                             layoutDetailModel.LAYOUT_SEQ = contentsAreaInfo.CONTENTSTYPES[contentstype][i];
 
+                        console.log('  Added layoutDetailModel:', layoutDetailModel);
                         layoutDetailModels.push(layoutDetailModel);
                     }
                 }
+
+                console.log('=== 최종 layoutDetailModels ===');
+                console.log('Total count:', layoutDetailModels.length);
+                console.log('Data:', layoutDetailModels);
 
                 formData.append('layoutDetailModels', JSON.stringify(layoutDetailModels));
 
@@ -477,12 +486,23 @@
         }
 
         function layoutBindCallBack() {
+            console.log('=== layoutBindCallBack 실행 ===');
+            console.log('contentsAreaInfo:', contentsAreaInfo);
+            
             $mtxtScreenW.val(contentsAreaInfo.screenW);
             $mtxtScreenH.val(contentsAreaInfo.screenH);
             $mtxContentsCnt.val(contentsAreaInfo.contentsCnt);
             $mtxtLayoutHVType.val(contentsAreaInfo.layoutHVType == 'H' ? '가로' : '세로');
             $mtxtLayoutHByV.val(contentsAreaInfo.layoutHByV);
             $mtxtEvalUseYn.val(contentsAreaInfo.evalUseYn);
+            
+            console.log('Form values set:');
+            console.log('  screenW:', $mtxtScreenW.val());
+            console.log('  screenH:', $mtxtScreenH.val());
+            console.log('  contentsCnt:', $mtxContentsCnt.val());
+            console.log('  layoutHVType:', $mtxtLayoutHVType.val());
+            console.log('  layoutHByV:', $mtxtLayoutHByV.val());
+            console.log('  evalUseYn:', $mtxtEvalUseYn.val());
         }
 
         function manageTemplate() {
@@ -500,15 +520,17 @@
 
             if (isIE()) {
                 if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight - 10) {
-                    if (!(totalPageCnt == currentPageNo)) {
-                        searchLayout(currentPageNo++);
+                    if (currentPageNo < totalPageCnt) {
+                        currentPageNo++;
+                        searchLayout();
                     }
                 }
             }
             else {
                 if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
-                    if (!(totalPageCnt == currentPageNo)) {
-                        searchLayout(currentPageNo++);
+                    if (currentPageNo < totalPageCnt) {
+                        currentPageNo++;
+                        searchLayout();
                     }
                 }
             }
@@ -516,7 +538,7 @@
 
 
         // 레이아웃 최초 조회
-        currentPageNo++;
+        currentPageNo = 1;
         searchLayout();
 
     </script>

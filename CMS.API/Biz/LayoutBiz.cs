@@ -123,29 +123,72 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel layoutManage(string type, string userId, LayoutModel layoutModel, List<LayoutDetailModel> layoutDetailModels, List<LayoutImageModel> layoutImageModels)
         {
-            NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_TYPE",            type),
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", layoutModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_LAYOUT_ID",       layoutModel.LAYOUT_ID),
-                                          new NpgsqlParameter("P_LAYOUT_TYPE",     layoutModel.LAYOUT_TYPE),
-                                          new NpgsqlParameter("P_LAYOUT_NM",       layoutModel.LAYOUT_NM),
-                                          new NpgsqlParameter("P_LAYOUT_DESC",     layoutModel.LAYOUT_DESC),
-                                          new NpgsqlParameter("P_FILE_NM",         layoutModel.FILE_NM),
-                                          new NpgsqlParameter("P_CONTENT_CNT",     layoutModel.CONTENT_CNT),
-                                          new NpgsqlParameter("P_SCREEN_W",        layoutModel.SCREEN_W),
-                                          new NpgsqlParameter("P_SCREEN_H",        layoutModel.SCREEN_H),
-                                          new NpgsqlParameter("P_LAYOUT_HV_TYPE",  layoutModel.LAYOUT_HV_TYPE),
-                                          new NpgsqlParameter("P_LAYOUT_H_BY_V",   layoutModel.LAYOUT_H_BY_V),
-                                          new NpgsqlParameter("P_EVAL_USE_YN",     layoutModel.EVAL_USE_YN),
-                                          new NpgsqlParameter("P_THUMBNAIL_NM",    layoutModel.THUMBNAIL_NM),
-                                          new NpgsqlParameter("P_REG_ID",          userId),
-                                          new NpgsqlParameter("P_XML_REQ_IMG",     JsonHelper.GetJsonToXmlString<LayoutImageModel>(layoutImageModels)),
-                                          new NpgsqlParameter("P_XML_REQ_DETAIL",  JsonHelper.GetJsonToXmlString<LayoutDetailModel>(layoutDetailModels)),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor)
-                                      };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+            // 디버깅: 입력 데이터 로깅
+            System.Diagnostics.Debug.WriteLine("=== LayoutBiz.layoutManage 시작 ===");
+            System.Diagnostics.Debug.WriteLine($"Type: {type}");
+            System.Diagnostics.Debug.WriteLine($"layoutDetailModels count: {layoutDetailModels?.Count ?? 0}");
+            System.Diagnostics.Debug.WriteLine($"layoutImageModels count: {layoutImageModels?.Count ?? 0}");
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "PKG_CMS_LAYOUT.PR_LAYOUT_MANAGE", param).Tables[0])[0];
+            // 문자열을 정수로 변환
+            int? layoutId = string.IsNullOrEmpty(layoutModel.LAYOUT_ID) ? (int?)null : int.Parse(layoutModel.LAYOUT_ID);
+            int? contentCnt = string.IsNullOrEmpty(layoutModel.CONTENT_CNT) ? (int?)null : int.Parse(layoutModel.CONTENT_CNT);
+            int? screenW = string.IsNullOrEmpty(layoutModel.SCREEN_W) ? (int?)null : int.Parse(layoutModel.SCREEN_W);
+            int? screenH = string.IsNullOrEmpty(layoutModel.SCREEN_H) ? (int?)null : int.Parse(layoutModel.SCREEN_H);
+
+            // XML 변환
+            string xmlImg = JsonHelper.GetJsonToXmlString<LayoutImageModel>(layoutImageModels);
+            string xmlDetail = JsonHelper.GetJsonToXmlString<LayoutDetailModel>(layoutDetailModels);
+
+            // 디버깅: XML 변환 결과 로깅
+            System.Diagnostics.Debug.WriteLine("=== XML 변환 결과 ===");
+            System.Diagnostics.Debug.WriteLine($"xmlImg length: {xmlImg?.Length ?? 0}");
+            System.Diagnostics.Debug.WriteLine($"xmlImg: {xmlImg}");
+            System.Diagnostics.Debug.WriteLine($"xmlDetail length: {xmlDetail?.Length ?? 0}");
+            System.Diagnostics.Debug.WriteLine($"xmlDetail: {xmlDetail}");
+
+            string sql = @"SELECT * FROM publicdata.pr_layout_manage(
+                @p_type, @p_restaurant_code, @p_layout_id, @p_layout_type, 
+                @p_layout_nm, @p_layout_desc, @p_file_nm, @p_content_cnt, 
+                @p_screen_w, @p_screen_h, @p_layout_hv_type, @p_layout_h_by_v, 
+                @p_eval_use_yn, @p_thumbnail_nm, @p_reg_id, @p_xml_req_img, @p_xml_req_detail
+            )";
+
+            NpgsqlParameter[] param = {
+                new NpgsqlParameter("@p_type", type ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_restaurant_code", layoutModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_id", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_layout_type", layoutModel.LAYOUT_TYPE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_nm", layoutModel.LAYOUT_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_desc", layoutModel.LAYOUT_DESC ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_file_nm", layoutModel.FILE_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_content_cnt", NpgsqlDbType.Integer) { Value = contentCnt ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_screen_w", NpgsqlDbType.Integer) { Value = screenW ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_screen_h", NpgsqlDbType.Integer) { Value = screenH ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_layout_hv_type", layoutModel.LAYOUT_HV_TYPE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_h_by_v", layoutModel.LAYOUT_H_BY_V ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_eval_use_yn", layoutModel.EVAL_USE_YN ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_thumbnail_nm", layoutModel.THUMBNAIL_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_reg_id", userId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_xml_req_img", xmlImg ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_xml_req_detail", xmlDetail ?? (object)DBNull.Value)
+            };
+
+            // 디버깅: 파라미터 로깅
+            System.Diagnostics.Debug.WriteLine("=== 프로시저 파라미터 ===");
+            foreach (var p in param)
+            {
+                System.Diagnostics.Debug.WriteLine($"{p.ParameterName}: {p.Value}");
+            }
+
+            var result = Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0])[0];
+
+            // 디버깅: 결과 로깅
+            System.Diagnostics.Debug.WriteLine("=== 프로시저 실행 결과 ===");
+            System.Diagnostics.Debug.WriteLine($"ERR_CODE: {result.ERR_CODE}");
+            System.Diagnostics.Debug.WriteLine($"ERROR_MSG: {result.ERROR_MSG}");
+            System.Diagnostics.Debug.WriteLine($"ID: {result.ID}");
+
+            return result;
         }
 
         /// <summary>
@@ -157,29 +200,40 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel layoutManage(string type, string userId, LayoutModel layoutModel)
         {
-            NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_TYPE",            type),
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", layoutModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_LAYOUT_ID",       layoutModel.LAYOUT_ID),
-                                          new NpgsqlParameter("P_LAYOUT_TYPE",     layoutModel.LAYOUT_TYPE),
-                                          new NpgsqlParameter("P_LAYOUT_NM",       layoutModel.LAYOUT_NM),
-                                          new NpgsqlParameter("P_LAYOUT_DESC",     layoutModel.LAYOUT_DESC),
-                                          new NpgsqlParameter("P_FILE_NM",         layoutModel.FILE_NM),
-                                          new NpgsqlParameter("P_CONTENT_CNT",     layoutModel.CONTENT_CNT),
-                                          new NpgsqlParameter("P_SCREEN_W",        layoutModel.SCREEN_W),
-                                          new NpgsqlParameter("P_SCREEN_H",        layoutModel.SCREEN_H),
-                                          new NpgsqlParameter("P_LAYOUT_HV_TYPE",  layoutModel.LAYOUT_HV_TYPE),
-                                          new NpgsqlParameter("P_LAYOUT_H_BY_V",   layoutModel.LAYOUT_H_BY_V),
-                                          new NpgsqlParameter("P_EVAL_USE_YN",     layoutModel.EVAL_USE_YN),
-                                          new NpgsqlParameter("P_THUMBNAIL_NM",    layoutModel.THUMBNAIL_NM),
-                                          new NpgsqlParameter("P_REG_ID",          userId),
-                                          new NpgsqlParameter("P_XML_REQ_IMG",     null),
-                                          new NpgsqlParameter("P_XML_REQ_DETAIL",  null),
-                                          new NpgsqlParameter("CUR",               NpgsqlDbType.Refcursor)
-                                      };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+            // 문자열을 정수로 변환
+            int? layoutId = string.IsNullOrEmpty(layoutModel.LAYOUT_ID) ? (int?)null : int.Parse(layoutModel.LAYOUT_ID);
+            int? contentCnt = string.IsNullOrEmpty(layoutModel.CONTENT_CNT) ? (int?)null : int.Parse(layoutModel.CONTENT_CNT);
+            int? screenW = string.IsNullOrEmpty(layoutModel.SCREEN_W) ? (int?)null : int.Parse(layoutModel.SCREEN_W);
+            int? screenH = string.IsNullOrEmpty(layoutModel.SCREEN_H) ? (int?)null : int.Parse(layoutModel.SCREEN_H);
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "PKG_CMS_LAYOUT.PR_LAYOUT_MANAGE", param).Tables[0])[0];
+            string sql = @"SELECT * FROM publicdata.pr_layout_manage(
+                @p_type, @p_restaurant_code, @p_layout_id, @p_layout_type, 
+                @p_layout_nm, @p_layout_desc, @p_file_nm, @p_content_cnt, 
+                @p_screen_w, @p_screen_h, @p_layout_hv_type, @p_layout_h_by_v, 
+                @p_eval_use_yn, @p_thumbnail_nm, @p_reg_id, @p_xml_req_img, @p_xml_req_detail
+            )";
+
+            NpgsqlParameter[] param = {
+                new NpgsqlParameter("@p_type", type ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_restaurant_code", layoutModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_id", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_layout_type", layoutModel.LAYOUT_TYPE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_nm", layoutModel.LAYOUT_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_desc", layoutModel.LAYOUT_DESC ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_file_nm", layoutModel.FILE_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_content_cnt", NpgsqlDbType.Integer) { Value = contentCnt ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_screen_w", NpgsqlDbType.Integer) { Value = screenW ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_screen_h", NpgsqlDbType.Integer) { Value = screenH ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_layout_hv_type", layoutModel.LAYOUT_HV_TYPE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_layout_h_by_v", layoutModel.LAYOUT_H_BY_V ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_eval_use_yn", layoutModel.EVAL_USE_YN ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_thumbnail_nm", layoutModel.THUMBNAIL_NM ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_reg_id", userId ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_xml_req_img", DBNull.Value),
+                new NpgsqlParameter("@p_xml_req_detail", DBNull.Value)
+            };
+
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0])[0];
         }
     }
 }

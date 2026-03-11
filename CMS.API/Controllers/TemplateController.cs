@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
 using System.Data;
@@ -46,13 +46,29 @@ namespace CMS.API.Controllers
             TemplateModel templateModel = new TemplateModel();
 
             templateModel.RESTAURANT_CODE = UserBiz.getRestaurantCode(User);
-            templateModel.TEMPLATE_ID = id;
-            templateModel.LAYOUT_ID = id;
-
-            // 템플릿 수정일 경우 템플릿 정보 추가로 가져옴
-            if (type.ToUpper().Equals("U"))
+            
+            // 디버깅: 파라미터 확인
+            System.Diagnostics.Debug.WriteLine($"[ManageTemplate] type: {type}, id: {id}");
+            
+            // 템플릿 생성일 경우 id는 LAYOUT_ID
+            // 템플릿 수정일 경우 id는 TEMPLATE_ID
+            if (type.ToUpper().Equals("I"))
             {
+                templateModel.LAYOUT_ID = id;
+            }
+            else if (type.ToUpper().Equals("U"))
+            {
+                templateModel.TEMPLATE_ID = id;
+                // 템플릿 정보 조회 (LAYOUT_ID 포함)
                 templateModel = TemplateBiz.getTemplateList(templateModel);
+                
+                // 디버깅: 조회된 템플릿 정보 확인
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplate] After getTemplateList:");
+                System.Diagnostics.Debug.WriteLine($"  TEMPLATE_ID: {templateModel.TEMPLATE_ID}");
+                System.Diagnostics.Debug.WriteLine($"  LAYOUT_ID: {templateModel.LAYOUT_ID}");
+                System.Diagnostics.Debug.WriteLine($"  FILE_PATH: {templateModel.FILE_PATH}");
+                System.Diagnostics.Debug.WriteLine($"  FILE_NM: {templateModel.FILE_NM}");
+                
                 templateModel.templateMapModels = TemplateBiz.getTemplateMapList(templateModel);
             }
 
@@ -90,20 +106,34 @@ namespace CMS.API.Controllers
             FileInfo file = null;
 
             if (type.ToUpper().Equals("I"))
-                file = new FileInfo(Server.MapPath(string.Format("/upload/layout/{0}/{1}", layoutModel.LAYOUT_ID, layoutModel.FILE_NM)));
+            {
+                string layoutFilePath = Server.MapPath(string.Format("/upload/layout/{0}/{1}", layoutModel.LAYOUT_ID, layoutModel.FILE_NM));
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplate] Layout file path: {layoutFilePath}");
+                file = new FileInfo(layoutFilePath);
+            }
             else if (type.ToUpper().Equals("U"))
             {
                 // 수정시 템플릿 정보가 없을시 오류
                 if (string.IsNullOrEmpty(templateModel.FILE_PATH) || string.IsNullOrEmpty(templateModel.FILE_NM))
                 {
+                    System.Diagnostics.Debug.WriteLine($"[ManageTemplate] ERROR: FILE_PATH or FILE_NM is empty!");
                     return Redirect(Url.Action("index", "template"));
                 }
 
-                file = new FileInfo((Path.Combine(templateModel.FILE_PATH, templateModel.FILE_NM)));
+                string templateFilePath = Path.Combine(templateModel.FILE_PATH, templateModel.FILE_NM);
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplate] Template file path: {templateFilePath}");
+                file = new FileInfo(templateFilePath);
             }
 
             if (file.Exists)
+            {
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplate] File exists: {file.FullName}");
                 return View(templateModel);
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplate] ERROR: File not found: {file?.FullName}");
+            }
 
             return Redirect(Url.Action("index", "template"));
         }
@@ -378,6 +408,14 @@ namespace CMS.API.Controllers
                 templateModel.TEMPLATE_ID = templateId;
                 templateModel.FILE_PATH = saveRootPath;
                 templateModel.FILE_NM = templateFileName;
+
+                // 파일 확장자 설정
+                templateModel.FILE_EXT = Path.GetExtension(templateFileName).TrimStart('.');
+
+                // 파일 크기 설정 (바이트 단위)
+                FileInfo fileInfo = new FileInfo(Path.Combine(saveRootPath, templateFileName));
+                templateModel.FILE_SIZE = fileInfo.Length.ToString();
+
                 templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName); // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateThumbnailFileName;
                 templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);          // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateFileName;
 
@@ -406,6 +444,7 @@ namespace CMS.API.Controllers
 
             return Content(JsonConvert.SerializeObject(resultModel, Formatting.Indented));
         }
+
 
         /// <summary>
         /// 템플릿 저장/수정
@@ -616,6 +655,14 @@ namespace CMS.API.Controllers
                 templateModel.TEMPLATE_ID = templateId;
                 templateModel.FILE_PATH = saveRootPath;
                 templateModel.FILE_NM = templateFileName;
+
+                // 파일 확장자 설정
+                templateModel.FILE_EXT = Path.GetExtension(templateFileName).TrimStart('.');
+
+                // 파일 크기 설정 (바이트 단위)
+                FileInfo fileInfo = new FileInfo(Path.Combine(saveRootPath, templateFileName));
+                templateModel.FILE_SIZE = fileInfo.Length.ToString();
+
                 templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName); // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateThumbnailFileName;
                 templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);          // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateFileName;
 
@@ -644,6 +691,7 @@ namespace CMS.API.Controllers
 
             return Content(JsonConvert.SerializeObject(resultModel, Formatting.Indented));
         }
+
 
         /// <summary>
         /// 템플릿 삭제

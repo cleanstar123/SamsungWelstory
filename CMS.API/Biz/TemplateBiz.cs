@@ -99,6 +99,27 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static ResultModel ManageTemplateAll(string type, string userId, TemplateModel templateModel, List<TemplateMapModel> templateMapModels)
         {
+            // 디버깅: templateMapModels 확인
+            System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] type={type}");
+            System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] templateMapModels count={templateMapModels?.Count ?? 0}");
+            
+            if (templateMapModels != null && templateMapModels.Count > 0)
+            {
+                for (int i = 0; i < templateMapModels.Count; i++)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] templateMapModels[{i}]: LAYOUT_SEQ={templateMapModels[i].LAYOUT_SEQ}, CONNECTION_TYPE={templateMapModels[i].CONNECTION_TYPE}, CONNECTION_NM={templateMapModels[i].CONNECTION_NM}");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] WARNING: templateMapModels is null or empty!");
+            }
+            
+            // XML 변환
+            string xmlString = JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels);
+            System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] XML length={xmlString?.Length ?? 0}");
+            System.Diagnostics.Debug.WriteLine($"[ManageTemplateAll] XML content={xmlString}");
+            
             // TEMPLATE_ID, LAYOUT_ID, FILE_SIZE를 integer로 변환
             int? templateId = null;
             if (!string.IsNullOrEmpty(templateModel.TEMPLATE_ID) && int.TryParse(templateModel.TEMPLATE_ID, out int parsedTemplateId))
@@ -132,7 +153,7 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("p_layout_id", NpgsqlDbType.Integer) { Value = layoutId ?? (object)DBNull.Value },
                 new NpgsqlParameter("p_thumbnail_nm", NpgsqlDbType.Varchar) { Value = templateModel.THUMBNAIL_NM ?? (object)DBNull.Value },
                 new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
-                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<TemplateMapModel>(templateMapModels) ?? (object)DBNull.Value }
+                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = xmlString ?? (object)DBNull.Value }
             };
 
             return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_template_manage_all", param).Tables[0])[0];

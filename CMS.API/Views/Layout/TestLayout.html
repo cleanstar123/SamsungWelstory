@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>레이아웃 테스트</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+// 컨텐츠 영역의 메뉴 정보
+function ProductContentsArea() {
+    this.contentsAreaId = '';
+    this.image          = false;
+    this.name           = false;
+    this.ename          = false;
+    this.price          = false;
+    this.sidedish       = false;
+    this.kcal           = false;
+    this.score1         = false;
+    this.score2         = false;
+    this.score3         = false;
+    this.score4         = false;
+    this.score5         = false;
+}
+
+// 컨텐츠 영역 정보
+function ContentsArea() {
+    this.screenW      = 0;
+    this.screenH      = 0;
+    this.layoutHByV   = '';
+    this.layoutHVType = '';
+    this.evalUseYn    = 'N';
+    this.contentsCnt  = 0;
+    this.product      = [];
+    this.badge        = [];
+    this.head         = [];
+    this.image        = [];
+    this.text         = [];
+    this.movie        = [];
+    this.url          = [];
+    this.date         = [];
+
+    this.CONTENTSTYPES = {
+        product: [],
+        badge  : [],
+        head   : [],
+        image  : [],
+        text   : [],
+        movie  : [],
+        url    : [],
+        date   : []
+    }
+}
+
+/**
+ * 컨텐츠 영역의 아이디와 타입 목록을 MAP형식(아이디=타입)으로 리턴
+ */
+function getContentsAreaIdAndTyps() {
+    var arrContentsArea = $('[data-contents-area-id]');
+    console.log('Found elements with data-contents-area-id:', arrContentsArea.length);
+    
+    var map = {};
+    for (var i = 0; i < arrContentsArea.length; i++) {
+        var id = $(arrContentsArea[i]).data("contents-area-id");
+        var type = $(arrContentsArea[i]).data("contents-area-type");
+        console.log('Element', i, '- ID:', id, 'Type:', type);
+        map[id] = type;
+    }
+    
+    console.log('Contents Area Map:', map);
+    return map;
+}
+
+/**
+ * 컨텐츠 영역 정보를 리턴
+ */
+function getContentsArea() {
+    console.log('=== getContentsArea() 시작 ===');
+    
+    var contentsArea = new ContentsArea();
+    var map = getContentsAreaIdAndTyps();
+
+    contentsArea.contentsCnt = Object.keys(map).length;
+    console.log('Total contents count:', contentsArea.contentsCnt);
+
+    for (var key in map) {
+        console.log('Processing key:', key, 'type:', map[key]);
+
+        if (map[key].toLowerCase() == 'product') {
+            var productContentsArea = new ProductContentsArea();
+            productContentsArea.contentsAreaId = key;
+
+            $('[data-contents-area-id="' + key + '"][data-product-category]').each(function () {
+                var category = $(this).data('product-category');
+                console.log('  Product category:', category);
+                productContentsArea[category] = true;
+            });
+
+            contentsArea.CONTENTSTYPES[map[key].toLowerCase()].push(productContentsArea);
+            console.log('  Added product area:', productContentsArea);
+        }
+        else {
+            contentsArea.CONTENTSTYPES[map[key].toLowerCase()].push(key);
+            console.log('  Added non-product area:', key);
+        }
+    }
+
+    contentsArea.layoutHByV   = $('#LAYOUT_H_BY_V').val();
+    contentsArea.layoutHVType = $('#LAYOUT_HV_TYPE').val();
+    contentsArea.screenW      = $('#SCREEN_X').val();
+    contentsArea.screenH      = $('#SCREEN_Y').val();
+    contentsArea.evalUseYn    = ($('[data-product-category*="score"]').length > 0 ? 'Y' : 'N');
+
+    console.log('=== 최종 contentsArea 객체 ===');
+    console.log('layoutHByV:', contentsArea.layoutHByV);
+    console.log('layoutHVType:', contentsArea.layoutHVType);
+    console.log('screenW:', contentsArea.screenW);
+    console.log('screenH:', contentsArea.screenH);
+    console.log('evalUseYn:', contentsArea.evalUseYn);
+    console.log('CONTENTSTYPES:', contentsArea.CONTENTSTYPES);
+
+    return contentsArea;
+}
+
+$(document).ready(function() {
+    console.log('Document ready');
+    
+    // 테스트 버튼 클릭 시 getContentsArea() 실행
+    $('#testBtn').click(function() {
+        var result = getContentsArea();
+        $('#result').text(JSON.stringify(result, null, 2));
+    });
+});
+</script>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; }
+.test-area { background: #f0f0f0; padding: 20px; margin: 20px 0; }
+button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+#result { background: #fff; border: 1px solid #ccc; padding: 10px; margin-top: 20px; white-space: pre-wrap; }
+.menuList { border: 1px solid #ddd; padding: 10px; margin: 10px 0; background: #fff; }
+.area_name { color: #666; font-size: 12px; }
+.area_explain { display: none; }
+span.tit_val { display: none; }
+</style>
+</head>
+<body>
+
+<h1>레이아웃 컨텐츠 영역 파싱 테스트</h1>
+
+<div class="test-area">
+    <button id="testBtn">getContentsArea() 실행</button>
+    <div id="result"></div>
+</div>
+
+<h2>테스트 레이아웃 (2개 메뉴)</h2>
+
+<div id="layer">
+<input type="hidden" id="LAYOUT_HV_TYPE" value="H">
+<input type="hidden" id="LAYOUT_H_BY_V" value="1x1">
+<input type="hidden" id="SCREEN_X" value="1920">
+<input type="hidden" id="SCREEN_Y" value="1080">
+
+<!-- 첫번째 메뉴 -->
+<div class="menuList">
+    <div class="menuImage">
+        <p class="area_name">CA1</p>
+        <p class="area_explain">
+            <span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span>
+            <span class="tit_val" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="image"></span>
+        </p>
+    </div>
+    <div class="menuName">
+        <p class="area_name">CA1</p>
+        <p class="area_explain">
+            <span class="tit_blk">음식명</span>
+            <span class="tit_val" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="26"></span>
+        </p>
+    </div>
+    <div class="satisfaction">
+        <span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score1">0</span>
+        <span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score2">0</span>
+        <span class="score" data-contents-area-id="CA1" data-contents-area-type="product" data-product-category="score3">0</span>
+    </div>
+</div>
+
+<!-- 두번째 메뉴 -->
+<div class="menuList">
+    <div class="menuImage">
+        <p class="area_name">CA2</p>
+        <p class="area_explain">
+            <span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span>
+            <span class="tit_val" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="image"></span>
+        </p>
+    </div>
+    <div class="menuName">
+        <p class="area_name">CA2</p>
+        <p class="area_explain">
+            <span class="tit_blk">음식명</span>
+            <span class="tit_val" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="name" data-contetns-area-length="26"></span>
+        </p>
+    </div>
+    <div class="satisfaction">
+        <span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score1">0</span>
+        <span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score2">0</span>
+        <span class="score" data-contents-area-id="CA2" data-contents-area-type="product" data-product-category="score3">0</span>
+    </div>
+</div>
+
+</div>
+
+<h2>사용 방법</h2>
+<ol>
+    <li>이 HTML 파일을 브라우저에서 직접 열기</li>
+    <li>"getContentsArea() 실행" 버튼 클릭</li>
+    <li>브라우저 개발자 도구(F12) 콘솔 탭에서 로그 확인</li>
+    <li>결과 영역에 JSON 출력 확인</li>
+</ol>
+
+<h2>예상 결과</h2>
+<pre>
+{
+  "screenW": "1920",
+  "screenH": "1080",
+  "layoutHByV": "1x1",
+  "layoutHVType": "H",
+  "evalUseYn": "Y",
+  "contentsCnt": 2,
+  "CONTENTSTYPES": {
+    "product": [
+      {
+        "contentsAreaId": "CA1",
+        "image": true,
+        "name": true,
+        "score1": true,
+        "score2": true,
+        "score3": true
+      },
+      {
+        "contentsAreaId": "CA2",
+        "image": true,
+        "name": true,
+        "score1": true,
+        "score2": true,
+        "score3": true
+      }
+    ]
+  }
+}
+</pre>
+
+</body>
+</html>

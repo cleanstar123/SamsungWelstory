@@ -61,6 +61,18 @@ namespace CMS.API.Controllers
                 LayoutModel layoutModel                    = JsonConvert.DeserializeObject<LayoutModel>(Request.Form["layoutModel"]);                     // 레이아웃 기본 정보
                 List<LayoutDetailModel> layoutDetailModels = JsonConvert.DeserializeObject<List<LayoutDetailModel>>(Request.Form["layoutDetailModels"]);  // 레이아웃 상세 정보 (컨텐츠 영역 정보)
 
+                // 디버깅: 받은 데이터 로깅
+                System.Diagnostics.Debug.WriteLine("=== LayoutUpload 받은 데이터 ===");
+                System.Diagnostics.Debug.WriteLine("layoutModel: " + JsonConvert.SerializeObject(layoutModel));
+                System.Diagnostics.Debug.WriteLine("layoutDetailModels count: " + (layoutDetailModels?.Count ?? 0));
+                if (layoutDetailModels != null)
+                {
+                    foreach (var detail in layoutDetailModels)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"  LAYOUT_SEQ: {detail.LAYOUT_SEQ}, CONTENT_TYPE: {detail.CONTENT_TYPE}");
+                    }
+                }
+
                 string layoutFilename = string.Empty;                                     // 레이아웃(HTML) 파일명
                 List<LayoutImageModel> layoutImageModels = new List<LayoutImageModel>();  // 레이아웃(HTML) 파일과 함께 사용할 고정 이미지
 
@@ -70,6 +82,17 @@ namespace CMS.API.Controllers
                     CommonProperties.XSSCheck_LayoutModel(layoutModel);
                     CommonProperties.XSSCheck_LayoutDetailModel(layoutDetailModels);
                     CommonProperties.XSSCheck_LayoutImageModel(layoutImageModels);
+
+                    // 디버깅: XSS 체크 후 데이터 확인
+                    System.Diagnostics.Debug.WriteLine("=== XSS 체크 후 layoutDetailModels ===");
+                    System.Diagnostics.Debug.WriteLine("Count: " + (layoutDetailModels?.Count ?? 0));
+                    if (layoutDetailModels != null)
+                    {
+                        foreach (var detail in layoutDetailModels)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"  LAYOUT_SEQ: {detail.LAYOUT_SEQ}, CONTENT_TYPE: {detail.CONTENT_TYPE}");
+                        }
+                    }
 
                     // 2019-05-14 특수기호 입력 체크
                     //if (CommonProperties.speSymbol(layoutModel.LAYOUT_NM) || CommonProperties.speSymbol(layoutModel.LAYOUT_DESC))

@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Data;
+using System;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
@@ -91,17 +92,17 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet userList(UserModel userModel)
         {
+            string sql = "SELECT * FROM publicdata.pr_user_list(@p_restaurant_code, @p_group_cd, @p_user_nm, @p_user_group_code, @p_user_group_nm)";
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_GROUP_CD",        userModel.GROUP_CD),
-                                          new NpgsqlParameter("P_USER_NM",         userModel.USER_NM),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = userModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_group_cd", NpgsqlDbType.Varchar) { Value = userModel.GROUP_CD ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_nm", NpgsqlDbType.Varchar) { Value = userModel.USER_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_group_code", NpgsqlDbType.Varchar) { Value = userModel.USER_GROUP_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_group_nm", NpgsqlDbType.Varchar) { Value = userModel.USER_GROUP_NM ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_LIST", param);
-
+            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
             dsResult.Tables[0].TableName = "rows";
 
             return dsResult;
@@ -114,15 +115,19 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getRestaurantList(string restaurant)
         {
+            string sql = "SELECT * FROM publicdata.pr_find_restaurant(@p_user_group_code)";
+
+            int? userGroupCode = null;
+            if (!string.IsNullOrEmpty(restaurant) && int.TryParse(restaurant, out int parsedValue))
+            {
+                userGroupCode = parsedValue;
+            }
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_NM", restaurant),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("p_user_group_code", NpgsqlDbType.Integer) { Value = userGroupCode ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_FIND_RESTAURANT", param);
-
+            DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
             dsResult.Tables[0].TableName = "rows";
 
             return dsResult;
@@ -165,22 +170,27 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static List<ResultModel> manageUser(string TYPE, string userId, UserModel userModel)
         {
+            string sql = @"SELECT * FROM publicdata.pr_user_manage(
+                @p_type, @p_user_id, @p_restaurant_code, @p_restaurant_nm, 
+                @p_user_nm, @p_group_cd, @p_user_pw, @p_use_yn, @p_reg_id, 
+                @p_user_group_code, @p_user_group_nm
+            )";
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_TYPE",            TYPE),
-                                          new NpgsqlParameter("P_USER_ID",         userModel.USER_ID),
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", userModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_RESTAURANT_NM",   userModel.RESTAURANT_NM),
-                                          new NpgsqlParameter("P_USER_NM",         userModel.USER_NM),
-                                          new NpgsqlParameter("P_GROUP_CD",        userModel.GROUP_CD),
-                                          new NpgsqlParameter("P_USER_PW",         userModel.USER_PW),
-                                          new NpgsqlParameter("P_USE_YN",          userModel.USE_YN),
-                                          new NpgsqlParameter("P_REG_ID",          userId),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("p_type", NpgsqlDbType.Varchar) { Value = TYPE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_id", NpgsqlDbType.Varchar) { Value = userModel.USER_ID ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = userModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_restaurant_nm", NpgsqlDbType.Varchar) { Value = userModel.RESTAURANT_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_nm", NpgsqlDbType.Varchar) { Value = userModel.USER_NM ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_group_cd", NpgsqlDbType.Varchar) { Value = userModel.GROUP_CD ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_pw", NpgsqlDbType.Varchar) { Value = userModel.USER_PW ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_use_yn", NpgsqlDbType.Varchar) { Value = userModel.USE_YN ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = userId ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_group_code", NpgsqlDbType.Varchar) { Value = userModel.USER_GROUP_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_user_group_nm", NpgsqlDbType.Varchar) { Value = userModel.USER_GROUP_NM ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_USER.PR_USER_MANAGE", param).Tables[0]);
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0]);
         }
     }
 }

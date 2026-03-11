@@ -18,5 +18,7 @@ namespace CMS.API.Models
         public string REG_DTM         { get; set; }
         public string MOD_ID          { get; set; }
         public string MOD_DTM         { get; set; }
+        public string USER_GROUP_CODE { get; set; }  // int?에서 string으로 변경
+        public string USER_GROUP_NM   { get; set; }
     }
 }

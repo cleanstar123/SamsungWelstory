@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System;
 
 using CMS.API.Models;
 using CMS.API.App_Code;
@@ -18,33 +19,34 @@ namespace CMS.API.Biz
         /// <returns></returns>
         public static DataSet getGroupCodes(string pCodeGroup, string pCodeGroupNm)
         {
+            string sql = "SELECT * FROM publicdata.pr_code_group_list(@p_code_group, @p_code_group_nm)";
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_CODE_GROUP",    pCodeGroup),
-                                          new NpgsqlParameter("P_CODE_GROUP_NM", pCodeGroupNm),
-                                          new NpgsqlParameter("CUR",             NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("@p_code_group", NpgsqlDbType.Varchar) { Value = pCodeGroup ?? (object)DBNull.Value },
+                new NpgsqlParameter("@p_code_group_nm", NpgsqlDbType.Varchar) { Value = pCodeGroupNm ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_LIST", param);
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
-        /// <summary>
-        /// 코드 조회
-        /// </summary>
-        /// <param name="pCodeGroup">그룹 코드</param>
-        /// <returns></returns>
-        public static DataSet getCodes(string pCodeGroup)
-        {
-            NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_CODE_GROUP", pCodeGroup),
-                                          new NpgsqlParameter("CUR",          NpgsqlDbType.Refcursor)
-                                      };
+            /// <summary>
+            /// 코드 조회
+            /// </summary>
+            /// <param name="pCodeGroup">그룹 코드</param>
+            /// <returns></returns>
+            public static DataSet getCodes(string pCodeGroup)
+            {
+                // CommandType.Text로 직접 함수 호출
+                string sql = "SELECT * FROM publicdata.pr_code_list(@p_code_group)";
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+                NpgsqlParameter[] param = {
+            new NpgsqlParameter("@p_code_group", pCodeGroup ?? "")
+        };
 
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_LIST", param);
-        }
+                return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
+            }
+
+
 
         /// <summary>
         /// 그룹코드 생성, 수정, 삭제 메서드
@@ -72,7 +74,7 @@ namespace CMS.API.Biz
                                       };
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_GROUP_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.PR_CODE_GROUP_MANAGE", param).Tables[0])[0];
         }
 
         /// <summary>
@@ -102,7 +104,7 @@ namespace CMS.API.Biz
                                       };
             param[param.Length - 1].Direction = ParameterDirection.Output;
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_CODE.PR_CODE_MANAGE", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.PR_CODE_MANAGE", param).Tables[0])[0];
         }
     }
 }
