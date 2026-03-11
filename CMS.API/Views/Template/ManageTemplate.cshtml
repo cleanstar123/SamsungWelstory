@@ -1,4 +1,4 @@
-﻿@model TemplateModel
+@model TemplateModel
 
 @{
     ViewBag.Title = "템플릿 관리";
@@ -275,6 +275,8 @@
         $(document).ready(function () {
 
             if ('@ViewBag.type' == 'I') {
+                // 템플릿 생성: 레이아웃 이미지 경로로 변경
+                
                 // 스타일로 background-image 를 설정한 경우 경로 수정
                 $('#templateArea, #templateArea *').each(function () {
 
@@ -296,19 +298,7 @@
                     $(this).attr('src', '/upload/layout/' + '@Model.layoutModel.LAYOUT_ID' + '/images/' + name);
                 });
             }
-            else { /* 템플릿 수정일 경우 */
-
-                $('#templateArea').each(function () {
-
-                    if ($(this).css('background-image') != 'none') {
-
-                        var names = $(this).css('background-image').split('/');
-                        var name = names[names.length - 1].replace('")', "");
-
-                        $(this).css('background-image', "url('" + '/upload/layout/' + '@Model.layoutModel.LAYOUT_ID' + '/images/' + name + "')");
-                    }
-                });
-            }
+            // 템플릿 수정: 저장된 템플릿 HTML을 그대로 사용 (이미지 경로 변경 안 함)
         });
 
 
@@ -803,7 +793,11 @@
                     templateModel.TEMPLATE_NM   = manageTemplate.elements.$M_TEMPLATE_NM.val();
                     templateModel.TEMPLATE_DESC = manageTemplate.elements.$M_TEMPLATE_DESC.val();
                     templateModel.TEMPLATE_HTML = $('#templateArea').html();
+<<<<<<< HEAD
                     templateModel.LAYOUT_ID     = $('#LAYOUT_ID').val();  // LAYOUT_ID 추가
+=======
+                    templateModel.LAYOUT_ID     = $('#LAYOUT_ID').val();
+>>>>>>> dev_sepil
 
                     var templateMapModels = [];
 

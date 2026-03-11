@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -25,6 +25,10 @@ namespace CMS.API
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
+            
+            // Web API 라우팅 등록 (클라이언트 API용)
+            System.Web.Http.GlobalConfiguration.Configure(WebApiConfig.Register);
+            
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }

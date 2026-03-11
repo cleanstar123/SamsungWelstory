@@ -17,58 +17,67 @@ namespace CMS.API.Biz
 
         public static List<WelmenuModel> welmenuList(WelmenuModel welmenuModel)
         {
+            string sql = @"SELECT * FROM publicdata.pr_welmenu_list(@p_restaurant_code, @p_menu_dt, @p_menu_meal_type)";
+
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", welmenuModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_MENU_DT",         welmenuModel.MENU_DT),
-                                          new NpgsqlParameter("P_MENU_MEAL_TYPE",  welmenuModel.MEAL_TYPE),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("@p_restaurant_code", welmenuModel.RESTAURANT_CODE ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_menu_dt", welmenuModel.MENU_DT ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_menu_meal_type", welmenuModel.MEAL_TYPE ?? (object)DBNull.Value)
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return Util.ConvertDataTable<WelmenuModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_WELMENU.PR_WELMENU_LIST", param).Tables[0]);
+            try
+            {
+                return Util.ConvertDataTable<WelmenuModel>(
+                    PostgresHelper.ExecuteDataSet(
+                        CommonProperties.ConnectionString, 
+                        CommandType.Text, 
+                        sql, 
+                        param
+                    ).Tables[0]
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"welmenuList 오류: {ex.Message}");
+                return new List<WelmenuModel>();
+            }
         }
 
         public static DataSet getSatisfactionlist(List<WelmenuModel> welmenuModels)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_XML_REQ", JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels)),
-                                          new NpgsqlParameter("CUR",       NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels) ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_WELMENU.PR_WELMENU_EVAL_RESULT", param);
+            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_result(@p_xml_req)";
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
         public static DataSet getSatisfactionlist2(List<WelmenuModel> welmenuModels)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_XML_REQ", JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels)),
-                                          new NpgsqlParameter("CUR",       NpgsqlDbType.Refcursor)
-                                      };
+                new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels) ?? (object)DBNull.Value }
+            };
 
-            param[param.Length - 1].Direction = ParameterDirection.Output;
-
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_WELMENU.PR_WELMENU_EVAL_RESULT_VIEW ", param);
+            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_result_view(@p_xml_req)";
+            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
         public static ResultModel setSatisfaction(WelmenuModel welmenuModel)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_RESTAURANT_CODE", welmenuModel.RESTAURANT_CODE),
-                                          new NpgsqlParameter("P_HALL_NO",         welmenuModel.HALL_NO),
-                                          new NpgsqlParameter("P_MENU_DT",         welmenuModel.MENU_DT),
-                                          new NpgsqlParameter("P_MEAL_TYPE",       welmenuModel.MEAL_TYPE),
-                                          new NpgsqlParameter("P_COURSE_TYPE",     welmenuModel.COURSE_TYPE),
-                                          new NpgsqlParameter("P_MENU_CODE",       welmenuModel.MENU_CODE),
-                                          new NpgsqlParameter("P_EVAL_SCORE",      welmenuModel.EVAL_SCORE),
-                                          new NpgsqlParameter("P_REG_ID",          "DID"),
-                                          new NpgsqlParameter("CUR", NpgsqlDbType.Refcursor)
-                                      };
-            param[param.Length - 1].Direction = ParameterDirection.Output;
+                new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = welmenuModel.RESTAURANT_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_hall_no", NpgsqlDbType.Varchar) { Value = welmenuModel.HALL_NO ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_menu_dt", NpgsqlDbType.Varchar) { Value = welmenuModel.MENU_DT ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_meal_type", NpgsqlDbType.Varchar) { Value = welmenuModel.MEAL_TYPE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_course_type", NpgsqlDbType.Varchar) { Value = welmenuModel.COURSE_TYPE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_menu_code", NpgsqlDbType.Varchar) { Value = welmenuModel.MENU_CODE ?? (object)DBNull.Value },
+                new NpgsqlParameter("p_eval_score", NpgsqlDbType.Integer) { Value = string.IsNullOrEmpty(welmenuModel.EVAL_SCORE) ? (object)DBNull.Value : int.Parse(welmenuModel.EVAL_SCORE) },
+                new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = "DID" }
+            };
 
-            DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "DID.PKG_CMS_WELMENU.PR_WELMENU_EVAL_IN_KIOSK", param);
+            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_in_kiosk(@p_restaurant_code, @p_hall_no, @p_menu_dt, @p_meal_type, @p_course_type, @p_menu_code, @p_eval_score, @p_reg_id)";
+            DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             ResultModel result = new ResultModel();
 

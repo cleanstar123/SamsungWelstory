@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메뉴 레이아웃</title>
+    <style>
+        .clickable { cursor: pointer; }
+    </style>
+</head>
+<body>
+<input type="hidden" id="LAYOUT_HV_TYPE" value="H">
+<input type="hidden" id="LAYOUT_H_BY_V" value="1x1">
+<input type="hidden" id="SCREEN_X" value="1920">
+<input type="hidden" id="SCREEN_Y" value="1080">
+    <div id="layer">
+        <div class="layer_wrap">
+            
+            <!-- 배경 이미지 영역 -->
+            <div class="bg clickable">
+                <p class="area_name">CA900</p>
+                <p class="area_explain">
+                    <span class="tit_blk">컨텐츠 영역<br>(이미지)</span>
+                    <span class="tit_val" 
+                          data-contents-area-id="CA900" 
+                          data-contents-area-type="image"></span>
+                </p>
+            </div>
+
+            <!-- 첫번째 메뉴 -->
+            <div class="menuList">
+                <!-- 배지 -->
+                <div class="sticker clickable">
+                    <p class="area_name">CA1</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA1" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 헤드라인 -->
+                <div class="menu_logo clickable">
+                    <p class="area_name">CA2</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(헤드라인)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA2" 
+                              data-contents-area-type="head"></span>
+                    </p>
+                </div>
+
+                <!-- 메뉴 이미지 -->
+                <div class="menuImage clickable">
+                    <p class="area_name">CA4</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA4" 
+                              data-contents-area-type="product" 
+                              data-product-category="image"></span>
+                    </p>
+                </div>
+
+                <!-- 상황 배지 2 -->
+                <div class="sticker2 clickable">
+                    <p class="area_name">CA3</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(상황 배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA3" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 상황 배지 3 -->
+                <div class="sticker sticker3 clickable">
+                    <p class="area_name">CA5</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(상황 배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA5" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 음식명 -->
+                <div class="menuName clickable">
+                    <p class="area_name">CA4</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">음식명</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA4" 
+                              data-contents-area-type="product" 
+                              data-product-category="name" 
+                              data-contetns-area-length="60"></span>
+                    </p>
+                </div>
+
+                <!-- 영문 타이틀 -->
+                <div class="menuNameEng clickable">
+                    <p class="area_name">CA4</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">ENG Title</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA4" 
+                              data-contents-area-type="product" 
+                              data-product-category="ename" 
+                              data-contetns-area-length="80"></span>
+                    </p>
+                </div>
+
+                <!-- 부찬 -->
+                <div class="menuAdd clickable">
+                    <p class="area_name">CA4</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">부찬</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA4" 
+                              data-contents-area-type="product" 
+                              data-product-category="sidedish" 
+                              data-contetns-area-length="100"></span>
+                    </p>
+                </div>
+
+                <!-- 칼로리 -->
+                <div class="menuKcal clickable">
+                    <p class="area_name">CA4</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">칼로리 Kcal</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA4" 
+                              data-contents-area-type="product" 
+                              data-product-category="kcal" 
+                              data-contetns-area-length="8"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- 두번째 메뉴 -->
+            <div class="menuList">
+                <!-- 배지 -->
+                <div class="sticker clickable">
+                    <p class="area_name">CA100</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA100" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 헤드라인 -->
+                <div class="menu_logo clickable">
+                    <p class="area_name">CA200</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(헤드라인)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA200" 
+                              data-contents-area-type="head"></span>
+                    </p>
+                </div>
+
+                <!-- 메뉴 이미지 -->
+                <div class="menuImage clickable">
+                    <p class="area_name">CA400</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(메뉴 이미지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA400" 
+                              data-contents-area-type="product" 
+                              data-product-category="image"></span>
+                    </p>
+                </div>
+
+                <!-- 상황 배지 2 -->
+                <div class="sticker2 clickable">
+                    <p class="area_name">CA300</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(상황 배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA300" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 상황 배지 3 -->
+                <div class="sticker sticker3 clickable">
+                    <p class="area_name">CA500</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">컨텐츠 영역<br>(상황 배지)</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA500" 
+                              data-contents-area-type="badge"></span>
+                    </p>
+                </div>
+
+                <!-- 음식명 -->
+                <div class="menuName clickable">
+                    <p class="area_name">CA400</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">음식명</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA400" 
+                              data-contents-area-type="product" 
+                              data-product-category="name" 
+                              data-contetns-area-length="60"></span>
+                    </p>
+                </div>
+
+                <!-- 영문 타이틀 -->
+                <div class="menuNameEng clickable">
+                    <p class="area_name">CA400</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">ENG Title</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA400" 
+                              data-contents-area-type="product" 
+                              data-product-category="ename" 
+                              data-contetns-area-length="80"></span>
+                    </p>
+                </div>
+
+                <!-- 부찬 -->
+                <div class="menuAdd clickable">
+                    <p class="area_name">CA400</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">부찬</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA400" 
+                              data-contents-area-type="product" 
+                              data-product-category="sidedish" 
+                              data-contetns-area-length="100"></span>
+                    </p>
+                </div>
+
+                <!-- 칼로리 -->
+                <div class="menuKcal menuKcal2 clickable">
+                    <p class="area_name">CA400</p>
+                    <p class="area_explain">
+                        <span class="tit_blk">칼로리 Kcal</span>
+                        <span class="tit_val" 
+                              data-contents-area-id="CA400" 
+                              data-contents-area-type="product" 
+                              data-product-category="kcal" 
+                              data-contetns-area-length="8"></span>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
