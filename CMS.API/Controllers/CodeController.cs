@@ -59,17 +59,23 @@ namespace CMS.API.Controllers
         /// <param name="codeGroupModel">그룹코드 모델</param>
         /// <returns>실행 결과</returns>
         [HttpPost]
-        public ActionResult CodeGroupManage(string TYPE, List<CodeGroupModel> codeGroupModels)
+        public ActionResult CodeGroupManage(string TYPE, List<CodeGroupModel> codeGroupModel)
         {
             ResultModel resultModel = userCheck();
 
-            //2019-10-22 XSS 공격에 대응하기 위해 넘어온 object에 대한 model 정보를 replace함
-            CommonProperties.XSSCheck_CodeGroupModel(codeGroupModels);
-            if (!TYPE.ToUpper().Equals("D") && codeGroupModels != null)
+            // null 체크 및 빈 리스트 초기화
+            if (codeGroupModel == null)
             {
-                foreach (CodeGroupModel codeGroupModel in codeGroupModels)
+                codeGroupModel = new List<CodeGroupModel>();
+            }
+
+            //2019-10-22 XSS 공격에 대응하기 위해 넘어온 object에 대한 model 정보를 replace함
+            CommonProperties.XSSCheck_CodeGroupModel(codeGroupModel);
+            if (!TYPE.ToUpper().Equals("D") && codeGroupModel != null)
+            {
+                foreach (CodeGroupModel model in codeGroupModel)
                 {
-                    if (string.IsNullOrEmpty(codeGroupModel.CODE_GROUP_NM))
+                    if (string.IsNullOrEmpty(model.CODE_GROUP_NM))
                     {
                         resultModel.ERR_CODE = "8001";
                         resultModel.ERROR_MSG = "코드 그룹 이름이 잘못되었습니다.";
@@ -92,7 +98,7 @@ namespace CMS.API.Controllers
                 //}
             }            
 
-            return Content(JsonConvert.SerializeObject(CodeBiz.codeGroupManage(TYPE, UserBiz.getUserId(User), codeGroupModels), Formatting.Indented));
+            return Content(JsonConvert.SerializeObject(CodeBiz.codeGroupManage(TYPE, UserBiz.getUserId(User), codeGroupModel), Formatting.Indented));
         }
 
         /// <summary>
@@ -102,17 +108,23 @@ namespace CMS.API.Controllers
         /// <param name="codeModel">그룹코드 모델</param>
         /// <returns>실행 결과</returns>
         [HttpPost]
-        public ActionResult CodeManage(string TYPE, List<CodeModel> codeModels)
+        public ActionResult CodeManage(string TYPE, List<CodeModel> codeModel)
         {
             ResultModel resultModel = userCheck();
 
-            //2019-10-22 XSS 공격에 대응하기 위해 넘어온 object에 대한 model 정보를 replace함
-            CommonProperties.XSSCheck_CodeModel(codeModels);
-            if (!TYPE.ToUpper().Equals("D") && codeModels != null)
+            // null 체크 및 빈 리스트 초기화
+            if (codeModel == null)
             {
-                foreach (CodeModel codeModel in codeModels)
+                codeModel = new List<CodeModel>();
+            }
+
+            //2019-10-22 XSS 공격에 대응하기 위해 넘어온 object에 대한 model 정보를 replace함
+            CommonProperties.XSSCheck_CodeModel(codeModel);
+            if (!TYPE.ToUpper().Equals("D") && codeModel != null)
+            {
+                foreach (CodeModel model in codeModel)
                 {
-                    if (string.IsNullOrEmpty(codeModel.CODE_NAME))
+                    if (string.IsNullOrEmpty(model.CODE_NAME))
                     {
                         resultModel.ERR_CODE = "8001";
                         resultModel.ERROR_MSG = "코드 이름이 잘못되었습니다.";
@@ -135,7 +147,7 @@ namespace CMS.API.Controllers
                 //}
             }                
 
-            return Content(JsonConvert.SerializeObject(CodeBiz.codeManage(TYPE, UserBiz.getUserId(User), codeModels), Formatting.Indented));
+            return Content(JsonConvert.SerializeObject(CodeBiz.codeManage(TYPE, UserBiz.getUserId(User), codeModel), Formatting.Indented));
         }
 
         public ResultModel userCheck()
