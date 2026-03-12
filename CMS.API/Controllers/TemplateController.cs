@@ -378,13 +378,23 @@ namespace CMS.API.Controllers
 
                 #region 06. 저장된 템플릿 스크린샷 및 썸네일 이미지 생성
 
-                string url = string.Format("{0}/upload/template/{1}/{2}/{3}?type=S", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
+                string url = string.Format("{0}/upload/template/{1}/{2}/{3}?type=S", CommonProperties.INTERNAL_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
+
 
                 ProcessStartInfo startInfo = new ProcessStartInfo(Server.MapPath("~/bin/ScreenShotUrl.exe"));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
+                startInfo.WorkingDirectory = Server.MapPath("~/bin/");
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
                 startInfo.Arguments = string.Format("{0} {1} {2} {3} {4} {5}", url, string.IsNullOrEmpty(templateModel.SCREEN_W) ? 1920 : int.Parse(templateModel.SCREEN_W), string.IsNullOrEmpty(templateModel.SCREEN_H) ? 1080 : int.Parse(templateModel.SCREEN_H), CommonProperties.LAYOUT_THUMBNAIL_WIDTH, CommonProperties.LAYOUT_THUMBNAIL_HEIGHT, Path.Combine(saveRootPath, templateThumbnailFileName));
-                Process.Start(startInfo);
+
+                Process process = Process.Start(startInfo);
+                if (process != null)
+                {
+                    process.WaitForExit(30000); // 30초 타임아웃
+                    process.Close();
+                }
+
 
 
                 //CMSLib cmslib = new CMSLib();
@@ -625,13 +635,22 @@ namespace CMS.API.Controllers
 
                 #region 06. 저장된 템플릿 스크린샷 및 썸네일 이미지 생성
 
-                string url = string.Format("{0}/upload/template/{1}/{2}/{3}?type=S", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
+                string url = string.Format("{0}/upload/template/{1}/{2}/{3}?type=S", CommonProperties.INTERNAL_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
 
                 ProcessStartInfo startInfo = new ProcessStartInfo(Server.MapPath("~/bin/ScreenShotUrl.exe"));
                 startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
+                startInfo.WorkingDirectory = Server.MapPath("~/bin/");
+                startInfo.UseShellExecute = false;
+                startInfo.CreateNoWindow = true;
                 startInfo.Arguments = string.Format("{0} {1} {2} {3} {4} {5}", url, string.IsNullOrEmpty(templateModel.SCREEN_W) ? 1920 : int.Parse(templateModel.SCREEN_W), string.IsNullOrEmpty(templateModel.SCREEN_H) ? 1080 : int.Parse(templateModel.SCREEN_H), CommonProperties.LAYOUT_THUMBNAIL_WIDTH, CommonProperties.LAYOUT_THUMBNAIL_HEIGHT, Path.Combine(saveRootPath, templateThumbnailFileName));
-                Process.Start(startInfo);
+
+                Process process = Process.Start(startInfo);
+                if (process != null)
+                {
+                    process.WaitForExit(30000); // 30초 타임아웃
+                    process.Close();
+                }
+
 
 
                 //CMSLib cmslib = new CMSLib();

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Web.Configuration;
@@ -26,6 +26,7 @@ namespace CMS.API.App_Code
         #region 도메인 정보
         public static string HTTP_DOMAIN_URL  = WebConfigurationManager.AppSettings["HTTP_DOMAIN_URL"];
         public static string HTTPS_DOMAIN_URL = WebConfigurationManager.AppSettings["HTTPS_DOMAIN_URL"];
+        public static string INTERNAL_DOMAIN_URL = WebConfigurationManager.AppSettings["INTERNAL_DOMAIN_URL"];
         #endregion
 
         #region 썸네일 크기 정보

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
@@ -180,13 +180,28 @@ namespace CMS.API.Controllers
                     string originImageFileName    = Path.ChangeExtension(layoutFilename, ".jpg");
                     string thumbnailImageFileName = "thumbnail_" + Path.ChangeExtension(layoutFilename, ".jpg");
 
+                    // 외부 접근용 URL (DB 저장용)
                     string url          = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, layoutFilename);          // 레이아웃(HTML) URL
                     string urlThumbnail = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, thumbnailImageFileName);  // 레이아웃 썸네일(JPG) URL
+
+                    // ScreenShotUrl.exe 실행용 로컬 URL (서버 내부에서 접근)
+                    // 외부 IP로 자기 자신에게 접근하면 네트워크 라우팅 문제 발생 가능하므로 localhost 사용
+                    string localUrl = string.Format("http://localhost:{0}/upload/layout/{1}/{2}", 
+                        Request.Url.Port, 
+                        resultModel.ID, 
+                        layoutFilename);
 
                     ProcessStartInfo startInfo = new ProcessStartInfo(Server.MapPath("~/bin/ScreenShotUrl.exe"));
                     startInfo.WindowStyle = ProcessWindowStyle.Hidden;
 
-                    startInfo.Arguments = string.Format("{0} {1} {2} {3} {4} {5}", url, string.IsNullOrEmpty(layoutModel.SCREEN_W) ? 1920 : int.Parse(layoutModel.SCREEN_W), string.IsNullOrEmpty(layoutModel.SCREEN_H) ? 1080 : int.Parse(layoutModel.SCREEN_H), CommonProperties.LAYOUT_THUMBNAIL_WIDTH, CommonProperties.LAYOUT_THUMBNAIL_HEIGHT, Path.Combine(saveHtmlPath, thumbnailImageFileName));
+                    startInfo.Arguments = string.Format("{0} {1} {2} {3} {4} {5}", 
+                        localUrl,  // 로컬 URL 사용
+                        string.IsNullOrEmpty(layoutModel.SCREEN_W) ? 1920 : int.Parse(layoutModel.SCREEN_W), 
+                        string.IsNullOrEmpty(layoutModel.SCREEN_H) ? 1080 : int.Parse(layoutModel.SCREEN_H), 
+                        CommonProperties.LAYOUT_THUMBNAIL_WIDTH, 
+                        CommonProperties.LAYOUT_THUMBNAIL_HEIGHT, 
+                        Path.Combine(saveHtmlPath, thumbnailImageFileName));
+                    
                     Process.Start(startInfo);
 
 
