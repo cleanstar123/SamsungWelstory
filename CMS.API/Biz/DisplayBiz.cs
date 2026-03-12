@@ -107,7 +107,38 @@ namespace CMS.API.Biz
                                       };
 
             string sql = "SELECT * FROM publicdata.pr_display_map_list(@P_RESTAURANT_CODE, @P_DISPLAY_GROUP_ID)";
-            return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
+            DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
+            
+            DataTable mappedTable = null;
+            DataTable unmappedTable = null;
+            
+            // 결과를 RESULT_TYPE으로 분리하여 두 개의 테이블로 반환
+            if (ds.Tables.Count > 0)
+            {
+                mappedTable = ds.Tables[0].Clone();
+                mappedTable.TableName = "Table";  // 프론트엔드가 기대하는 이름
+                
+                unmappedTable = ds.Tables[0].Clone();
+                unmappedTable.TableName = "Table1";  // 프론트엔드가 기대하는 이름
+                
+                if (ds.Tables[0].Rows.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        string resultType = row["RESULT_TYPE"]?.ToString() ?? "";
+                        if (resultType == "MAPPED")
+                            mappedTable.ImportRow(row);
+                        else if (resultType == "UNMAPPED")
+                            unmappedTable.ImportRow(row);
+                    }
+                }
+                
+                ds.Tables.Clear();
+                ds.Tables.Add(mappedTable);   // Table: 그룹에 속한 디스플레이 (MAPPED)
+                ds.Tables.Add(unmappedTable); // Table1: 그룹에 속하지 않은 디스플레이 (UNMAPPED)
+            }
+            
+            return ds;
         }
         
         /// <summary>
