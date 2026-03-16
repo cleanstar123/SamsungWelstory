@@ -19,9 +19,16 @@ namespace CMS.API.Biz
         {
             string sql = @"SELECT * FROM publicdata.pr_welmenu_list(@p_restaurant_code, @p_menu_dt, @p_menu_meal_type)";
 
+            // 날짜 형식 정규화: "2026-03-16" → "20260316" (프로시저는 YYYYMMDD 형식 요구)
+            string menuDt = welmenuModel.MENU_DT;
+            if (!string.IsNullOrEmpty(menuDt) && menuDt.Contains("-"))
+            {
+                menuDt = menuDt.Replace("-", "");
+            }
+
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("@p_restaurant_code", welmenuModel.RESTAURANT_CODE ?? (object)DBNull.Value),
-                new NpgsqlParameter("@p_menu_dt", welmenuModel.MENU_DT ?? (object)DBNull.Value),
+                new NpgsqlParameter("@p_menu_dt", menuDt ?? (object)DBNull.Value),
                 new NpgsqlParameter("@p_menu_meal_type", welmenuModel.MEAL_TYPE ?? (object)DBNull.Value)
             };
 
