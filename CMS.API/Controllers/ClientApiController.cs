@@ -61,6 +61,7 @@ namespace CMS.API.Controllers
                     var row = ds.Tables[0].Rows[0];
                     string scheduleId = row["SCHEDULE_ID"].ToString();
                     string templateUrl = row["TEMPLATE_URL"].ToString();
+                    string modDtm = row["MOD_DTM"].ToString();
 
                     // 이전 스케줄과 비교
                     string actionType = "11"; // 신규 또는 업데이트
@@ -76,7 +77,8 @@ namespace CMS.API.Controllers
                         {
                             actionType = actionType,
                             scheduleId = scheduleId,
-                            templateId = templateUrl
+                            templateId = templateUrl,
+                            modDtm = modDtm
                         }
                     });
                 }
