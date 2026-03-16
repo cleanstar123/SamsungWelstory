@@ -31,3 +31,6 @@ Desktop.ini
 # Temp files
 *.tmp
 *.temp
+
+# 환경설정 (서버별로 다름)
+Web.config
