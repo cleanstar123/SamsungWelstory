@@ -14,22 +14,15 @@ namespace CMS.API.Biz
         /// <summary>
         /// 컨텐츠 조회(페이징)
         /// </summary>
-        /// <param name="contentsModel"></param>
-        /// <returns></returns>
         public static DataSet getContentsPageList(ContentsModel contentsModel)
         {
-            // PAGE_CNT, PAGE_NO를 integer로 변환
             int? pageCnt = null;
             if (!string.IsNullOrEmpty(contentsModel.PAGE_CNT) && int.TryParse(contentsModel.PAGE_CNT, out int parsedCnt))
-            {
                 pageCnt = parsedCnt;
-            }
 
             int? pageNo = null;
             if (!string.IsNullOrEmpty(contentsModel.PAGE_NO) && int.TryParse(contentsModel.PAGE_NO, out int parsedNo))
-            {
                 pageNo = parsedNo;
-            }
 
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("P_RESTAURANT_CODE", NpgsqlDbType.Varchar) { Value = contentsModel.RESTAURANT_CODE ?? (object)DBNull.Value },
@@ -39,19 +32,15 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
             };
 
-            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_list_page", param);
+            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_content_list_page", param);
 
-            // JavaScript가 Table과 Table1을 기대하므로 분리
             if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
             {
                 DataSet ds = new DataSet();
-                
-                // Table: 컨텐츠 목록
                 DataTable dtList = result.Tables[0].Copy();
                 dtList.TableName = "Table";
                 ds.Tables.Add(dtList);
-                
-                // Table1: 카운트 정보 (첫 번째 행의 카운트 정보만)
+
                 DataTable dtCount = new DataTable("Table1");
                 dtCount.Columns.Add("TOT_ROW_COUNT", typeof(int));
                 dtCount.Columns.Add("TOT_PAGE_COUNT", typeof(int));
@@ -60,21 +49,16 @@ namespace CMS.API.Biz
                 countRow["TOT_PAGE_COUNT"] = result.Tables[0].Rows[0]["TOT_PAGE_COUNT"];
                 dtCount.Rows.Add(countRow);
                 ds.Tables.Add(dtCount);
-                
+
                 return ds;
             }
-            
+
             return result;
         }
 
         /// <summary>
         /// 컨텐츠 저장/수정
         /// </summary>
-        /// <param name="actionType"></param>
-        /// <param name="userId"></param>
-        /// <param name="restaurantCode"></param>
-        /// <param name="contentsFileModels"></param>
-        /// <returns></returns>
         public static ResultModel manageContents(string actionType, string userId, string restaurantCode, List<ContentsModel> contentsFileModels)
         {
             try
@@ -94,7 +78,7 @@ namespace CMS.API.Biz
                     new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = xmlReq ?? (object)DBNull.Value }
                 };
 
-                var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_manage", param);
+                var result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_content_manage", param);
                 return Util.ConvertDataTable<ResultModel>(result.Tables[0])[0];
             }
             catch (Exception ex)
@@ -102,9 +86,7 @@ namespace CMS.API.Biz
                 System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] {ex.GetType().Name}: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] StackTrace: {ex.StackTrace}");
                 if (ex.InnerException != null)
-                {
                     System.Diagnostics.Debug.WriteLine($"[manageContents ERROR] InnerException: {ex.InnerException.Message}");
-                }
                 throw;
             }
         }
@@ -112,10 +94,6 @@ namespace CMS.API.Biz
         /// <summary>
         /// 컨텐츠 삭제
         /// </summary>
-        /// <param name="restaurantCode"></param>
-        /// <param name="userId"></param>
-        /// <param name="contentsModels"></param>
-        /// <returns></returns>
         public static ResultModel manageDelete(string restaurantCode, string userId, List<ContentsModel> contentsModels)
         {
             NpgsqlParameter[] param = {
@@ -124,7 +102,7 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("P_XML_REQ", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString(contentsModels) ?? (object)DBNull.Value }
             };
 
-            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_content_manage_delete", param).Tables[0])[0];
+            return Util.ConvertDataTable<ResultModel>(PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_content_manage_delete", param).Tables[0])[0];
         }
     }
 }

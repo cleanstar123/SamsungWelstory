@@ -42,7 +42,7 @@ namespace CMS.API.Controllers
                 }
 
                 // 현재 시간에 맞는 스케줄 조회 (프로시저 사용)
-                string sql = "SELECT * FROM publicdata.pr_schedule_client_select(@p_restaurant_code, @p_display_id)";
+                string sql = "SELECT * FROM did.pr_schedule_client_select(@p_restaurant_code, @p_display_id)";
 
                 NpgsqlParameter[] parameters = {
                     new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = accessToken },
