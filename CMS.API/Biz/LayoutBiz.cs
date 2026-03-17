@@ -39,7 +39,7 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("P_PAGE_NO", NpgsqlDbType.Integer) { Value = pageNo ?? (object)DBNull.Value }
             };
 
-            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list_page", param);
+            DataSet result = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_layout_list_page", param);
             
             // JavaScript가 Table과 Table1을 기대하므로 분리
             if (result.Tables.Count > 0 && result.Tables[0].Rows.Count > 0)
@@ -92,7 +92,7 @@ namespace CMS.API.Biz
 
             // 레이아웃 기본 정보 조회
             DataSet ds = new DataSet();
-            DataSet dsLayout = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_list", param);
+            DataSet dsLayout = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_layout_list", param);
             if (dsLayout.Tables.Count > 0)
             {
                 DataTable dtLayout = dsLayout.Tables[0].Copy();
@@ -101,7 +101,7 @@ namespace CMS.API.Biz
             }
 
             // 레이아웃 상세 정보 조회
-            DataSet dsDetail = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "publicdata.pr_layout_detail_list", param);
+            DataSet dsDetail = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.StoredProcedure, "did.pr_layout_detail_list", param);
             if (dsDetail.Tables.Count > 0)
             {
                 DataTable dtDetail = dsDetail.Tables[0].Copy();
@@ -146,7 +146,7 @@ namespace CMS.API.Biz
             System.Diagnostics.Debug.WriteLine($"xmlDetail length: {xmlDetail?.Length ?? 0}");
             System.Diagnostics.Debug.WriteLine($"xmlDetail: {xmlDetail}");
 
-            string sql = @"SELECT * FROM publicdata.pr_layout_manage(
+            string sql = @"SELECT * FROM did.pr_layout_manage(
                 @p_type, @p_restaurant_code, @p_layout_id, @p_layout_type, 
                 @p_layout_nm, @p_layout_desc, @p_file_nm, @p_content_cnt, 
                 @p_screen_w, @p_screen_h, @p_layout_hv_type, @p_layout_h_by_v, 
@@ -206,7 +206,7 @@ namespace CMS.API.Biz
             int? screenW = string.IsNullOrEmpty(layoutModel.SCREEN_W) ? (int?)null : int.Parse(layoutModel.SCREEN_W);
             int? screenH = string.IsNullOrEmpty(layoutModel.SCREEN_H) ? (int?)null : int.Parse(layoutModel.SCREEN_H);
 
-            string sql = @"SELECT * FROM publicdata.pr_layout_manage(
+            string sql = @"SELECT * FROM did.pr_layout_manage(
                 @p_type, @p_restaurant_code, @p_layout_id, @p_layout_type, 
                 @p_layout_nm, @p_layout_desc, @p_file_nm, @p_content_cnt, 
                 @p_screen_w, @p_screen_h, @p_layout_hv_type, @p_layout_h_by_v, 

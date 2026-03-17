@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using System;
@@ -20,8 +20,6 @@ namespace CMS.API.Biz
         /// <summary>
         /// 현재 로그인한 사용자의 아이디를 리턴한다.
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getUserId(IPrincipal User)
         {
             return User.Identity.GetUserId<string>();
@@ -30,8 +28,6 @@ namespace CMS.API.Biz
         /// <summary>
         /// 현재 로그인한 사용자의 이름을 리턴한다.
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getUserNm(IPrincipal User)
         {
             return User.Identity.GetUserName();
@@ -40,20 +36,17 @@ namespace CMS.API.Biz
         /// <summary>
         /// 현재 로그인한 사용자의 권한을 리턴한다.
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getUserRole(IPrincipal User)
         {
-            List<string> roles = ((ClaimsIdentity)User.Identity).Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
-
+            List<string> roles = ((ClaimsIdentity)User.Identity).Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value).ToList();
             return roles[0];
         }
 
         /// <summary>
         /// 현재 로그인한 사용자의 레스토랑 코드를 리턴한다.
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getRestaurantCode(IPrincipal User)
         {
             var claim = ((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(c => c.Type == "urn:Custom:RESTAURANT_CODE");
@@ -63,20 +56,15 @@ namespace CMS.API.Biz
         /// <summary>
         /// 현재 로그인한 사용자의 레스토랑 이름을 리턴한다.
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getRestaurantName(IPrincipal User)
         {
             var claim = ((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(c => c.Type == "urn:Custom:RESTAURANT_NM");
             return claim == null ? string.Empty : claim.Value;
         }
 
-
         /// <summary>
         /// 비밀번호를 바꿔야 하는지 체크
         /// </summary>
-        /// <param name="User"></param>
-        /// <returns></returns>
         public static string getChangePassYN(IPrincipal User)
         {
             var claim = ((ClaimsIdentity)User.Identity).Claims.FirstOrDefault(c => c.Type == "urn:Custom:CHANGE_PASS_YN");
@@ -88,11 +76,9 @@ namespace CMS.API.Biz
         /// <summary>
         /// 사용자 검색
         /// </summary>
-        /// <param name="userModel"></param>
-        /// <returns></returns>
         public static DataSet userList(UserModel userModel)
         {
-            string sql = "SELECT * FROM publicdata.pr_user_list(@p_restaurant_code, @p_group_cd, @p_user_nm, @p_user_group_code, @p_user_group_nm)";
+            string sql = "SELECT * FROM did.pr_user_list(@p_restaurant_code, @p_group_cd, @p_user_nm, @p_user_group_code, @p_user_group_nm)";
 
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("p_restaurant_code", NpgsqlDbType.Varchar) { Value = userModel.RESTAURANT_CODE ?? (object)DBNull.Value },
@@ -104,24 +90,19 @@ namespace CMS.API.Biz
 
             DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
             dsResult.Tables[0].TableName = "rows";
-
             return dsResult;
         }
 
         /// <summary>
         /// 레스토랑 검색
         /// </summary>
-        /// <param name="restaurant">레스토랑 코드</param>
-        /// <returns></returns>
         public static DataSet getRestaurantList(string restaurant)
         {
-            string sql = "SELECT * FROM publicdata.pr_find_restaurant(@p_user_group_code)";
+            string sql = "SELECT * FROM did.pr_find_restaurant(@p_user_group_code)";
 
             int? userGroupCode = null;
             if (!string.IsNullOrEmpty(restaurant) && int.TryParse(restaurant, out int parsedValue))
-            {
                 userGroupCode = parsedValue;
-            }
 
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("p_user_group_code", NpgsqlDbType.Integer) { Value = userGroupCode ?? (object)DBNull.Value }
@@ -129,48 +110,38 @@ namespace CMS.API.Biz
 
             DataSet dsResult = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
             dsResult.Tables[0].TableName = "rows";
-
             return dsResult;
         }
 
         /// <summary>
         /// 사용자 검색 (로그인시 사용)
         /// </summary>
-        /// <param name="id">아이디</param>
-        /// <param name="password">비밀번호</param>
-        /// <returns></returns>
         public static ResultModel user(string id, string password)
         {
             NpgsqlParameter[] param = {
-                                          new NpgsqlParameter("P_USER_ID", id),
-                                          new NpgsqlParameter("P_USER_PW", password)
-                                      };
+                new NpgsqlParameter("P_USER_ID", id),
+                new NpgsqlParameter("P_USER_PW", password)
+            };
 
-            string sql = "SELECT * FROM publicdata.pr_user_login(@P_USER_ID, @P_USER_PW)";
+            string sql = "SELECT * FROM did.pr_user_login(@P_USER_ID, @P_USER_PW)";
             DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             ResultModel result = new ResultModel();
-
             if (Util.IsNullDataset(ds))
             {
                 ds.Tables[0].TableName = "rows";
                 result.ERR_CODE = "0";
                 result.DATA = ds.Tables[0];
             }
-
             return result;
         }
 
         /// <summary>
-        /// 사용사 생성/수정/삭제
+        /// 사용자 생성/수정/삭제
         /// </summary>
-        /// <param name="TYPE">I(생성), U(수정), D(삭제)</param>
-        /// <param name="userId"></param>
-        /// <param name="userModel"></param>
-        /// <returns></returns>
         public static List<ResultModel> manageUser(string TYPE, string userId, UserModel userModel)
         {
-            string sql = @"SELECT * FROM publicdata.pr_user_manage(
+            string sql = @"SELECT * FROM did.pr_user_manage(
                 @p_type, @p_user_id, @p_restaurant_code, @p_restaurant_nm, 
                 @p_user_nm, @p_group_cd, @p_user_pw, @p_use_yn, @p_reg_id, 
                 @p_user_group_code, @p_user_group_nm
