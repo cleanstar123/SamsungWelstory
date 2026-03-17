@@ -180,29 +180,37 @@ namespace CMS.API.Controllers
                     string originImageFileName    = Path.ChangeExtension(layoutFilename, ".jpg");
                     string thumbnailImageFileName = "thumbnail_" + Path.ChangeExtension(layoutFilename, ".jpg");
 
-                    // 외부 접근용 URL (DB 저장용)
-                    string url          = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, layoutFilename);          // 레이아웃(HTML) URL
-                    string urlThumbnail = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, thumbnailImageFileName);  // 레이아웃 썸네일(JPG) URL
+                    // DB 저장용 외부 접근 URL
+                    string url          = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, layoutFilename);
+                    string urlThumbnail = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.HTTPS_DOMAIN_URL, resultModel.ID, thumbnailImageFileName);
 
-                    // ScreenShotUrl.exe 실행용 로컬 URL (서버 내부에서 접근)
-                    // 외부 IP로 자기 자신에게 접근하면 네트워크 라우팅 문제 발생 가능하므로 localhost 사용
-                    string localUrl = string.Format("http://localhost:{0}/upload/layout/{1}/{2}", 
-                        Request.Url.Port, 
-                        resultModel.ID, 
-                        layoutFilename);
+                    // ScreenShotUrl.exe는 서버 내부에서 실행되므로 INTERNAL_DOMAIN_URL 사용
+                    string screenshotUrl = string.Format("{0}/upload/layout/{1}/{2}", CommonProperties.INTERNAL_DOMAIN_URL, resultModel.ID, layoutFilename);
 
                     ProcessStartInfo startInfo = new ProcessStartInfo(Server.MapPath("~/bin/ScreenShotUrl.exe"));
-                    startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-
+                    startInfo.WindowStyle      = ProcessWindowStyle.Hidden;
+                    startInfo.WorkingDirectory = Server.MapPath("~/bin/");
+                    startInfo.UseShellExecute  = false;
+                    startInfo.CreateNoWindow   = true;
                     startInfo.Arguments = string.Format("{0} {1} {2} {3} {4} {5}", 
-                        localUrl,  // 로컬 URL 사용
+                        screenshotUrl,
                         string.IsNullOrEmpty(layoutModel.SCREEN_W) ? 1920 : int.Parse(layoutModel.SCREEN_W), 
                         string.IsNullOrEmpty(layoutModel.SCREEN_H) ? 1080 : int.Parse(layoutModel.SCREEN_H), 
                         CommonProperties.LAYOUT_THUMBNAIL_WIDTH, 
                         CommonProperties.LAYOUT_THUMBNAIL_HEIGHT, 
                         Path.Combine(saveHtmlPath, thumbnailImageFileName));
                     
-                    Process.Start(startInfo);
+                    Process layoutProcess = Process.Start(startInfo);
+                    if (layoutProcess != null)
+                    {
+                        bool exited = layoutProcess.WaitForExit(30000);
+                        layoutProcess.Close();
+                        if (!exited)
+                            throw new Exception("레이아웃 썸네일 생성 시간이 초과되었습니다. (30초)");
+                    }
+
+                    if (!System.IO.File.Exists(Path.Combine(saveHtmlPath, thumbnailImageFileName)))
+                        throw new Exception("레이아웃 썸네일 이미지 생성에 실패했습니다.");
 
 
                     //CMSLib cmslib = new CMSLib();
@@ -282,7 +290,12 @@ namespace CMS.API.Controllers
             ResultModel resultModel = LayoutBiz.layoutManage("D", UserBiz.getUserId(User), layoutModel);
 
             if (resultModel.ERR_CODE.Equals("0"))
-                Directory.Delete(Path.Combine(Server.MapPath("~/"), CommonProperties.LAYOUT_UPLOAD_PATH, layoutModel.LAYOUT_ID), true);
+            {
+                string dirPath = Path.Combine(Server.MapPath("~/"), CommonProperties.LAYOUT_UPLOAD_PATH, layoutModel.LAYOUT_ID);
+                if (Directory.Exists(dirPath))
+                    Directory.Delete(dirPath, true);
+                // 폴더가 없어도 정상 처리 (업로드 전 오류로 폴더 미생성 케이스)
+            }
 
             return resultModel;
         }
