@@ -14,10 +14,9 @@ namespace CMS.API.Biz
 {
     public class WelmenuBiz
     {
-
         public static List<WelmenuModel> welmenuList(WelmenuModel welmenuModel)
         {
-            string sql = @"SELECT * FROM publicdata.pr_welmenu_list(@p_restaurant_code, @p_menu_dt, @p_menu_meal_type)";
+            string sql = @"SELECT * FROM did.pr_welmenu_list(@p_restaurant_code, @p_menu_dt, @p_menu_meal_type)";
 
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("@p_restaurant_code", welmenuModel.RESTAURANT_CODE ?? (object)DBNull.Value),
@@ -28,12 +27,7 @@ namespace CMS.API.Biz
             try
             {
                 return Util.ConvertDataTable<WelmenuModel>(
-                    PostgresHelper.ExecuteDataSet(
-                        CommonProperties.ConnectionString, 
-                        CommandType.Text, 
-                        sql, 
-                        param
-                    ).Tables[0]
+                    PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param).Tables[0]
                 );
             }
             catch (Exception ex)
@@ -49,7 +43,7 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels) ?? (object)DBNull.Value }
             };
 
-            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_result(@p_xml_req)";
+            string sql = "SELECT * FROM did.pr_welmenu_eval_result(@p_xml_req)";
             return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
@@ -59,7 +53,7 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("p_xml_req", NpgsqlDbType.Text) { Value = JsonHelper.GetJsonToXmlString<WelmenuModel>(welmenuModels) ?? (object)DBNull.Value }
             };
 
-            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_result_view(@p_xml_req)";
+            string sql = "SELECT * FROM did.pr_welmenu_eval_result_view(@p_xml_req)";
             return PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
         }
 
@@ -76,19 +70,16 @@ namespace CMS.API.Biz
                 new NpgsqlParameter("p_reg_id", NpgsqlDbType.Varchar) { Value = "DID" }
             };
 
-            string sql = "SELECT * FROM publicdata.pr_welmenu_eval_in_kiosk(@p_restaurant_code, @p_hall_no, @p_menu_dt, @p_meal_type, @p_course_type, @p_menu_code, @p_eval_score, @p_reg_id)";
+            string sql = "SELECT * FROM did.pr_welmenu_eval_in_kiosk(@p_restaurant_code, @p_hall_no, @p_menu_dt, @p_meal_type, @p_course_type, @p_menu_code, @p_eval_score, @p_reg_id)";
             DataSet ds = PostgresHelper.ExecuteDataSet(CommonProperties.ConnectionString, CommandType.Text, sql, param);
 
             ResultModel result = new ResultModel();
-
             if (Util.IsNullDataset(ds))
             {
                 result.ERR_CODE = ds.Tables[0].Rows[0]["ERR_CODE"].ToString();
                 result.ERROR_MSG = ds.Tables[0].Rows[0]["ERROR_MSG"].ToString();
             }
-
             return result;
         }
-
     }
 }
