@@ -63,9 +63,10 @@ namespace CMS.API.Controllers
                     string templateUrl = row["TEMPLATE_URL"].ToString();
                     string modDtm = row["MOD_DTM"].ToString();
 
-                    // 이전 스케줄과 비교
+                    // 이전 스케줄과 비교 (scheduleId + modDtm 모두 같아야 변경 없음)
                     string actionType = "11"; // 신규 또는 업데이트
-                    if (request != null && request.scheduleId == scheduleId)
+                    if (request != null && request.scheduleId == scheduleId
+                        && !string.IsNullOrEmpty(request.modDtm) && request.modDtm == modDtm)
                     {
                         actionType = "00"; // 변경 없음
                     }
@@ -139,6 +140,7 @@ namespace CMS.API.Controllers
     public class ScheduleRequest
     {
         public string scheduleId { get; set; }
+        public string modDtm { get; set; }
     }
 
     /// <summary>
