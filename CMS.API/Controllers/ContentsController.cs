@@ -331,8 +331,9 @@ namespace CMS.API.Controllers
                     contentsModel.THUMBNAIL_URL = string.Format("{0}/{1}/{2}/{3}/{4}/{5}/{6}", CommonProperties.HTTP_DOMAIN_URL, CommonProperties.CONTENTS_UPLOAD_PATH, UserBiz.getRestaurantCode(User), contentsModel.CONTENT_TYPE, DateTime.Now.ToString("yyyyMMdd"), "thumbnail", fileThumbnailUniqName);
                     contentsModel.TEMPLATE_ORG_URL = contentsModel.FILE_URL;
 
-                    if (!Directory.Exists(saveContentsPath))
-                        Directory.CreateDirectory(saveContentsPath);
+                    // 2026-03-18 contentsPath 주석처리
+                    //if (!Directory.Exists(saveContentsPath))
+                    //    Directory.CreateDirectory(saveContentsPath);
 
                     if (!Directory.Exists(saveContentsThumbnailPath))
                         Directory.CreateDirectory(saveContentsThumbnailPath);
