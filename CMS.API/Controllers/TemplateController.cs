@@ -391,24 +391,16 @@ namespace CMS.API.Controllers
                 Process process = Process.Start(startInfo);
                 if (process != null)
                 {
-                    process.WaitForExit(30000); // 30초 타임아웃
+                    bool exited = process.WaitForExit(30000); // 30초 타임아웃
                     process.Close();
+                    if (!exited)
+                        throw new Exception("썸네일 생성 시간이 초과되었습니다. (30초)");
                 }
 
-
-
-                //CMSLib cmslib = new CMSLib();
-                //using (Bitmap bitmap = cmslib.GenerateWebSiteThumbnailImage(url, string.IsNullOrEmpty(templateModel.SCREEN_W) ? 1920 : int.Parse(templateModel.SCREEN_W), string.IsNullOrEmpty(templateModel.SCREEN_H) ? 1080 : int.Parse(templateModel.SCREEN_H), CommonProperties.LAYOUT_THUMBNAIL_WIDTH, CommonProperties.LAYOUT_THUMBNAIL_HEIGHT))
-                //{
-                //    bitmap.Save(Path.Combine(saveRootPath, templateThumbnailFileName), ImageFormat.Jpeg);
-                //}
-
-                //using (Bitmap bitmap = cMSLib.Capture(url, 1920, 1080))
-                //{
-                //    bitmap.Save(Path.Combine(saveRootPath, templateCaptureFileName), ImageFormat.Jpeg);
-                //}
-
-                //Util.CreateThumbnail(Path.Combine(saveRootPath, templateCaptureFileName), Path.Combine(saveRootPath, templateThumbnailFileName), CommonProperties.LAYOUT_THUMBNAIL_WIDTH);
+                // 썸네일 파일이 실제로 생성됐는지 확인
+                string thumbnailPath = Path.Combine(saveRootPath, templateThumbnailFileName);
+                if (!System.IO.File.Exists(thumbnailPath))
+                    throw new Exception("썸네일 이미지 생성에 실패했습니다. 템플릿을 저장할 수 없습니다.");
 
                 #endregion
 
@@ -426,8 +418,8 @@ namespace CMS.API.Controllers
                 FileInfo fileInfo = new FileInfo(Path.Combine(saveRootPath, templateFileName));
                 templateModel.FILE_SIZE = fileInfo.Length.ToString();
 
-                templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName); // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateThumbnailFileName;
-                templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);          // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateFileName;
+                templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName);
+                templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
 
                 resultModel = TemplateBiz.ManageTemplate("U", UserBiz.getUserId(User), templateModel);
                 resultModel = TemplateBiz.ManageTemplateMap("U", UserBiz.getRestaurantCode(User), templateMapModels, UserBiz.getUserId(User));
@@ -438,7 +430,7 @@ namespace CMS.API.Controllers
             {
                 if (!string.IsNullOrEmpty(templateId) && TYPE.ToUpper().Equals("I"))
                 {
-                    // 1, DB 삭제
+                    // 1. DB 삭제
                     templateModel.TEMPLATE_ID = templateId;
                     TemplateBiz.ManageTemplate("D", UserBiz.getUserId(User), templateModel);
 
@@ -647,24 +639,16 @@ namespace CMS.API.Controllers
                 Process process = Process.Start(startInfo);
                 if (process != null)
                 {
-                    process.WaitForExit(30000); // 30초 타임아웃
+                    bool exited = process.WaitForExit(30000); // 30초 타임아웃
                     process.Close();
+                    if (!exited)
+                        throw new Exception("썸네일 생성 시간이 초과되었습니다. (30초)");
                 }
 
-
-
-                //CMSLib cmslib = new CMSLib();
-                //using (Bitmap bitmap = cmslib.GenerateWebSiteThumbnailImage(url, string.IsNullOrEmpty(templateModel.SCREEN_W) ? 1920 : int.Parse(templateModel.SCREEN_W), string.IsNullOrEmpty(templateModel.SCREEN_H) ? 1080 : int.Parse(templateModel.SCREEN_H), CommonProperties.LAYOUT_THUMBNAIL_WIDTH, CommonProperties.LAYOUT_THUMBNAIL_HEIGHT))
-                //{
-                //    bitmap.Save(Path.Combine(saveRootPath, templateThumbnailFileName), ImageFormat.Jpeg);
-                //}
-
-                //using (Bitmap bitmap = cMSLib.Capture(url, 1920, 1080))
-                //{
-                //    bitmap.Save(Path.Combine(saveRootPath, templateCaptureFileName), ImageFormat.Jpeg);
-                //}
-
-                //Util.CreateThumbnail(Path.Combine(saveRootPath, templateCaptureFileName), Path.Combine(saveRootPath, templateThumbnailFileName), CommonProperties.LAYOUT_THUMBNAIL_WIDTH);
+                // 썸네일 파일이 실제로 생성됐는지 확인
+                string thumbnailPath = Path.Combine(saveRootPath, templateThumbnailFileName);
+                if (!System.IO.File.Exists(thumbnailPath))
+                    throw new Exception("썸네일 이미지 생성에 실패했습니다. 템플릿을 저장할 수 없습니다.");
 
                 #endregion
 
@@ -682,8 +666,8 @@ namespace CMS.API.Controllers
                 FileInfo fileInfo = new FileInfo(Path.Combine(saveRootPath, templateFileName));
                 templateModel.FILE_SIZE = fileInfo.Length.ToString();
 
-                templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName); // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateThumbnailFileName;
-                templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);          // Request.Headers["host"] + "/upload/template/" + UserBiz.getRestaurantCode(User) + "/" + templateId + "/" + templateFileName;
+                templateModel.THUMBNAIL_NM = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateThumbnailFileName);
+                templateModel.TEMPLATE_URL = string.Format("{0}/upload/template/{1}/{2}/{3}", CommonProperties.HTTPS_DOMAIN_URL, UserBiz.getRestaurantCode(User), templateId, templateFileName);
 
                 resultModel = TemplateBiz.ManageTemplate("U", UserBiz.getUserId(User), templateModel);
                 resultModel = TemplateBiz.ManageTemplateMap("U", UserBiz.getRestaurantCode(User), templateMapModels, UserBiz.getUserId(User));

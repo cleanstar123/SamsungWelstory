@@ -15,6 +15,19 @@ namespace CMS.API.Controllers
     public class ClientApiController : ApiController
     {
         /// <summary>
+        /// 서버 연결 상태 확인 (헬스체크)
+        /// GET /api/v1/ping
+        /// </summary>
+        [HttpGet]
+        [Route("ping")]
+        [AllowAnonymous]
+        public IHttpActionResult Ping()
+        {
+            return Ok(new { result = "pong", time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") });
+        }
+
+
+        /// <summary>
         /// 클라이언트 스케줄 조회
         /// POST /api/v1/schedule/SelectSchedule
         /// </summary>
@@ -63,9 +76,10 @@ namespace CMS.API.Controllers
                     string templateUrl = row["TEMPLATE_URL"].ToString();
                     string modDtm = row["MOD_DTM"].ToString();
 
-                    // 이전 스케줄과 비교
+                    // 이전 스케줄과 비교 (scheduleId + modDtm 모두 같아야 변경 없음)
                     string actionType = "11"; // 신규 또는 업데이트
-                    if (request != null && request.scheduleId == scheduleId)
+                    if (request != null && request.scheduleId == scheduleId
+                        && !string.IsNullOrEmpty(request.modDtm) && request.modDtm == modDtm)
                     {
                         actionType = "00"; // 변경 없음
                     }
@@ -139,6 +153,7 @@ namespace CMS.API.Controllers
     public class ScheduleRequest
     {
         public string scheduleId { get; set; }
+        public string modDtm { get; set; }
     }
 
     /// <summary>
