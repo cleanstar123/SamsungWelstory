@@ -389,7 +389,14 @@ namespace CMS.API.Controllers
                 {
                     for (int i = 0; i < contentsModels.Count; i++)
                     {
-                        if (contentsModels[i].CONTENT_TYPE != "T")
+                        // 2026.03.18 컨텐츠 조건(URL) 조건 추가
+                        if (contentsModels[i].CONTENT_TYPE == "U")
+                        {
+                            if (System.IO.File.Exists(Path.Combine(contentsModels[i].THUMBNAIL_PATH, contentsModels[i].THUMBNAIL_NM)))
+                                System.IO.File.Delete(Path.Combine(contentsModels[i].THUMBNAIL_PATH, contentsModels[i].THUMBNAIL_NM));
+                        }
+
+                        else if (contentsModels[i].CONTENT_TYPE != "T")
                         {
                             if (System.IO.File.Exists(Path.Combine(contentsModels[i].FILE_PATH, contentsModels[i].FILE_NM)))
                                 System.IO.File.Delete(Path.Combine(contentsModels[i].FILE_PATH, contentsModels[i].FILE_NM));
@@ -397,6 +404,7 @@ namespace CMS.API.Controllers
                             if (System.IO.File.Exists(Path.Combine(contentsModels[i].THUMBNAIL_PATH, contentsModels[i].THUMBNAIL_NM)))
                                 System.IO.File.Delete(Path.Combine(contentsModels[i].THUMBNAIL_PATH, contentsModels[i].THUMBNAIL_NM));
                         }
+
                     }
                 }
             }
