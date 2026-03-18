@@ -15,6 +15,19 @@ namespace CMS.API.Controllers
     public class ClientApiController : ApiController
     {
         /// <summary>
+        /// 서버 연결 상태 확인 (헬스체크)
+        /// GET /api/v1/ping
+        /// </summary>
+        [HttpGet]
+        [Route("ping")]
+        [AllowAnonymous]
+        public IHttpActionResult Ping()
+        {
+            return Ok(new { result = "pong", time = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") });
+        }
+
+
+        /// <summary>
         /// 클라이언트 스케줄 조회
         /// POST /api/v1/schedule/SelectSchedule
         /// </summary>
