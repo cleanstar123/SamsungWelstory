@@ -1,11 +1,12 @@
-﻿using CMS.API.App_Code;
-using CMS.API.Models;
-using Npgsql;
-using NpgsqlTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
+using CMS.API.App_Code;
+using CMS.API.Models;
+using Newtonsoft.Json.Linq;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace CMS.API.Biz
 {
@@ -170,7 +171,7 @@ namespace CMS.API.Biz
         {
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("P_RESTAURANT_CODE",  displayModel.RESTAURANT_CODE ?? (object)DBNull.Value),
-                new NpgsqlParameter("P_DISPLAY_ID",       displayModel.DISPLAY_ID ?? (object)DBNull.Value),
+                new NpgsqlParameter("P_DISPLAY_ID",       NpgsqlDbType.Integer) { Value = displayModel.DISPLAY_ID ?? (object)DBNull.Value },
                 new NpgsqlParameter("P_REG_ID",           userId ?? (object)DBNull.Value)
             };
 
