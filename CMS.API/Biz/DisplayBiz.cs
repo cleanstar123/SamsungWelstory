@@ -135,7 +135,7 @@ namespace CMS.API.Biz
             NpgsqlParameter[] param = {
                 new NpgsqlParameter("P_TYPE",               type ?? (object)DBNull.Value),
                 new NpgsqlParameter("P_RESTAURANT_CODE",    restaurantCode ?? (object)DBNull.Value),
-                new NpgsqlParameter("P_DISPLAY_GROUP_ID",   model.DISPLAY_GROUP_ID ?? (object)DBNull.Value),
+                new NpgsqlParameter("P_DISPLAY_GROUP_ID",   NpgsqlDbType.Integer) { Value = model.DISPLAY_GROUP_ID ?? (object)DBNull.Value },
                 new NpgsqlParameter("P_DISPLAY_GROUP_NM",   model.DISPLAY_GROUP_NM ?? (object)DBNull.Value),
                 new NpgsqlParameter("P_DISPLAY_GROUP_DESC", model.DISPLAY_GROUP_DESC ?? (object)DBNull.Value),
                 new NpgsqlParameter("P_REG_ID",             userId ?? (object)DBNull.Value),
